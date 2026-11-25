@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 37 章 · 注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html" class="cur"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="37-d-softmax-mask">第 37 章 · 注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</h1><div class="run"><a class="btn" href="../animations/37-attention-math.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch37_attention_math.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch37_attention_math.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch37_attention_math.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：为什么点积要除以 √d？softmax 的"温度"为什么会让梯度消失？注意力和经典统计里的什么东西是同一回事？多头注意力每个头到底能表示什么？因果 mask 为什么填 −∞ 而不是 0？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/36-cnn-training.html">第 36 章 CNN 训练的数学</a> · 下一章：<a href="../lessons/38-position-encoding.html">第 38 章 位置编码的数学</a><br />
+对应原文：Attention Is All You Need <code>transformer-deep-dive/materials/text/papers/attention-is-all-you-need-1706.03762.txt</code>（§3.2.1 缩放点积注意力 L164、为什么除以 √d_k L184–L188、脚注 4 方差为 d_k L198–L201；§3.2.2 多头 L192）；Formal Algorithms for Transformers <code>transformer-deep-dive/materials/text/papers/formal-algorithms-transformers-2207.09238.txt</code>（注意力与 mask 的伪代码）<br />
+本章缩写：Q、K、V = Query、Key、Value（查询 / 键 / 值）；d、d_k = 键的维度；d_head = 每个头的维度；h = 头数；τ = 温度；NW = Nadaraya–Watson（两位统计学家的姓：核回归）；nat = 以 e 为底的信息单位。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="d-d2026-11-25">第一步：为什么除以 √d：点积的方差是 d（2026-11-25）</h3>
+<p><strong>类比：d 个人各掷一次硬币，正面 +1、反面 −1，加起来。</strong> 人越多，总和的波动越大（标准差 √d）。</p>
+<p>q、k 每个分量独立、均值 0、方差 1，<span class="arithmatex">\(q\cdot k = \sum_{i=1}^dq_ik_i\)</span> 是 d 个独立的、方差为 1 的项之和（AIAYN 脚注 4，L198–L201）：</p>
+<div class="arithmatex">\[\mathbb E[q\cdot k] = 0,\quad\text{Var}(q\cdot k) = d\]</div>
+<table>
+<thead>
+<tr>
+<th>d</th>
+<th>q·k 的标准差</th>
+<th>除以 √d 后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>16</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>64</td>
+<td>8</td>
+<td>1</td>
+</tr>
+<tr>
+<td>256</td>
+<td>16</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>不缩放的话，d 越大 logits 越分散，softmax 越接近 one-hot（下一步），梯度越小（AIAYN L184–L188）。除以 √d 让 logits 的尺度和 d 无关。</p>
+<p><strong>一句话</strong>：d 个独立项相加方差是 d，除以 √d 把 logits 的标准差拉回 1，softmax 不会因为维度大而饱和。</p>
+<h3 id="softmax-2026-11-25">第二步：softmax 的温度与饱和（2026-11-25）</h3>
+<p>softmax 的雅可比是 <span class="arithmatex">\(\partial p_i/\partial z_j = p_i(\delta_{ij} - p_j)\)</span>，对角元 p_i(1 − p_i)。一旦某个 p 接近 1，所有元素都接近 0：梯度消失。</p>
+<p><strong>例子</strong>（logits = 缩放 × [2, 1, 0, −1]）：</p>
+<table>
+<thead>
+<tr>
+<th>缩放</th>
+<th>最大概率</th>
+<th>熵（nat）</th>
+<th>最大局部梯度 p(1 − p)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.25</td>
+<td>0.3499</td>
+<td>1.3482</td>
+<td>0.227</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.6439</td>
+<td>0.9475</td>
+<td>0.229</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.9817</td>
+<td>0.0931</td>
+<td>0.018</td>
+</tr>
+<tr>
+<td>16</td>
+<td>1.0000</td>
+<td>0.0000</td>
+<td>1.1 × 10⁻⁷</td>
+</tr>
+</tbody>
+</table>
+<p>缩放 16 相当于 d = 256 时不除 √d（第一步的标准差 16）：梯度只剩 10⁻⁷。反过来温度太高（缩放 0.25），分布接近均匀，注意力"什么都看一点"，也学不出东西。</p>
+<p><img alt="softmax 温度：概率与梯度" src="../figures/37-attention-math-softmax.png" />
+<em>图 37-1 · 横轴缩放（对数），左轴最大概率、右轴最大局部梯度 p(1 − p)；缩放超过 4 以后梯度迅速掉到 0</em></p>
+<p><strong>一句话</strong>：softmax 的梯度是 p(δ − p)，一旦接近 one-hot 就趋于 0；温度控制"选得多尖"，太尖太平都学不动。</p>
+<h3 id="2026-11-25">第三步：注意力 = 核平滑（软查表）（2026-11-25）</h3>
+<p><strong>类比：查字典的软版本。</strong> 普通字典是"键完全匹配就返回值"；注意力是"每个键按和查询的相似度打分，返回所有值的加权平均"。</p>
+<p>统计里的 Nadaraya–Watson 核回归：</p>
+<div class="arithmatex">\[\hat f(q) = \frac{\sum_jK(q, k_j)v_j}{\sum_jK(q, k_j)}\]</div>
+<p>取 <span class="arithmatex">\(K(q, k) = e^{q\cdot k/\tau}\)</span>，就是 softmax(q·Kᵀ/τ)·V，正是注意力。高斯核 <span class="arithmatex">\(e^{-\|q - k\|^2/2\tau^2}\)</span> 展开后 = <span class="arithmatex">\(e^{q\cdot k/\tau^2}\cdot e^{-\|k\|^2/2\tau^2}\cdot\)</span>（和 j 无关的常数）：键长度相同时两者完全一样。</p>
+<p><strong>例子</strong>（21 个键 = [0, 2π] 上的位置，值 = sin(位置)；查询 q = 1，真值 sin 1 = 0.8415）：</p>
+<table>
+<thead>
+<tr>
+<th>核宽 τ</th>
+<th>输出</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>0.8147</td>
+<td>几乎只看最近的键（≈ 最近邻）</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>0.7529</td>
+<td>平均了附近几个，有偏差</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>0.3931</td>
+<td>几乎平均了全部，严重偏向整体均值</td>
+</tr>
+</tbody>
+</table>
+<p>核宽（温度）在偏差和方差之间折中，和第二步是同一件事的统计视角。</p>
+<p><strong>一句话</strong>：注意力就是 Nadaraya–Watson 核回归：按相似度对值做加权平均，温度就是核宽。</p>
+<h3 id="2026-11-25_1">第四步：多头 = 若干个低秩的打分矩阵（2026-11-25）</h3>
+<p>一个头的打分 <span class="arithmatex">\(s_{ij} = x_i^\top W_QW_K^\top x_j\)</span>，中间那个 d_model × d_model 的矩阵 <span class="arithmatex">\(W_QW_K^\top\)</span> 秩最多 d_head（AIAYN §3.2.2，L192）。</p>
+<p><strong>例子</strong>：d_model = 512、d_head = 64：<span class="arithmatex">\(W_QW_K^\top\)</span> 是 512×512，秩只有 64。8 个头的 Q、K、V 参数共 3 × 512 × 64 × 8 = 786,432，和一个 512 维的头一样多。</p>
+<p>所以多头不是"多花参数"，而是把一个满秩的相似度拆成 h 个低秩的、各自做 softmax 的相似度：每个头只能在一个 64 维的子空间里比较，但 h 个头可以同时关注不同的东西（一个看语法、一个看指代）。代价是单头的秩受限：d_head 太小时一个头表达不了复杂的匹配。</p>
+<p><strong>一句话</strong>：每个头的 W_QW_Kᵀ 秩 ≤ d_head；多头 = 用同样的参数换 h 个低秩、独立 softmax 的打分。</p>
+<h3 id="mask-2026-11-25">第五步：因果 mask：未来位置填 −∞（2026-11-25）</h3>
+<p>自回归生成时，第 i 个位置只能看 j ≤ i。做法：在 softmax 之前把 j &gt; i 的分数设成 −∞，e^{−∞} = 0，这些位置的权重恰好为 0，剩下的自动重新归一化。</p>
+<p><strong>例子</strong>（4×4 随机分数加 mask 后的权重，每行和都是 1）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>j = 1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>i = 1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>i = 2</td>
+<td>0.29</td>
+<td>0.71</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>i = 3</td>
+<td>0.377</td>
+<td>0.215</td>
+<td>0.408</td>
+<td>0</td>
+</tr>
+<tr>
+<td>i = 4</td>
+<td>0.059</td>
+<td>0.481</td>
+<td>0.172</td>
+<td>0.288</td>
+</tr>
+</tbody>
+</table>
+<p>为什么不是在 softmax 之后乘 0：那样每行和不再是 1，还得重新归一化；为什么不是填 0：e⁰ = 1，未来位置会分到权重。n = 4096 时可见的 (i, j) 对 8,390,656，约 n²/2：FlashAttention 等实现会直接跳过全被 mask 的块，省一半算力。</p>
+<p><img alt="因果 mask 的权重矩阵" src="../figures/37-attention-math-mask.png" />
+<em>图 37-2 · 8×8 因果注意力权重（颜色越深权重越大），上三角全是 0；每行和为 1</em></p>
+<p><strong>场景代码</strong>：PyTorch 的写法（真实库调用；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">out = F.scaled_dot_product_attention(q, k, v, is_causal=True)   # 内部除以 √d、填 −∞、softmax
+# 等价的手写版
+s = q @ k.transpose(-2, -1) / math.sqrt(q.size(-1))
+s = s.masked_fill(torch.triu(torch.ones(n, n, dtype=torch.bool), 1), float(&quot;-inf&quot;))
+out = s.softmax(-1) @ v
+</code></pre>
+<p><strong>一句话</strong>：因果 mask 在 softmax 之前填 −∞，未来位置权重精确为 0、每行仍归一化；约省一半计算。</p>
+<h3 id="_2">动画演示：查询在键之间滑动</h3>
+<p><img alt="注意力的数学" src="../animations/37-attention-math.gif" /></p>
+<p>可交互版：<a href="../animations/37-attention-math.html">animations/37-attention-math.html</a>（滑块调查询位置 q 和温度 τ）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>灰色曲线是 sin，21 个点是键值对；每个点的大小是它的注意力权重（第三步）；</li>
+<li>红点是输出（加权平均），竖虚线是真值 sin q；</li>
+<li>τ 调小：权重集中到最近的一两个点（尖），输出贴近真值；τ 调大：权重摊平，输出被拉向整体均值（第二、三步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：如果 q、k 的每个分量方差是 σ²（不是 1），q·k 的方差是多少？要让 logits 方差为 1，应该除以什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：两个 logits [z, 0]，softmax 的第一个概率是 sigmoid(z)。z 为多少时 p(1 − p) 降到 0.01 以下？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四、五步）：d_model = 1024、h = 16，每个头的打分矩阵秩最多多少？n = 6 的因果 mask 一共保留多少个 (i, j) 对？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>d 个硬币加起来，标准差根号 d，所以除根号 d；<br />
+softmax 太尖梯度没，太平学不出；<br />
+注意力就是核回归，温度就是核宽；<br />
+每个头秩不过 d_head，多头是拆开不是加；<br />
+因果 mask 先填负无穷，再 softmax。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST124（√d 的方差推导；softmax 的饱和）、ST125（注意力 = Nadaraya–Watson 核回归）、ST126（多头的低秩视角；因果 mask 为什么填 −∞）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Attention Is All You Need</td>
+<td>§3.2.1–3.2.2（L164–L201）</td>
+<td>缩放点积与多头的原文</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/transformer-visual/lessons/08-sqrt-dk.html">《从零读懂 Transformer》第 8 章 √d_k</a>、<a href="https://wikieden.github.io/transformer-visual/lessons/13-multi-head.html">第 13 章 多头</a>、<a href="https://wikieden.github.io/transformer-visual/lessons/17-causal-mask.html">第 17 章 因果 mask</a></td>
+<td>全章</td>
+<td>直觉版和动画</td>
+</tr>
+<tr>
+<td>Formal Algorithms for Transformers</td>
+<td>注意力、mask 的伪代码</td>
+<td>精确的符号和形状</td>
+</tr>
+<tr>
+<td><a href="../lessons/30-functional-analysis.html">第 30 章 泛函分析入门</a></td>
+<td>第六步</td>
+<td>核方法、RKHS</td>
+</tr>
+<tr>
+<td><a href="../lessons/22-numerics.html">第 22 章 数值计算</a></td>
+<td>第二步</td>
+<td>softmax 的稳定写法</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>独立和的方差</strong>：Var(Σq_ik_i) = ΣVar(q_ik_i) = Σ E[q_i²]E[k_i²] = d。</li>
+<li><strong>softmax 的雅可比</strong>：J = diag(p) − ppᵀ（第 34 章：也是 softmax 策略的 Fisher）。</li>
+<li><strong>高斯核 = 指数点积核 × 键长度项</strong>：<span class="arithmatex">\(-\|q - k\|^2/2 = q\cdot k - \|q\|^2/2 - \|k\|^2/2\)</span>，‖q‖² 在 softmax 里约掉。</li>
+<li><strong>秩不等式</strong>：rank(AB) ≤ min(rank A, rank B)。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\text{Var}(q\cdot k) = d\)</span></td>
+<td>点积方差</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{softmax}(QK^\top/\sqrt d)V\)</span></td>
+<td>缩放点积注意力</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\partial p_i/\partial z_j = p_i(\delta_{ij} - p_j)\)</span></td>
+<td>softmax 雅可比</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat f(q) = \sum K(q, k_j)v_j/\sum K(q, k_j)\)</span></td>
+<td>Nadaraya–Watson</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{rank}(W_QW_K^\top) \le d_{head}\)</span></td>
+<td>单头的秩</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch37_attention_math.py</code>，配套测试 <code>tests/test_ch37.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch37_attention_math.py  
+uv run pytest tests/test_ch37.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 方差</td>
+<td>√d</td>
+<td><code>dot_std(d, scaled)</code></td>
+<td>4、8、16 → 1</td>
+</tr>
+<tr>
+<td>第二步 饱和</td>
+<td>p(1 − p)</td>
+<td><code>saturation(16)</code></td>
+<td>1.1e-7</td>
+</tr>
+<tr>
+<td>第三步 核平滑</td>
+<td>NW</td>
+<td><code>kernel_smoother(1.0, tau)</code></td>
+<td>0.8147、0.7529、0.3931</td>
+</tr>
+<tr>
+<td>第四步 秩</td>
+<td>rank</td>
+<td><code>head_rank()</code></td>
+<td>64</td>
+</tr>
+<tr>
+<td>第五步 mask</td>
+<td>−∞</td>
+<td><code>causal_weights()</code></td>
+<td>下三角，行和 1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">w = softmax(-((q - x) ** 2) / (2 * tau ** 2))          # 高斯核权重 = 注意力权重
+s[np.triu_indices(n, 1)] = -np.inf                      # 上三角填 −∞
+np.linalg.matrix_rank(wq @ wk.T)                        # 单头打分矩阵的秩
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>softmax 先减行最大值</strong>：mask 后每行至少有对角线一个有限值，减最大值不会出现 −∞ − (−∞) = nan。</li>
+<li><strong>第一步没有模拟</strong>：Var(q·k) = d 直接由公式给出，代码只返回 √d；用随机数验证它是留给自己的练习（里程碑 ME-M24）。</li>
+<li><strong>核平滑只有 21 个键</strong>：τ = 0.1 时间距 0.31 比核宽大，输出基本就是最近那个键的值，所以误差没有继续变小。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把键加密到 201 个，重看三个 τ 的输出。</li>
+<li>把 <code>head_rank</code> 的 d_head 改成 600（大于 d_model），秩会是多少？</li>
+</ol><nav class="pager"><a href="36-cnn-training.html">← 第 36 章 · CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="38-position-encoding.html">第 38 章 · 位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -2,7 +2,7 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 34 章 · 34 个动画（GIF + 可交互页面）· 77 张静态图 · 117 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 66 章大纲 · 已写 40 章 · 40 个动画（GIF + 可交互页面）· 89 张静态图 · 135 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
 > 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
 
 ## 这本书讲什么
@@ -73,12 +73,12 @@
 | 32 | [随机微积分](https://wikieden.github.io/math-and-eval-stats/lessons/32-stochastic-calculus.html) | 布朗运动、Itô 积分与 Itô 引理、SDE 的数值解、Fokker-Planck 方程、反向时间 SDE、概率流 ODE | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/32-stochastic-calculus.gif) | ST108–ST111 | ✅ 讲解（练习待作答） |
 | 33 | [最优传输](https://wikieden.github.io/math-and-eval-stats/lessons/33-optimal-transport.html) | Monge / Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输与 flow matching 的联系 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/33-optimal-transport.gif) | ST112–ST114 | ✅ 讲解（练习待作答） |
 | 34 | [信息几何](https://wikieden.github.io/math-and-eval-stats/lessons/34-information-geometry.html) | Fisher 信息、自然梯度、KL 的局部二阶近似、TRPO / PPO 的信任域视角 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/34-information-geometry.gif) | ST115–ST117 | ✅ 讲解（练习待作答） |
-| 35 | 卷积的数学 | 卷积 = 稀疏共享权重的线性映射（Toeplitz）、互相关与卷积、尺寸公式（填充 / 步长 / 空洞）、感受野、卷积定理与 FFT、im2col = 矩阵乘法 | — | — | ⬜ |
-| 36 | CNN 训练的数学 | 卷积的反向传播与转置卷积、Xavier / He 初始化的方差推导、BatchNorm 的统计与梯度、残差的梯度流 | — | — | ⬜ |
-| 37 | 注意力的数学 | 缩放点积与 $\sqrt{d}$ 的方差推导、softmax 温度与饱和、注意力 = 核平滑 / 软检索、多头的低秩视角、因果 mask | — | — | ⬜ |
-| 38 | 位置编码的数学 | 正弦编码、RoPE = 复数旋转与相对位置、长度外推（位置插值、NTK、YaRN）、ALiBi | — | — | ⬜ |
-| 39 | 归一化与信号传播 | LayerNorm / RMSNorm 的几何、Pre-LN vs Post-LN 的梯度、深层网络的方差传播 | — | — | ⬜ |
-| 40 | 张量的数学（PyTorch） | stride 与索引映射、广播规则、einsum 记号、视图与连续性、计算图上的 VJP 组合 | — | — | ⬜ |
+| 35 | [卷积的数学](https://wikieden.github.io/math-and-eval-stats/lessons/35-convolution.html) | 卷积 = 稀疏共享权重的线性映射（Toeplitz）、互相关与卷积、尺寸公式（填充 / 步长 / 空洞）、感受野、卷积定理与 FFT、im2col = 矩阵乘法 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/35-convolution.gif) | ST118–ST120 | ✅ 讲解（练习待作答） |
+| 36 | [CNN 训练的数学](https://wikieden.github.io/math-and-eval-stats/lessons/36-cnn-training.html) | 卷积的反向传播与转置卷积、Xavier / He 初始化的方差推导、BatchNorm 的统计与梯度、残差的梯度流 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/36-cnn-training.gif) | ST121–ST123 | ✅ 讲解（练习待作答） |
+| 37 | [注意力的数学](https://wikieden.github.io/math-and-eval-stats/lessons/37-attention-math.html) | 缩放点积与 $\sqrt{d}$ 的方差推导、softmax 温度与饱和、注意力 = 核平滑 / 软检索、多头的低秩视角、因果 mask | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/37-attention-math.gif) | ST124–ST126 | ✅ 讲解（练习待作答） |
+| 38 | [位置编码的数学](https://wikieden.github.io/math-and-eval-stats/lessons/38-position-encoding.html) | 正弦编码、RoPE = 复数旋转与相对位置、长度外推（位置插值、NTK、YaRN）、ALiBi | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/38-position-encoding.gif) | ST127–ST129 | ✅ 讲解（练习待作答） |
+| 39 | [归一化与信号传播](https://wikieden.github.io/math-and-eval-stats/lessons/39-normalization.html) | LayerNorm / RMSNorm 的几何、Pre-LN vs Post-LN 的梯度、深层网络的方差传播 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/39-normalization.gif) | ST130–ST132 | ✅ 讲解（练习待作答） |
+| 40 | [张量的数学（PyTorch）](https://wikieden.github.io/math-and-eval-stats/lessons/40-tensor-math.html) | stride 与索引映射、广播规则、einsum 记号、视图与连续性、计算图上的 VJP 组合 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/40-tensor-math.gif) | ST133–ST135 | ✅ 讲解（练习待作答） |
 | 41 | Scaling law | 幂律与 log-log 拟合、Kaplan vs Chinchilla、计算最优 N / D、6ND 计算账、外推误差 | — | — | ⬜ |
 | 42 | 参数化与初始化 | 标准参数化 vs μP、超参从小模型迁移、宽度缩放下的学习率 | — | — | ⬜ |
 | 43 | 现代优化器 | Adam 的预条件视角、Shampoo / SOAP（Kronecker 预条件）、Muon（Newton-Schulz 正交化）、Lion（符号更新）、WSD 调度、梯度噪声尺度与临界批量 | — | — | ⬜ |

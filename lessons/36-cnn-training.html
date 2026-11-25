@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 36 章 · CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html" class="cur"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="36-cnn-xavier-he-batchnorm">第 36 章 · CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</h1><div class="run"><a class="btn" href="../animations/36-cnn-training.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch36_cnn_training.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch36_cnn_training.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch36_cnn_training.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：卷积层的梯度怎么算，为什么"反向是转置"？转置卷积（反卷积）的输出尺寸怎么算？He 初始化的 2/n 是怎么推出来的？BatchNorm 的梯度有什么特殊结构？残差连接为什么能让 100 层的网络训得动？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/35-convolution.html">第 35 章 卷积的数学</a> · 下一章：<a href="../lessons/37-attention-math.html">第 37 章 注意力的数学</a><br />
+对应原文：Dumoulin &amp; Visin <code>math-and-eval-stats/materials/text/papers/conv-arithmetic-1603.07285.txt</code> 第 4 章转置卷积（Relationship 8–14，L846–L1003）；He 2015 <code>math-and-eval-stats/materials/text/papers/he-init-prelu-1502.01852.txt</code> §2.2（式 (9) 方差连乘、式 (10) ½n_l Var[w_l] = 1，L225–L239）；BatchNorm <code>math-and-eval-stats/materials/text/papers/batchnorm-1502.03167.txt</code>（算法 1 L195、反向传播公式 L249 起）；ResNet <code>math-and-eval-stats/materials/text/papers/resnet-1512.03385.txt</code>（F(x) + x，L95–L102）<br />
+本章缩写：BN = Batch Normalization（批归一化）；n_in、n_out = fan-in、fan-out（一个神经元的输入、输出连接数）；x̂ = 标准化后的值；γ、β = BN 的缩放和平移参数；VJP = Vector-Jacobian Product（向量-雅可比积）；ReLU = Rectified Linear Unit（整流 / 线性 / 单元）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：卷积的反向传播 = 乘转置矩阵（2026-11-25）</h3>
+<p><strong>类比：正向是每个输出向几个输入"收钱"，反向就是每个输入把收到的账单按同样的比例"退回去"。</strong></p>
+<p>第 35 章：y = Tx。对线性映射，<span class="arithmatex">\(\partial L/\partial x = T^\top\,\partial L/\partial y\)</span>（第 13 章的 VJP）。Tᵀ 也是 Toeplitz，作用在梯度上等于"把上游梯度和核做 full 模式的真正卷积"（核翻转，第 35 章第二步说的那一处）：</p>
+<p><strong>例子</strong>（x、核同第 35 章，上游梯度 g = [1, 2, 0, −1]）：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>∂L/∂x</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tᵀg</td>
+<td>[1, 2, −1, −3, 0, 1]</td>
+</tr>
+<tr>
+<td>np.convolve(g, k, "full")</td>
+<td>[1, 2, −1, −3, 0, 1]</td>
+</tr>
+</tbody>
+</table>
+<p>对核的梯度：<span class="arithmatex">\(\partial L/\partial k_j = \sum_ig_ix_{i+j}\)</span>，是输入和上游梯度的互相关。所以一个卷积层的反向传播里有两个"卷积"：对输入（full 卷积）、对权重（互相关）。</p>
+<p><strong>一句话</strong>：卷积是线性的，反向就是乘 Tᵀ：对输入是梯度和核的 full 卷积，对核是输入和梯度的互相关。</p>
+<h3 id="2026-11-25_1">第二步：转置卷积：把"反向"拿来做"上采样"（2026-11-25）</h3>
+<p><strong>转置卷积</strong>就是把第一步那个 Tᵀ 当成一层前向运算用：从小图得到大图（分割、生成网络的解码器）。它不是卷积的逆（T 不可逆），只是形状上"反过来"。</p>
+<p>尺寸公式（Dumoulin &amp; Visin 第 4 章，PyTorch ConvTranspose 文档同式）：</p>
+<div class="arithmatex">\[o = (n - 1)s - 2p + d(k - 1) + \text{output\_padding} + 1\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>输入</th>
+<th>k</th>
+<th>s</th>
+<th>p</th>
+<th>output_padding</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>16</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>32（DCGAN、U-Net 常用的"放大一倍"）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>13</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>14</td>
+</tr>
+</tbody>
+</table>
+<p>步长 2 的卷积把 13 和 14 都变成 7，所以转置回去有歧义，output_padding 用来选。步长不整除核大小时（k = 3、s = 2），输出上会有些位置被叠加的次数多、有些少，产生棋盘格伪影；k = 4、s = 2 或"先插值再普通卷积"可以避免。</p>
+<p><strong>一句话</strong>：转置卷积 = 拿 Tᵀ 做前向的上采样，不是卷积的逆；尺寸 (n − 1)s − 2p + d(k − 1) + op + 1。</p>
+<h3 id="xavier-he-2026-11-25">第三步：Xavier / He 初始化：让每层的信号大小不变（2026-11-25）</h3>
+<p><strong>类比：接力传话，每个人说话的音量要和听到的一样大，不然传十个人以后不是听不见就是震耳欲聋。</strong></p>
+<p>一层 <span class="arithmatex">\(y = \sum_{i=1}^{n_{in}}w_ix_i\)</span>，w、x 独立、w 均值 0：</p>
+<div class="arithmatex">\[\mathbb E[y^2] = n_{in}\,\text{Var}(w)\,\mathbb E[x^2]\]</div>
+<p>ReLU 把一半砍掉，二阶矩减半（He 式 (9)，L225）。L 层连乘 <span class="arithmatex">\(\prod\frac12n_l\text{Var}(w_l)\)</span>，要它不指数爆炸或消失，就让每一项 = 1（式 (10)，L239）：</p>
+<div class="arithmatex">\[\text{He：}\ \text{Var}(w) = 2/n_{in}\qquad\text{Xavier（为 tanh 推）：}\ \text{Var}(w) = 2/(n_{in} + n_{out})\]</div>
+<p><strong>例子</strong>（n_in = n_out = 512，输入二阶矩 1，过一层 ReLU）：</p>
+<table>
+<thead>
+<tr>
+<th>初始化</th>
+<th>理论增益 ½·n·Var(w)</th>
+<th>模拟一层</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N(0, 0.01²)</td>
+<td>0.0256</td>
+<td>0.0256</td>
+</tr>
+<tr>
+<td>Xavier</td>
+<td>0.5000</td>
+<td>0.5005</td>
+</tr>
+<tr>
+<td>He</td>
+<td>1.0000</td>
+<td>1.0011</td>
+</tr>
+</tbody>
+</table>
+<p>每层乘一次这个增益，多层就是它的幂。</p>
+<p><strong>场景代码</strong>：PyTorch 里显式指定（真实库调用；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">nn.init.kaiming_normal_(conv.weight, mode=&quot;fan_in&quot;, nonlinearity=&quot;relu&quot;)   # Var = 2 / fan_in
+nn.init.xavier_uniform_(linear.weight)                                     # Var = 2 / (fan_in + fan_out)
+# 卷积的 fan_in = C_in × k × k
+</code></pre>
+<p><strong>一句话</strong>：一层的信号增益是 ½·n_in·Var(w)（ReLU），He 取 Var = 2/n_in 让它等于 1；Xavier 是为对称激活推的。</p>
+<h3 id="batchnorm-x-2026-11-25">第四步：BatchNorm 的梯度：自动去掉"均值方向"和"x̂ 方向"（2026-11-25）</h3>
+<p>BN 对每个通道、在一个 batch 上做 <span class="arithmatex">\(\hat x = (x - \mu_B)/\sigma_B\)</span>，再 γx̂ + β（BatchNorm 算法 1，L195）。因为 μ、σ 本身依赖 x，梯度不是简单的 g/σ（反向公式 L249 起）：</p>
+<div class="arithmatex">\[\frac{\partial L}{\partial x_i} = \frac1\sigma\Big(g_i - \overline g - \hat x_i\cdot\overline{g\hat x}\Big)\]</div>
+<p><strong>例子</strong>（32 个样本 × 4 个通道，随机上游梯度）：每个通道 Σ dx = 0，Σ dx·x̂ = 0（数值上都是 10⁻¹⁰ 以下）。</p>
+<p>含义：BN 之前的层，梯度里"让整批一起变大 / 平移"的分量被消掉了，因为 BN 反正会把它归一化掉。这让训练对前面层的尺度不敏感、可以用更大的学习率。代价：训练和推理行为不同（推理用滑动平均的 μ、σ），batch 太小时统计不准。</p>
+<p><img alt="BatchNorm 前后的分布" src="../figures/36-cnn-training-bn.png" />
+<em>图 36-1 · 一个通道 32 个样本：灰点是原始值（均值约 3、标准差约 2），蓝点是 BN 后的 x̂（均值 0、标准差 1）；橙线是 BN 之前的梯度 dx（放大 3 倍画），它们加起来为 0，和 x̂ 的内积也为 0</em></p>
+<p><strong>一句话</strong>：BN 的梯度 = (g − 均值 − x̂·⟨g, x̂⟩)/σ，自动和"全 1"、"x̂"两个方向正交。</p>
+<h3 id="12026-11-25">第五步：残差：梯度连乘里多了一个 1（2026-11-25）</h3>
+<p><strong>类比：楼梯每一级都有一部直达电梯。</strong> 走楼梯可能越走越累（梯度越乘越小），电梯保证至少有一条路是通的。</p>
+<p>普通堆叠 <span class="arithmatex">\(x_{l+1} = f(x_l)\)</span>：<span class="arithmatex">\(\partial x_L/\partial x_0 = \prod f'\)</span>。残差 <span class="arithmatex">\(x_{l+1} = x_l + F(x_l)\)</span>（ResNet L95–L102）：</p>
+<div class="arithmatex">\[\frac{\partial x_L}{\partial x_0} = \prod_l(1 + F'_l)\]</div>
+<p><strong>例子</strong>（50 层，标量版）：</p>
+<table>
+<thead>
+<tr>
+<th>结构</th>
+<th>每层导数</th>
+<th>连乘</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>普通堆叠</td>
+<td>U(0.5, 1.1)</td>
+<td>1.11 × 10⁻⁵</td>
+</tr>
+<tr>
+<td>残差</td>
+<td>1 + 0.1·U(−1, 1)</td>
+<td>1.8153</td>
+</tr>
+</tbody>
+</table>
+<p>普通堆叠的连乘按指数消失；残差的每一项都在 1 附近，连乘保持在 1 的量级。ResNet 的原始动机是"学 F(x) = 0 比学恒等映射容易"，梯度流是同一件事的另一面。</p>
+<p><img alt="普通堆叠与残差的梯度连乘" src="../figures/36-cnn-training-residual.png" />
+<em>图 36-2 · 横轴层数，纵轴 |∂x_l/∂x_0|（对数）；普通堆叠一路下降到 10⁻⁵，残差在 1 附近波动</em></p>
+<p><strong>一句话</strong>：残差把每层的雅可比从 F′ 变成 I + F′，连乘不会指数消失，深网络才训得动。</p>
+<h3 id="_2">动画演示：方差逐层传播与残差捷径</h3>
+<p><img alt="CNN 训练的数学" src="../animations/36-cnn-training.gif" /></p>
+<p>可交互版：<a href="../animations/36-cnn-training.html">animations/36-cnn-training.html</a>（下拉切换"一层的方差增益 / 梯度连乘"；滑块调初始化方差或层数）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>一层的方差增益：左边是输入的直方图，右边是过一层 ReLU 后的直方图，滑块调 n·Var(w)，右上角是增益 ½n·Var(w)（第三步）；</li>
+<li>梯度连乘：两条折线是普通堆叠和残差的 |∂x_l/∂x_0|，层数从 1 拖到 50（第五步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：信号 x = [1, 2, 3, 4]，核 [2, −1]（valid 互相关），上游梯度 g = [1, 0, 1]。算 ∂L/∂x 和 ∂L/∂k。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：卷积层 C_in = 64、3×3 核，用 He 初始化，权重的标准差是多少？如果激活函数是 tanh（在 0 附近近似恒等）而不是 ReLU，该用多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：每层残差分支的导数恰好是 −0.5（每层 1 − 0.5），20 层的连乘是多少？这说明残差连接在什么情况下也救不了梯度？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>卷积反向乘转置：对输入 full 卷积，对核互相关；<br />
+转置卷积拿来上采样，不是逆，注意棋盘格；<br />
+一层增益半个 n 乘方差，He 取二除 n；<br />
+BN 梯度去掉均值和 x̂ 两个方向；<br />
+残差每层多个 1，连乘不消失。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST121（卷积的反向传播与转置卷积尺寸）、ST122（He / Xavier 初始化的方差推导）、ST123（BatchNorm 的梯度结构；残差的梯度流）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ He 2015</td>
+<td>§2.2（式 (9)(10)，L225–L239）</td>
+<td>初始化方差的推导，含反向传播的版本</td>
+</tr>
+<tr>
+<td>★ BatchNorm（Ioffe 2015）</td>
+<td>§3（算法 1、反向公式）</td>
+<td>BN 的定义与梯度</td>
+</tr>
+<tr>
+<td>★ ResNet（He 2016）</td>
+<td>§3.1–3.2</td>
+<td>残差学习的动机</td>
+</tr>
+<tr>
+<td>Dumoulin &amp; Visin</td>
+<td>第 4 章（转置卷积）</td>
+<td>转置卷积的尺寸与图解</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/pytorch-inside-out/lessons/04-autograd.html">《PyTorch 从里到外》第 4 章 autograd</a></td>
+<td>全章</td>
+<td>VJP 在框架里怎么组合</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>线性层的反向</strong>：y = Tx ⇒ ∂L/∂x = Tᵀ∂L/∂y；Toeplitz 的转置还是 Toeplitz，对应翻转核的 full 卷积。</li>
+<li><strong>独立乘积的二阶矩</strong>：w、x 独立且 E[w] = 0 时 E[(wx)²] = Var(w)E[x²]；n 项独立求和方差相加。</li>
+<li><strong>ReLU 减半</strong>：y 对称分布时 E[ReLU(y)²] = ½E[y²]。</li>
+<li><strong>BN 梯度的投影形式</strong>：dx = (1/σ)(I − (1/m)(𝟙𝟙ᵀ + x̂x̂ᵀ))g，括号里是投影到 {𝟙, x̂} 正交补的矩阵。</li>
+<li><strong>残差雅可比</strong>：∂x_{l+1}/∂x_l = I + J_F；‖∏(I + J_l)‖ 在 J_l 小时接近 1。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\partial L/\partial x = T^\top g\)</span></td>
+<td>卷积的反向</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(o = (n - 1)s - 2p + d(k - 1) + op + 1\)</span></td>
+<td>转置卷积尺寸</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{Var}(w) = 2/n_{in}\)</span></td>
+<td>He 初始化</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{Var}(w) = 2/(n_{in} + n_{out})\)</span></td>
+<td>Xavier 初始化</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(dx = (g - \bar g - \hat x\,\overline{g\hat x})/\sigma\)</span></td>
+<td>BN 的梯度</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\partial x_L/\partial x_0 = \prod(1 + F'_l)\)</span></td>
+<td>残差的梯度连乘</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch36_cnn_training.py</code>，配套测试 <code>tests/test_ch36.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch36_cnn_training.py  
+uv run pytest tests/test_ch36.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 反向</td>
+<td>Tᵀg</td>
+<td><code>conv_backward(g)</code></td>
+<td>[1, 2, −1, −3, 0, 1]</td>
+</tr>
+<tr>
+<td>第二步 转置卷积</td>
+<td>尺寸公式</td>
+<td><code>tconv_size(16, 4, 2, 1)</code></td>
+<td>32</td>
+</tr>
+<tr>
+<td>第三步 初始化</td>
+<td>½n·Var</td>
+<td><code>layer_gain</code>、<code>one_layer_check</code></td>
+<td>1.0000、1.0011</td>
+</tr>
+<tr>
+<td>第四步 BN 梯度</td>
+<td>投影</td>
+<td><code>batchnorm_grad(x, g)</code></td>
+<td>Σ = 0</td>
+</tr>
+<tr>
+<td>第五步 残差</td>
+<td>连乘</td>
+<td><code>grad_products()</code></td>
+<td>1.11e-5 vs 1.8153</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">return np.convolve(g, k, &quot;full&quot;)                                   # 反向：梯度和核的 full 卷积
+return (g - g.mean(0) - xh * (g * xh).mean(0)) / np.sqrt(var + eps)  # BN 对输入的梯度
+a = np.maximum(x @ w, 0)                                           # 一层 + ReLU，看二阶矩
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>核梯度没单独写函数</strong>：∂L/∂k_j = Σ g_i x_{i+j}，就是 <code>np.correlate(x, g, "valid")</code>，留给题 1 自己验证。</li>
+<li><strong>BN 检查时 eps = 0</strong>：带 eps 时 x̂ 的分母和 <code>x.std()</code> 差一点，Σ dx·x̂ 就不是精确的 0。</li>
+<li><strong>一层模拟用 4000 × 512 的随机输入</strong>：二阶矩的估计误差约 1/√(4000·512)，所以和理论值差在千分位。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>one_layer_check</code> 的激活换成 tanh，Xavier 的增益变成多少？</li>
+<li>给 BN 加上 γ = 2、β = 1，梯度的两个正交性质还成立吗？</li>
+</ol><nav class="pager"><a href="35-convolution.html">← 第 35 章 · 卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="37-attention-math.html">第 37 章 · 注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

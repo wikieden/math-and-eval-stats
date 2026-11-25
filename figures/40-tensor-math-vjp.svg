@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">y = xW + b 的计算图：前向与 VJP</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">蓝箭头是前向，橙字是反向。g 经过加法原样传给 xW、沿 batch 求和给 b；经过矩阵乘变成 gWᵀ 和 xᵀg：每个梯度和它的变量同形状。</text>
+<rect x="40.0" y="60.0" width="110.0" height="50.0" rx="8" fill="#e0ecff" stroke="#2563eb" stroke-width="1.4" opacity="1"/>
+<text x="95.0" y="81.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">x</text>
+<text x="95.0" y="98.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">5×3</text>
+<rect x="40.0" y="170.0" width="110.0" height="50.0" rx="8" fill="#e0ecff" stroke="#2563eb" stroke-width="1.4" opacity="1"/>
+<text x="95.0" y="191.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">W</text>
+<text x="95.0" y="208.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">3×2</text>
+<rect x="270.0" y="110.0" width="120.0" height="60.0" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.4" opacity="1"/>
+<text x="330.0" y="136.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">xW</text>
+<text x="330.0" y="153.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">5×2</text>
+<rect x="270.0" y="210.0" width="120.0" height="50.0" rx="8" fill="#e0ecff" stroke="#2563eb" stroke-width="1.4" opacity="1"/>
+<text x="330.0" y="231.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">b</text>
+<text x="330.0" y="248.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">(2,) 广播到 5×2</text>
+<rect x="520.0" y="130.0" width="120.0" height="60.0" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4" opacity="1"/>
+<text x="580.0" y="156.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">y = xW + b</text>
+<text x="580.0" y="173.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">5×2</text>
+<line x1="150.0" y1="97.9" x2="270.0" y2="126.0" stroke="#2563eb" stroke-width="1.6"/>
+<polygon points="270.0,126.0 261.3,128.3 263.2,120.0" fill="#2563eb" stroke="#2563eb" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="150.0" y1="182.1" x2="270.0" y2="154.0" stroke="#2563eb" stroke-width="1.6"/>
+<polygon points="270.0,154.0 263.2,160.0 261.3,151.7" fill="#2563eb" stroke="#2563eb" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="390.0" y1="144.8" x2="520.0" y2="155.2" stroke="#2563eb" stroke-width="1.6"/>
+<polygon points="520.0,155.2 511.7,158.8 512.4,150.4" fill="#2563eb" stroke="#2563eb" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="390.0" y1="217.0" x2="520.0" y2="178.0" stroke="#2563eb" stroke-width="1.6"/>
+<polygon points="520.0,178.0 513.6,184.3 511.2,176.2" fill="#2563eb" stroke="#2563eb" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<text x="720.0" y="160.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#ea580c" text-anchor="middle" font-weight="normal">g = ∂L/∂y（5×2）</text>
+<rect x="169.5" y="59.5" width="71.0" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="205.0" y="71.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="normal">gWᵀ（5×3）</text>
+<rect x="169.5" y="214.5" width="71.0" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="205.0" y="226.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="normal">xᵀg（3×2）</text>
+<rect x="447.7" y="114.5" width="14.7" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="455.0" y="126.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="normal">g</text>
+<rect x="402.8" y="229.5" width="104.4" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="455.0" y="241.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="normal">Σ_batch g（2,）</text>
+</svg>

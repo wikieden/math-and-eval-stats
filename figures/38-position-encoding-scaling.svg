@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="320" viewBox="0 0 860 320">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">三种外推方法对各维度频率的缩放（s = 4）</text>
+<text x="16.0" y="310.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">纵轴是新频率 / 原频率。PI 全部压到 1/4；NTK-aware 从 1 平滑降到 1/4；YaRN 转得快的维度保持 1、没转满一圈的压到 1/4、中间线性过渡。</text>
+<line x1="80.0" y1="240.0" x2="780.0" y2="240.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="244.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="80.0" y1="196.8" x2="780.0" y2="196.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="200.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.25</text>
+<line x1="80.0" y1="153.6" x2="780.0" y2="153.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="157.6" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="80.0" y1="110.5" x2="780.0" y2="110.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="114.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.75</text>
+<line x1="80.0" y1="67.3" x2="780.0" y2="67.3" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="71.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">1</text>
+<line x1="80.0" y1="50.0" x2="80.0" y2="240.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="80.0" y="255.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">0</text>
+<line x1="257.8" y1="50.0" x2="257.8" y2="240.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="257.8" y="255.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">16</text>
+<line x1="435.6" y1="50.0" x2="435.6" y2="240.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="435.6" y="255.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">32</text>
+<line x1="613.3" y1="50.0" x2="613.3" y2="240.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="613.3" y="255.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">48</text>
+<line x1="780.0" y1="50.0" x2="780.0" y2="240.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="780.0" y="255.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">63</text>
+<line x1="80.0" y1="240.0" x2="780.0" y2="240.0" stroke="#1f2937" stroke-width="1.3"/>
+<line x1="80.0" y1="50.0" x2="80.0" y2="240.0" stroke="#1f2937" stroke-width="1.3"/>
+<text x="430.0" y="272.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle" font-weight="normal">维度对编号（左快右慢）</text>
+<text transform="translate(40.0,145.0) rotate(-90)" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle">频率缩放</text>
+<polyline points="80.0,196.8 91.1,196.8 102.2,196.8 113.3,196.8 124.4,196.8 135.6,196.8 146.7,196.8 157.8,196.8 168.9,196.8 180.0,196.8 191.1,196.8 202.2,196.8 213.3,196.8 224.4,196.8 235.6,196.8 246.7,196.8 257.8,196.8 268.9,196.8 280.0,196.8 291.1,196.8 302.2,196.8 313.3,196.8 324.4,196.8 335.6,196.8 346.7,196.8 357.8,196.8 368.9,196.8 380.0,196.8 391.1,196.8 402.2,196.8 413.3,196.8 424.4,196.8 435.6,196.8 446.7,196.8 457.8,196.8 468.9,196.8 480.0,196.8 491.1,196.8 502.2,196.8 513.3,196.8 524.4,196.8 535.6,196.8 546.7,196.8 557.8,196.8 568.9,196.8 580.0,196.8 591.1,196.8 602.2,196.8 613.3,196.8 624.4,196.8 635.6,196.8 646.7,196.8 657.8,196.8 668.9,196.8 680.0,196.8 691.1,196.8 702.2,196.8 713.3,196.8 724.4,196.8 735.6,196.8 746.7,196.8 757.8,196.8 768.9,196.8 780.0,196.8" fill="none" stroke="#6b7280" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<polyline points="80.0,67.3 91.1,71.0 102.2,74.7 113.3,78.3 124.4,81.8 135.6,85.3 146.7,88.6 157.8,91.9 168.9,95.2 180.0,98.3 191.1,101.4 202.2,104.4 213.3,107.4 224.4,110.2 235.6,113.1 246.7,115.8 257.8,118.5 268.9,121.2 280.0,123.8 291.1,126.3 302.2,128.8 313.3,131.2 324.4,133.6 335.6,135.9 346.7,138.1 357.8,140.4 368.9,142.5 380.0,144.6 391.1,146.7 402.2,148.8 413.3,150.7 424.4,152.7 435.6,154.6 446.7,156.4 457.8,158.3 468.9,160.0 480.0,161.8 491.1,163.5 502.2,165.1 513.3,166.8 524.4,168.4 535.6,169.9 546.7,171.5 557.8,172.9 568.9,174.4 580.0,175.8 591.1,177.2 602.2,178.6 613.3,179.9 624.4,181.2 635.6,182.5 646.7,183.8 657.8,185.0 668.9,186.2 680.0,187.4 691.1,188.5 702.2,189.6 713.3,190.7 724.4,191.8 735.6,192.8 746.7,193.9 757.8,194.9 768.9,195.9 780.0,196.8" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<polyline points="80.0,67.3 91.1,67.3 102.2,67.3 113.3,67.3 124.4,67.3 135.6,67.3 146.7,67.3 157.8,67.3 168.9,67.3 180.0,67.3 191.1,67.3 202.2,67.3 213.3,67.3 224.4,67.3 235.6,67.3 246.7,67.3 257.8,67.3 268.9,67.3 280.0,67.3 291.1,67.3 302.2,67.3 313.3,68.3 324.4,86.1 335.6,101.5 346.7,114.8 357.8,126.4 368.9,136.4 380.0,145.1 391.1,152.6 402.2,159.0 413.3,164.7 424.4,169.5 435.6,173.8 446.7,177.4 457.8,180.6 468.9,183.3 480.0,185.7 491.1,187.7 502.2,189.5 513.3,191.0 524.4,192.4 535.6,193.5 546.7,194.5 557.8,195.4 568.9,196.2 580.0,196.8 591.1,196.8 602.2,196.8 613.3,196.8 624.4,196.8 635.6,196.8 646.7,196.8 657.8,196.8 668.9,196.8 680.0,196.8 691.1,196.8 702.2,196.8 713.3,196.8 724.4,196.8 735.6,196.8 746.7,196.8 757.8,196.8 768.9,196.8 780.0,196.8" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="600.0" y1="66.0" x2="622.0" y2="66.0" stroke="#6b7280" stroke-width="2.5"/>
+<text x="628.0" y="70.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">PI</text>
+<line x1="600.0" y1="84.0" x2="622.0" y2="84.0" stroke="#16a34a" stroke-width="2.5"/>
+<text x="628.0" y="88.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">NTK-aware</text>
+<line x1="600.0" y1="102.0" x2="622.0" y2="102.0" stroke="#2563eb" stroke-width="2.5"/>
+<text x="628.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">YaRN（NTK-by-parts）</text>
+</svg>

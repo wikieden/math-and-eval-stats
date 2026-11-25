@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 35 章 · 卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html" class="cur"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="35-im2col">第 35 章 · 卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</h1><div class="run"><a class="btn" href="../animations/35-convolution.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch35_convolution.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch35_convolution.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch35_convolution.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：卷积层和全连接层的数学关系是什么？深度学习里的"卷积"为什么其实是互相关？输出尺寸怎么算，填充、步长、空洞各起什么作用？堆几层才能"看到"一块区域？卷积在 GPU 上是怎么变成矩阵乘法的？什么时候值得用 FFT？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/34-information-geometry.html">第 34 章 信息几何</a> · 下一章：<a href="../lessons/36-cnn-training.html">第 36 章 CNN 训练的数学</a><br />
+对应原文：Dumoulin &amp; Visin《A guide to convolution arithmetic》<code>math-and-eval-stats/materials/text/papers/conv-arithmetic-1603.07285.txt</code>（Relationship 1–6：步长 1 到任意步长与填充的尺寸公式 L521–L626；§2.4 L621；Relationship 15 空洞卷积 L1059 及图 5.1）；LeCun 1998 <code>math-and-eval-stats/materials/text/papers/lecun-1998-gradient-based-learning-lenet.txt</code> §II（卷积网络：局部感受野、权重共享）<br />
+本章缩写：CNN = Convolutional Neural Network（卷积神经网络）；k = 核大小；s = stride（步长）；p = padding（填充）；d = dilation（空洞率）；FFT = Fast Fourier Transform（快速傅里叶变换）；im2col = image to columns（图像 / 到 / 列：把每个窗口展开成一列）；GEMM = GEneral Matrix Multiply（通用矩阵乘法）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：卷积是一个稀疏、共享权重的线性映射（2026-11-25）</h3>
+<p><strong>类比：拿一个小印章沿着纸条一格一格盖。</strong> 每个位置用的是同一个印章（权重共享），每次只碰到几格（局部连接）。</p>
+<p>一维信号 x = [3, 1, 4, 1, 5, 9]、核 [1, 0, −1]（"左边减右边"，看相邻变化），valid 模式输出 4 个数。把它写成矩阵乘 y = Tx：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>x₁</th>
+<th>x₂</th>
+<th>x₃</th>
+<th>x₄</th>
+<th>x₅</th>
+<th>x₆</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>y₁</td>
+<td>1</td>
+<td>0</td>
+<td>−1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>y₂</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>−1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>y₃</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>−1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>y₄</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>−1</td>
+</tr>
+</tbody>
+</table>
+<p>T 是 <strong>Toeplitz 矩阵</strong>（每条对角线上是同一个数）：y = [−1, 0, −1, −8]。全连接层需要 4×6 = 24 个自由参数；卷积只有 3 个，非零元 8 个。卷积 = 一个被强行约束成"稀疏 + 沿对角线共享"的全连接层（第 11 章：线性映射就是矩阵）。</p>
+<p>这个约束的含义是<strong>平移等变</strong>：输入平移一格，输出也平移一格。图像里"猫耳朵"在左上角和右下角长得一样，用同一组权重去找是合理的（LeCun 1998 §II）。</p>
+<p><strong>一句话</strong>：卷积是线性映射，矩阵是稀疏、沿对角线共享权重的 Toeplitz 矩阵，换来平移等变和极少的参数。</p>
+<h3 id="2026-11-25_1">第二步：深度学习里的"卷积"其实是互相关（2026-11-25）</h3>
+<p>数学上的卷积要把核翻过来再滑：<span class="arithmatex">\((x * k)_i = \sum_j x_{i-j}k_j\)</span>；深度学习框架里的 conv 不翻：<span class="arithmatex">\(y_i = \sum_jx_{i+j}k_j\)</span>（互相关）。</p>
+<p><strong>例子</strong>：互相关 [−1, 0, −1, −8]；数学卷积（核翻成 [−1, 0, 1]）[1, 0, 1, 8]，差一个负号。</p>
+<p>核是学出来的，翻不翻只是学到的权重顺序不同，对模型能力没影响。要注意的只有两处：和信号处理的公式对照时（卷积定理是对真正的卷积说的），以及第 36 章的反向传播（梯度那一步才是真正的卷积）。</p>
+<p><strong>一句话</strong>：框架里的 conv 是不翻核的互相关；核是学出来的，所以无所谓，只在对照公式时要记得。</p>
+<h3 id="2026-11-25_2">第三步：尺寸公式（2026-11-25）</h3>
+<p>一维（二维每个方向各算一次），输入 n、核 k、步长 s、填充 p、空洞 d（Dumoulin &amp; Visin Relationship 6、15，L626、L1059）：</p>
+<div class="arithmatex">\[o = \left\lfloor\frac{n + 2p - d(k - 1) - 1}{s}\right\rfloor + 1\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>k</th>
+<th>s</th>
+<th>p</th>
+<th>d</th>
+<th>输出</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>32</td>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>32</td>
+<td>"same"：k = 2p + 1 时尺寸不变</td>
+</tr>
+<tr>
+<td>32</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>步长 2 下采样一半</td>
+</tr>
+<tr>
+<td>32</td>
+<td>3</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>28</td>
+<td>空洞 2：核实际覆盖 5 格</td>
+</tr>
+<tr>
+<td>224</td>
+<td>7</td>
+<td>2</td>
+<td>3</td>
+<td>1</td>
+<td>112</td>
+<td>ResNet 第一层</td>
+</tr>
+</tbody>
+</table>
+<p>空洞 d 的核在输入上"跨着"取点，有效大小 d(k − 1) + 1，参数不变、覆盖变大。</p>
+<p><strong>一句话</strong>：输出 = ⌊(n + 2p − d(k − 1) − 1)/s⌋ + 1；k = 2p + 1 且 s = 1 时尺寸不变。</p>
+<h3 id="2026-11-25_3">第四步：感受野：输出的一个点能"看到"输入多大一块（2026-11-25）</h3>
+<p><strong>类比：传话游戏。</strong> 第一层每人只听左右邻居；第二层的人听第一层的邻居，等于间接听到了更远的人。</p>
+<p>逐层递推：<span class="arithmatex">\(r \leftarrow r + (k - 1)\cdot d\cdot J\)</span>，J 是前面所有层步长的乘积（"一格"在输入上跨多远）。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>结构</th>
+<th>感受野</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三层 3×3（步长 1）</td>
+<td>7（VGG：三个 3×3 顶一个 7×7，参数 27 vs 49）</td>
+</tr>
+<tr>
+<td>三层 3×3，前两层步长 2</td>
+<td>15</td>
+</tr>
+<tr>
+<td>三层 3×3，空洞 1、2、4</td>
+<td>15（不下采样也能看得很远；WaveNet、语义分割常用）</td>
+</tr>
+</tbody>
+</table>
+<p>步长和空洞让感受野按指数涨，而层数只按线性涨。</p>
+<p><img alt="感受野随层数增长" src="../figures/35-convolution-receptive.png" />
+<em>图 35-1 · 三层 3×3 卷积：普通（左）、前两层步长 2（中）、空洞 1-2-4（右），最上面一个输出点在输入上能看到的范围</em></p>
+<p><strong>一句话</strong>：感受野按 r += (k − 1)·d·累计步长 增长；步长和空洞让它指数级变大。</p>
+<h3 id="im2col2026-11-25">第五步：卷积定理与 im2col：两种把卷积算快的办法（2026-11-25）</h3>
+<p><strong>卷积定理</strong>：<span class="arithmatex">\(\mathcal F(x * k) = \mathcal F(x)\cdot\mathcal F(k)\)</span>（循环卷积，真正的卷积，第二步）。时域里 n·k 次乘法，频域里只要逐点相乘，加上 FFT 的 O(n log n)：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>核长</th>
+<th>直接算</th>
+<th>FFT 约 3n log₂n</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1024</td>
+<td>3</td>
+<td>3,072</td>
+<td>30,720</td>
+</tr>
+<tr>
+<td>1024</td>
+<td>101</td>
+<td>103,424</td>
+<td>30,720</td>
+</tr>
+<tr>
+<td>65536</td>
+<td>1025</td>
+<td>67,174,400</td>
+<td>3,145,728</td>
+</tr>
+</tbody>
+</table>
+<p>CNN 的核很小（3×3），直接算更划算；FFT 适合长核（音频滤波、长卷积序列模型）。</p>
+<p><strong>im2col</strong>：把每个 k×k×C 的窗口拉成一列，排成矩阵，卷积就变成一次大矩阵乘法（GEMM），能用上高度优化的矩阵乘库和 Tensor Core。代价是内存：C = 64、56×56、3×3 核时 im2col 矩阵是 576 × 3136 = 180 万个元素，是输入（20 万）的 9 倍（= k²）。cuDNN 里的"隐式 GEMM"就是不真的展开、在算的时候按需取数。</p>
+<p><img alt="im2col：窗口展开成列，卷积变成矩阵乘" src="../figures/35-convolution-im2col.png" />
+<em>图 35-2 · 4×4 单通道输入、3×3 核：4 个窗口各拉成一列（9×4 矩阵），核拉成一行（1×9），相乘得到 2×2 输出</em></p>
+<p><strong>场景代码</strong>：PyTorch 里的 im2col 就是 <code>unfold</code>（真实库调用；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">cols = F.unfold(x, kernel_size=3, padding=1)        # (B, C·9, H·W)：每个窗口一列
+y = (w.view(C_out, -1) @ cols).view(B, C_out, H, W) # 卷积 = 矩阵乘
+assert torch.allclose(y, F.conv2d(x, w, padding=1), atol=1e-5)
+</code></pre>
+<p><strong>一句话</strong>：小核用 im2col 变矩阵乘（拿内存换速度），长核用 FFT（卷积定理把卷积变逐点乘）。</p>
+<h3 id="_2">动画演示：印章沿信号滑动</h3>
+<p><img alt="卷积的数学" src="../animations/35-convolution.gif" /></p>
+<p>可交互版：<a href="../animations/35-convolution.html">animations/35-convolution.html</a>（滑块调输出位置、步长、空洞）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上排是输入 [3, 1, 4, 1, 5, 9]（valid 时不补零），高亮的格子是当前窗口，下排是已经算出来的输出（第一、三步）；</li>
+<li>右边是同一个运算的 Toeplitz 矩阵，当前那一行高亮：每一行就是"印章盖在这里"（第一步）；</li>
+<li>把步长调成 2、空洞调成 2：窗口跳着走、跨着取，输出变短（第三步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：长度 5 的信号、核 [1, 2]（valid、步长 1），写出 Toeplitz 矩阵。全连接要多少参数？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三、四步）：输入 64×64，依次经过 conv(k = 5, s = 1, p = 2)、conv(k = 3, s = 2, p = 1)、conv(k = 3, s = 1, p = 1)。写出每层输出尺寸和最后的感受野。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：C = 128、28×28、3×3 核（填充 1）的 im2col 矩阵是多大？是输入的几倍？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>卷积是盖印章，矩阵稀疏又共享；<br />
+框架里不翻核，其实是互相关；<br />
+输出等于 n 加 2p 减 d(k−1) 减 1，除 s 加 1；<br />
+感受野逐层加 (k−1)·d·累计步长；<br />
+小核 im2col 变矩阵乘，长核 FFT 变逐点乘。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST118（卷积 = Toeplitz 矩阵；互相关 vs 卷积）、ST119（尺寸公式与感受野）、ST120（卷积定理、FFT 与 im2col 的取舍）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Dumoulin &amp; Visin</td>
+<td>第 2 章（Relationship 1–6，L521–L626）、§5.1 空洞卷积（L1035–L1075）</td>
+<td>尺寸公式的完整推导和配图</td>
+</tr>
+<tr>
+<td>★ LeCun 1998</td>
+<td>§II（卷积网络、LeNet-5）</td>
+<td>局部感受野、权重共享、下采样的动机</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/cuda-to-tensor-core/lessons/index.html">《CUDA 从线程到 Tensor Core》</a></td>
+<td>GEMM、Tensor Core 章节</td>
+<td>为什么把卷积变成矩阵乘就快</td>
+</tr>
+<tr>
+<td><a href="../lessons/11-linear-algebra-basics.html">第 11 章 线性代数基础</a></td>
+<td>第一步</td>
+<td>线性映射 = 矩阵</td>
+</tr>
+<tr>
+<td><a href="../lessons/30-functional-analysis.html">第 30 章 泛函分析入门</a></td>
+<td>第三、四步</td>
+<td>Fourier 基、积分算子（连续版的卷积）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>平移等变</strong>：S 是平移算子，Toeplitz（循环时是循环矩阵）T 满足 TS = ST。</li>
+<li><strong>循环矩阵被 DFT 对角化</strong>：循环矩阵的特征向量就是 Fourier 基，特征值是核的 DFT，这就是卷积定理的矩阵版。</li>
+<li><strong>尺寸公式</strong>：核在输入上占 d(k − 1) + 1 格，补零后长度 n + 2p，能放下的起点个数是 ⌊(n + 2p − d(k−1) − 1)/s⌋ + 1。</li>
+<li><strong>感受野递推</strong>：第 l 层一格对应输入上 J_l = ∏s 格，核再往外伸 (k − 1)d 格。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(y = Tx\)</span>，T 是 Toeplitz</td>
+<td>卷积是线性映射</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(y_i = \sum_jx_{i+j}k_j\)</span></td>
+<td>框架里的“卷积”（互相关）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(o = \lfloor(n + 2p - d(k-1) - 1)/s\rfloor + 1\)</span></td>
+<td>输出尺寸</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(r \leftarrow r + (k - 1)dJ\)</span></td>
+<td>感受野</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathcal F(x * k) = \mathcal F(x)\mathcal F(k)\)</span></td>
+<td>卷积定理</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch35_convolution.py</code>，配套测试 <code>tests/test_ch35.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch35_convolution.py  
+uv run pytest tests/test_ch35.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 Toeplitz</td>
+<td>y = Tx</td>
+<td><code>toeplitz_matrix(6, K) @ X</code></td>
+<td>[−1, 0, −1, −8]</td>
+</tr>
+<tr>
+<td>第二步 互相关</td>
+<td>翻不翻核</td>
+<td><code>np.correlate</code> vs <code>np.convolve</code></td>
+<td>差负号</td>
+</tr>
+<tr>
+<td>第三步 尺寸</td>
+<td>⌊…⌋ + 1</td>
+<td><code>out_size(224, 7, 2, 3)</code></td>
+<td>112</td>
+</tr>
+<tr>
+<td>第四步 感受野</td>
+<td>递推</td>
+<td><code>receptive_field(layers)</code></td>
+<td>7、15、15</td>
+</tr>
+<tr>
+<td>第五步 im2col</td>
+<td>矩阵形状</td>
+<td><code>im2col_cost(64, 56, 56, 3)</code></td>
+<td>(576, 3136)，9 倍</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">t[i, i:i + len(k)] = k                                  # Toeplitz：第 i 行从第 i 列开始放核
+return (n + 2 * p - d * (k - 1) - 1) // s + 1           # 尺寸公式
+r += (k - 1) * d * jump; jump *= s                      # 感受野：先用旧的累计步长，再乘上这一层的
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong><code>np.correlate</code> 和 <code>np.convolve</code> 是两个函数</strong>：NumPy 把互相关和卷积分开命名；PyTorch 的 <code>conv1d</code> 对应的是前者。</li>
+<li><strong>感受野递推里 jump 的更新在加之后</strong>：这一层的核按"前面各层"的累计步长伸展，自己的步长只影响后面的层。</li>
+<li><strong>FFT 的代价只是估算</strong>：3n log₂n 粗略算了两次正变换、一次反变换；实际还要补零到 2 的幂、处理边界。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把核换成 [1, 2, 1]/4（平滑），看 Toeplitz 矩阵和输出。</li>
+<li>算一算 ResNet-50 第一层（7×7、步长 2）再接 3×3 最大池化（步长 2）以后的感受野。</li>
+</ol><nav class="pager"><a href="34-information-geometry.html">← 第 34 章 · 信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="36-cnn-training.html">第 36 章 · CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

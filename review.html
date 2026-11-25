@@ -1073,6 +1073,152 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <p>softmax 对 logits 的 Fisher = diag(p) − ppᵀ，有零特征值（logits 同加常数策略不变），求逆要伪逆或加阻尼。</p>
 <p>口诀：TRPO 线性目标加二次 KL；PPO 截比率是替身；softmax 的 F 要加阻尼。</p>
 </details>
+<h2 id="cnntransformer">CNN、Transformer 与张量的数学</h2>
+<h3 id="st118">ST118 · 卷积层和全连接层是什么关系？深度学习框架里的“卷积”和数学上的卷积差在哪？</h3>
+<p>来源：<a href="lessons/35-convolution.html">第 35 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>卷积是线性映射，矩阵是 Toeplitz 矩阵：每行是同一个核往右挪一格，其余为 0（稀疏 + 权重共享），换来平移等变和极少的参数。例：长 6 的信号、核 [1, 0, −1]，全连接 24 个参数，卷积 3 个。</p>
+<p>框架里的 conv 是互相关 <span class="arithmatex">\(y_i = \sum_jx_{i+j}k_j\)</span>（不翻核）；数学卷积要翻核。核是学出来的，翻不翻不影响能力，只在对照卷积定理和推反向传播时要注意。</p>
+<p>口诀：卷积是盖印章，矩阵稀疏又共享；框架里其实是互相关。</p>
+</details>
+<h3 id="st119">ST119 · 卷积的输出尺寸公式是什么？感受野怎么递推？</h3>
+<p>来源：<a href="lessons/35-convolution.html">第 35 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(o = \lfloor(n + 2p - d(k - 1) - 1)/s\rfloor + 1\)</span>；s = 1、k = 2p + 1 时尺寸不变。例：224、k = 7、s = 2、p = 3 → 112。</p>
+<p>感受野逐层 <span class="arithmatex">\(r \leftarrow r + (k - 1)\cdot d\cdot J\)</span>，J 是前面各层步长之积。三层 3×3：7；前两层步长 2：15；空洞 1、2、4：15。步长和空洞让感受野按指数涨。</p>
+<p>口诀：输出是 n 加 2p 减 d(k−1) 减 1 除 s 加 1；感受野加 (k−1)·d·累计步长。</p>
+</details>
+<h3 id="st120-fft-im2col">ST120 · 卷积定理说什么？什么时候用 FFT、什么时候用 im2col？</h3>
+<p>来源：<a href="lessons/35-convolution.html">第 35 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>卷积定理：<span class="arithmatex">\(\mathcal F(x * k) = \mathcal F(x)\mathcal F(k)\)</span>（循环卷积），时域卷积变频域逐点乘，代价 O(n log n)。核很长时划算（n = 65536、核 1025：直接 6700 万次 vs FFT 约 300 万次）；3×3 这样的小核直接算更便宜。</p>
+<p>im2col：把每个窗口拉成一列，卷积变成一次大矩阵乘（GEMM），能用上矩阵乘库和 Tensor Core；代价是内存放大约 k² 倍（C = 64、56×56、3×3：9 倍）。cuDNN 的隐式 GEMM 不真正展开。</p>
+<p>口诀：小核 im2col 变矩阵乘，长核 FFT 变逐点乘。</p>
+</details>
+<h3 id="st121">ST121 · 卷积层的反向传播是什么？转置卷积的输出尺寸怎么算？</h3>
+<p>来源：<a href="lessons/36-cnn-training.html">第 36 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>y = Tx 是线性的，∂L/∂x = Tᵀg：等于上游梯度和核做 full 模式的真正卷积（翻核）；对核的梯度 ∂L/∂k_j = Σ_i g_i x_{i+j}，是输入和梯度的互相关。</p>
+<p>转置卷积 = 拿 Tᵀ 当前向做上采样，不是卷积的逆：<span class="arithmatex">\(o = (n - 1)s - 2p + d(k - 1) + \text{output\_padding} + 1\)</span>（16、k = 4、s = 2、p = 1 → 32）。k 不能被 s 整除时容易出棋盘格伪影。</p>
+<p>口诀：卷积反向乘转置；转置卷积拿来上采样，不是逆。</p>
+</details>
+<h3 id="st122-he-xavier">ST122 · He / Xavier 初始化的方差是怎么推出来的？</h3>
+<p>来源：<a href="lessons/36-cnn-training.html">第 36 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>一层 <span class="arithmatex">\(y = \sum_{i=1}^{n_{in}}w_ix_i\)</span>，w、x 独立、E[w] = 0：<span class="arithmatex">\(\mathbb E[y^2] = n_{in}\text{Var}(w)\mathbb E[x^2]\)</span>；ReLU 把二阶矩减半。L 层连乘 <span class="arithmatex">\(\prod\frac12n_l\text{Var}(w_l)\)</span>，要每项为 1：He 取 Var(w) = 2/n_in。Xavier 为对称激活（tanh）推，兼顾前向和反向，取 2/(n_in + n_out)。</p>
+<p>例（n = 512，过一层 ReLU）：N(0, 0.01²) 增益 0.0256，Xavier 0.5，He 1。卷积的 fan_in = C_in·k·k。</p>
+<p>口诀：一层增益半个 n 乘方差，He 取二除 n。</p>
+</details>
+<h3 id="st123-batchnorm">ST123 · BatchNorm 的梯度有什么结构？残差连接为什么让深网络训得动？</h3>
+<p>来源：<a href="lessons/36-cnn-training.html">第 36 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>BN 的梯度 <span class="arithmatex">\(dx = (g - \bar g - \hat x\cdot\overline{g\hat x})/\sigma\)</span>：自动和“全 1”、“x̂”两个方向正交（Σdx = 0、Σdx·x̂ = 0），因为整体平移、缩放会被 BN 消掉，梯度里也就没有这两个分量。</p>
+<p>残差 <span class="arithmatex">\(x_{l+1} = x_l + F(x_l)\)</span> 的雅可比是 I + F′，连乘 <span class="arithmatex">\(\prod(1 + F'_l)\)</span> 不会指数消失。例（50 层标量）：普通堆叠每层导数 U(0.5, 1.1) 连乘 1.1 × 10⁻⁵；残差每层 1 + 0.1·U(−1, 1) 连乘 1.82。</p>
+<p>口诀：BN 梯度去掉均值和 x̂ 方向；残差每层多个 1。</p>
+</details>
+<h3 id="st124-dsoftmax">ST124 · 为什么注意力要除以 √d？softmax 饱和时梯度怎样？</h3>
+<p>来源：<a href="lessons/37-attention-math.html">第 37 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>q、k 各分量独立、均值 0、方差 1 时 <span class="arithmatex">\(\text{Var}(q\cdot k) = d\)</span>（AIAYN 脚注 4）。不缩放时 d 越大 logits 越分散，softmax 接近 one-hot。</p>
+<p>softmax 雅可比 <span class="arithmatex">\(p_i(\delta_{ij} - p_j)\)</span>，对角元 p(1 − p)：一旦某个 p → 1，梯度 → 0。例：logits = 16 × [2, 1, 0, −1] 时最大局部梯度只有 1.1 × 10⁻⁷；缩放 1 时 0.23。温度太高（分布太平）也学不出东西。</p>
+<p>口诀：d 个硬币加起来标准差根号 d；softmax 太尖梯度没。</p>
+</details>
+<h3 id="st125">ST125 · 为什么说注意力就是核平滑？温度对应什么？</h3>
+<p>来源：<a href="lessons/37-attention-math.html">第 37 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Nadaraya–Watson 核回归 <span class="arithmatex">\(\hat f(q) = \sum K(q, k_j)v_j/\sum K(q, k_j)\)</span>；取 <span class="arithmatex">\(K = e^{q\cdot k/\tau}\)</span> 就是 softmax(qKᵀ/τ)V。高斯核展开后 = 指数点积核 × 只和键长度有关的项，键长度相同时完全一样。</p>
+<p>温度 = 核宽：小 → 接近最近邻（偏差小、方差大），大 → 平均一大片（偏差大）。例：值 = sin，q = 1：τ = 0.1 输出 0.81、τ = 2 输出 0.39（真值 0.84）。</p>
+<p>口诀：注意力就是核回归，温度就是核宽。</p>
+</details>
+<h3 id="st126-mask-softmax">ST126 · 多头注意力的“低秩”指什么？因果 mask 为什么在 softmax 前填 −∞？</h3>
+<p>来源：<a href="lessons/37-attention-math.html">第 37 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>一个头的打分 <span class="arithmatex">\(x_i^\top W_QW_K^\top x_j\)</span>，<span class="arithmatex">\(W_QW_K^\top\)</span> 是 d_model × d_model 但秩 ≤ d_head（例：512×512、秩 64）。h 个头的参数和一个 d_model 维的头一样多：多头是把满秩相似度拆成 h 个低秩、各自 softmax 的相似度。</p>
+<p>因果 mask：softmax 前把 j &gt; i 的分数设成 −∞，e^{−∞} = 0，未来位置权重精确为 0、每行自动重新归一化；填 0 不行（e⁰ = 1），softmax 后乘 0 要重新归一化。可见对数约 n²/2，实现里跳过全被 mask 的块。</p>
+<p>口诀：每个头秩不过 d_head；因果 mask 先填负无穷再 softmax。</p>
+</details>
+<h3 id="st127-rope-rope">ST127 · 正弦位置编码和 RoPE 各怎么编码位置？RoPE 为什么只依赖相对位置？</h3>
+<p>来源：<a href="lessons/38-position-encoding.html">第 38 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>正弦编码：第 i 对 (sin pω_i, cos pω_i)，ω_i = 10000^{−2i/d}；平移 k 是一个只依赖 k 的 2×2 旋转，但它加在输入上，进到点积以后相对性不精确。</p>
+<p>RoPE：把 q、k 每对维度当复数乘 <span class="arithmatex">\(e^{im\theta_i}\)</span>（按位置旋转），<span class="arithmatex">\(\text{Re}(\tilde q_m\overline{\tilde k_n}) = \text{Re}(q\bar ke^{i(m-n)\theta})\)</span>：绝对位置约掉、只剩 m − n。d = 128 时波长从 6.28 到 54,410，有 18 对超过训练长度 4096（训练时没转满一圈）。</p>
+<p>口诀：正弦编码平移是旋转但加在输入上；RoPE 直接转 q、k，点积只剩 m − n。</p>
+</details>
+<h3 id="st128-rope-l-slpintk-awareyarn">ST128 · 把 RoPE 模型的上下文从 L 扩到 sL，PI、NTK-aware、YaRN 各怎么做？</h3>
+<p>来源：<a href="lessons/38-position-encoding.html">第 38 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>PI：所有频率除以 s（m → m/s），简单但高频也被压缩，局部分辨率下降。</p>
+<p>NTK-aware：换底数 <span class="arithmatex">\(b' = b\,s^{d/(d-2)}\)</span>，最高频几乎不变、最低频正好缩小 s 倍（d = 128、s = 4：底数 10000 → 40,890）。</p>
+<p>YaRN：按每对维度在训练长度里转的圈数 r = L/λ 分段：r &gt; β（32）不动、r &lt; α（1）完全插值、中间线性过渡（d = 128、s = 4：21 / 25 / 18 对）；再把注意力 logits 乘以温度 (0.1 ln s + 1)²。</p>
+<p>口诀：PI 全压缩，NTK 换底数，YaRN 分三段加温度。</p>
+</details>
+<h3 id="st129-alibi">ST129 · ALiBi 怎么给注意力加位置信息？斜率怎么选？</h3>
+<p>来源：<a href="lessons/38-position-encoding.html">第 38 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>不加位置向量，直接在分数上减距离：<span class="arithmatex">\(s_{ij} - m_h(i - j)\)</span>。h 个头的斜率是几何序列，8 个头取 1/2, 1/4, …, 1/256（一般 <span class="arithmatex">\(m_h = 2^{-8h/H}\)</span>）。斜率大的头只看附近，斜率小的头看得远。</p>
+<p>偏置对任何长度都有定义，外推平稳；代价是强加“越远越不重要”的先验。</p>
+<p>口诀：ALiBi 按距离减分，斜率成几何序列。</p>
+</details>
+<h3 id="st130-layernorm-rmsnorm">ST130 · LayerNorm 在几何上做了什么？RMSNorm 少了哪一步，丢掉了什么性质？</h3>
+<p>来源：<a href="lessons/39-normalization.html">第 39 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>LN = 减均值（投影到和 𝟙 垂直的超平面）+ 除以 σ（拉到半径 √d 的球面），<span class="arithmatex">\(\|\text{LN}(x)\| = \sqrt d\)</span>。对平移 x + c𝟙 和缩放 αx 都不变。</p>
+<p>RMSNorm 只除以 RMS、不减均值：长度也是 √d，但只对缩放不变，平移会改变输出。论文认为缩放不变性才是关键，去掉重新居中速度快 7%–64%；现代 LLM 多用 RMSNorm。</p>
+<p>口诀：LayerNorm 先投影再拉到半径根号 d；RMSNorm 只管缩放、更快。</p>
+</details>
+<h3 id="st131">ST131 · 归一化层的梯度有什么特点？对前面层的权重尺度有什么影响？</h3>
+<p>来源：<a href="lessons/39-normalization.html">第 39 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\partial L/\partial x = (g - \bar g\mathbf 1 - y\,\overline{gy})/\sigma\)</span>：和 𝟙、y 两个方向正交（不变性 ⇒ 沿这些方向导数为 0），并除以 σ（和第 36 章 BN 同一个式子，只是在特征维上）。</p>
+<p>前面层的权重整体放大 → 输出不变、σ 变大 → 梯度变小：有效学习率 ∝ 1/‖W‖。所以在有归一化的网络里，weight decay 主要起“调有效学习率”的作用。</p>
+<p>口诀：梯度投影掉看不见的方向，权重越大步子越小。</p>
+</details>
+<h3 id="st132-pre-ln-post-ln-post-ln">ST132 · Pre-LN 和 Post-LN 有什么区别？为什么 Post-LN 需要学习率预热？</h3>
+<p>来源：<a href="lessons/39-normalization.html">第 39 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Post-LN：<span class="arithmatex">\(\text{LN}(x + F(x))\)</span>，残差流每层被拉回方差 1；Pre-LN：<span class="arithmatex">\(x + F(\text{LN}(x))\)</span>，残差路径上没有 LN，方差每层累加，约 1 + L（例：12 层 12.8）。</p>
+<p>Pre-LN 论文 Theorem 1：初始化时 Post-LN 最后一层的梯度 O(d√ln d)、和层数无关且偏大，所以要先用小学习率预热；Pre-LN 是 O(d√(ln d / L))，随层数变小，可以不预热、更稳。代价：残差流越来越大，后面的层相对贡献变小。</p>
+<p>口诀：Post-LN 每层拉回、梯度大要预热；Pre-LN 残差干净、方差加到 1 + L。</p>
+</details>
+<h3 id="st133-reshape">ST133 · 多维张量的地址怎么算？转置后 reshape 什么时候要拷贝？</h3>
+<p>来源：<a href="lessons/40-tensor-math.html">第 40 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>地址 = 起点 + Σ 下标 × 步长；行优先连续时最后一维步长 1，<span class="arithmatex">\(s_k = s_{k+1}n_{k+1}\)</span>。例：(2, 3, 4) 的步长 (12, 4, 1)，T[1, 2, 3] 偏移 23。</p>
+<p>转置、切片只改形状和步长（视图，共享内存）。reshape 要合并相邻两维 (n₁, n₂)、步长 (s₁, s₂) 时，只有 s₁ = n₂s₂ 才能不拷贝。例：T.transpose(0, 2, 1) 的后两维步长 (1, 4) 合不了，reshape(2, 12) 会拷贝；PyTorch 的 view 此时报错。</p>
+<p>口诀：地址是下标乘步长加起来；合并要步长接得上，不然就拷贝。</p>
+</details>
+<h3 id="st134-einsum">ST134 · 广播的规则是什么？是怎么实现的？反向时要做什么？einsum 怎么读？</h3>
+<p>来源：<a href="lessons/40-tensor-math.html">第 40 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>广播：两个形状右对齐，每一维要么相等、要么有一个是 1（或缺失），结果取较大的；被拉伸的维度步长设为 0，不真的复制。反向：被广播（复制）的维度要把梯度求和回去。例：(8, 1, 6, 1) 和 (7, 1, 5) → (8, 7, 6, 5)。</p>
+<p>einsum：每个输入一组下标，出现在输出里的保留、没出现的求和，同一个下标对齐相乘；复杂度 = 所有下标大小之积。例：<code>bhqd,bhkd-&gt;bhqk</code> 是注意力打分。</p>
+<p>口诀：广播右对齐、1 能拉伸步长 0、反向求和；einsum 留下的保留、消失的求和。</p>
+</details>
+<h3 id="st135-y-xw-b-vjp">ST135 · y = xW + b 的三个 VJP 是什么？怎么快速记住形状？</h3>
+<p>来源：<a href="lessons/40-tensor-math.html">第 40 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>上游梯度 g 和 y 同形状。<span class="arithmatex">\(\partial L/\partial x = gW^\top\)</span>，<span class="arithmatex">\(\partial L/\partial W = x^\top g\)</span>，<span class="arithmatex">\(\partial L/\partial b = \sum_{\text{batch}}g\)</span>（b 被广播过）。</p>
+<p>记法：结果要和被求导的变量同形状，转置谁、放哪边由形状唯一决定；广播过的维度求和。用有限差分检查时误差约 1e-10。</p>
+<p>口诀：VJP 的形状和变量一样：g 乘 Wᵀ、xᵀ 乘 g、偏置求和。</p>
+</details>
 <hr />
 <h2 id="_13">已掌握</h2>
 <p>（暂无）</p>

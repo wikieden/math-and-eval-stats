@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>张量的数学</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 40 章 · 一条内存，多种看法：步长、转置、广播</h1>
+<p class="sub">配套讲义：<a href="../lessons/40-tensor-math.html">第 40 章 · 张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a>。下面一条是内存里的格子，上面是张量的逻辑形状。选中一个逻辑位置，看它落在内存的哪一格：偏移 = Σ 下标 × 步长。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">看法</label><select id="md"><option value="0">连续 (2, 3, 4)</option><option value="1">转置 (2, 4, 3)</option><option value="2">广播 (3, 1) → (3, 4)</option></select><label for="k">逻辑位置（按行数第几个）</label><input type="range" id="k" min="0" max="23" step="1" value="0"><span id="kv">0</span></div>
+<p class="note">看点：① 连续：逻辑位置按行往后数，内存位置也一格一格往后走（步长 (12, 4, 1)）；② 转置：逻辑上沿行走一步，内存里跳 4 格（步长 (12, 1, 4)）；数据没动，只是读法变了；③ 广播：一列 3 个数被看成 3×4，同一行的 4 个位置都指向内存里同一格（第二维步长 0）。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','k'],F=[[0,0],[0,1],[0,5],[0,23],[1,0],[1,1],[1,2],[1,4],[2,0],[2,1],[2,5]];
+function render(md,k){const shape=md==0?[2,3,4]:md==1?[2,4,3]:[3,4],st=md==0?[12,4,1]:md==1?[12,1,4]:[1,0],nmem=md==2?3:24,tot=shape.reduce((a,b)=>a*b,1);k=Math.min(k,tot-1);
+ const idx=[];let r=k;for(let i=shape.length-1;i>=0;i--){idx.unshift(r%shape[i]);r=Math.floor(r/shape[i])}const off=idx.reduce((s,v,i)=>s+v*st[i],0);
+ cap(`形状 (${shape.join(', ')})、步长 (${st.join(', ')})：下标 [${idx.join(', ')}] → 偏移 ${idx.map((v,i)=>`${v}×${st[i]}`).join(' + ')} = ${off}`);
+ const c=26;const rows=md==2?3:shape[shape.length-2],cols=shape[shape.length-1],slabs=md==2?1:shape[0];
+ for(let s=0;s<slabs;s++)for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){const id=md==2?[i,j]:[s,i,j],o=id.reduce((a,v,t)=>a+v*st[t],0),sel=id.every((v,t)=>v==idx[t]),x=60+s*(cols*c+40)+j*c,y=60+i*c;
+  R(x,y,c-3,c-3,sel?'var(--warm)':(o==off?'var(--warm)':'var(--line)'),sel?.9:(o==off?.35:.45));T(String(o),x+11,y+17,'middle','s')}
+ T('逻辑形状（格子里写的是它在内存里的偏移）',60,48,'start','s');
+ for(let m=0;m<nmem;m++){const x=40+m*25,y=270;R(x,y,22,26,m==off?'var(--warm)':'var(--accent)',m==off?.9:.2);T(String(m),x+11,y+17,'middle','s')}T('内存（一维）',40,262,'start','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

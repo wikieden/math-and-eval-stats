@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>卷积的数学</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 35 章 · 印章沿信号滑动：卷积 = Toeplitz 矩阵</h1>
+<p class="sub">配套讲义：<a href="../lessons/35-convolution.html">第 35 章 · 卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a>。输入 [3, 1, 4, 1, 5, 9]，核 [1, 0, −1]（valid，不补零）。左：窗口在输入上滑动；右：同一个运算写成矩阵，当前输出对应高亮的那一行。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="i">输出位置</label><input type="range" id="i" min="0" max="3" step="1" value="0"><span id="iv">0</span><label for="s">步长</label><input type="range" id="s" min="1" max="2" step="1" value="1"><span id="sv">1</span><label for="d">空洞</label><input type="range" id="d" min="1" max="2" step="1" value="1"><span id="dv">1</span></div>
+<p class="note">看点：① 每个输出 = 窗口里的数和核逐个相乘再相加；② 右边矩阵的每一行就是“印章盖在这里”，所有行用同一组数（权重共享），其余全是 0（稀疏）；③ 步长 2：窗口跳着走，输出变短；空洞 2：核跨着取数，一个核覆盖 5 格。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['i','s','d'],F=[[0,1,1],[1,1,1],[2,1,1],[3,1,1],[0,2,1],[1,2,1],[0,1,2],[1,1,2]];
+const X=[3,1,4,1,5,9],K=[1,0,-1];
+function render(i,s,d){const span=d*2+1,n=Math.floor((6-span)/s)+1;i=Math.min(i,n-1);const out=[];for(let o=0;o<n;o++){let v=0;for(let t=0;t<3;t++)v+=X[o*s+t*d]*K[t];out.push(v)}
+ cap(`步长 ${s}、空洞 ${d}：输出长度 ${n}；y${i+1} = ${[0,1,2].map(t=>`${X[i*s+t*d]}×${K[t]}`).join(' + ')} = ${out[i]}`);
+ const cw=44,x0=40,y0=80;T('输入 x',x0,y0-12,'start','s');X.forEach((v,j)=>{const on=[0,1,2].some(t=>i*s+t*d==j);R(x0+j*cw,y0,cw-4,36,on?'var(--accent)':'var(--line)',on?.35:.5);T(String(v),x0+j*cw+20,y0+24,'middle','num')});
+ [0,1,2].forEach(t=>{const j=i*s+t*d;T(String(K[t]),x0+j*cw+20,y0+60,'middle','s');AR(x0+j*cw+20,y0+64,x0+j*cw+20,y0+40,'var(--warm)',1.4)});T('核',x0-6,y0+60,'end','s');
+ T('输出 y',x0,y0+112,'start','s');for(let o=0;o<n;o++){R(x0+o*cw,y0+120,cw-4,36,o==i?'var(--warm)':'var(--line)',o==i?.5:.5);if(o<=i)T(String(out[o]),x0+o*cw+20,y0+144,'middle','num')}
+ const mx=360,my=70,c=40;T('Toeplitz 矩阵 T（'+n+'×6）',mx,my-8,'start','s');for(let r=0;r<n;r++)for(let j=0;j<6;j++){let v=0;[0,1,2].forEach(t=>{if(r*s+t*d==j)v=K[t]});R(mx+j*c,my+r*c,c-3,c-3,r==i?'var(--accent)':'var(--line)',r==i?.3:.35);T(String(v),mx+j*c+18,my+r*c+25,'middle',v?'num':'s')}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

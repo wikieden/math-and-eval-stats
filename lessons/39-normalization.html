@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 39 章 · 归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html" class="cur"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="39-layernorm-rmsnorm-pre-ln-post-ln">第 39 章 · 归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</h1><div class="run"><a class="btn" href="../animations/39-normalization.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch39_normalization.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch39_normalization.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch39_normalization.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：LayerNorm 在几何上做了什么？RMSNorm 少了一步，丢掉了什么？归一化的梯度有什么结构？为什么现在的大模型几乎都用 Pre-LN，残差流的大小又为什么会随层数越来越大？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/38-position-encoding.html">第 38 章 位置编码的数学</a> · 下一章：<a href="../lessons/40-tensor-math.html">第 40 章 张量的数学</a><br />
+对应原文：LayerNorm <code>transformer-deep-dive/materials/text/papers/layernorm-1607.06450.txt</code>；RMSNorm <code>transformer-deep-dive/materials/text/papers/rmsnorm-1910.07467.txt</code>（重新居中 vs 重新缩放的不变性 L18–L50）；On Layer Normalization in the Transformer Architecture（Pre-LN）<code>transformer-deep-dive/materials/text/papers/preln-on-layer-normalization-2002.04745.txt</code>（Theorem 1：Post-LN 最后一层梯度 O(d√ln d)、Pre-LN O(d√(ln d / L))，L338–L352）<br />
+本章缩写：LN = Layer Normalization（层归一化）；RMS = Root Mean Square（均方根）；RMSNorm = 用 RMS 归一化；Pre-LN / Post-LN = 归一化放在残差分支之前 / 残差相加之后；F = 残差分支（注意力或 MLP）；L = 层数；d = 隐藏维度。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="layernorm-2026-11-25">第一步：LayerNorm 的几何：投影 + 拉到固定半径（2026-11-25）</h3>
+<p><strong>类比：把一组考试分数换成"比平均高几个标准差"。</strong> 不管原来满分是 100 还是 150、整体偏高还是偏低，换完以后都在同一个尺度上。</p>
+<div class="arithmatex">\[\text{LN}(x) = \frac{x - \bar x\mathbf 1}{\sigma(x)},\quad\sigma(x) = \sqrt{\tfrac1d\textstyle\sum(x_i - \bar x)^2}\]</div>
+<p>（再乘 γ、加 β，这里先不管）两步各有几何意义：</p>
+<ol>
+<li>减均值 = 投影到和 𝟙 = [1, …, 1] 垂直的超平面（分量和为 0）；</li>
+<li>除以 σ = 拉到这个超平面上半径 √d 的球面（<span class="arithmatex">\(\|\text{LN}(x)\|^2 = d\)</span>）。</li>
+</ol>
+<p><strong>例子</strong>：x = [2, 4, 6, 8] → LN(x) = [−1.3416, −0.4472, 0.4472, 1.3416]：分量和 0，长度 2 = √4。</p>
+<p><strong>RMSNorm</strong>：不减均值，只除以 RMS：<span class="arithmatex">\(x/\sqrt{\frac1d\sum x_i^2}\)</span>。RMSNorm(x) = [0.3651, 0.7303, 1.0954, 1.4606]，长度也是 2，但不在“和为 0”的超平面上。</p>
+<p><img alt="LayerNorm 的几何（d = 3）" src="../figures/39-normalization-geometry.png" />
+<em>图 39-1 · d = 3，视线沿 [1, 1, 1]，和它垂直的平面正对着我们：灰点是 10 个随机向量减均值后的位置（都在这个平面上），蓝点是 LN 之后（都落在半径 √3 的圆上）</em></p>
+<p><strong>一句话</strong>：LayerNorm = 投影到“和为 0”的超平面 + 拉到半径 √d 的球面；RMSNorm 只做后一步（拉到半径 √d 的球面，但不投影）。</p>
+<h3 id="2026-11-25">第二步：不变性：归一化之后，前面的哪些变化被“看不见”了（2026-11-25）</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>平移 x + c𝟙</th>
+<th>整体缩放 αx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LayerNorm</td>
+<td>不变</td>
+<td>不变</td>
+</tr>
+<tr>
+<td>RMSNorm</td>
+<td><strong>会变</strong></td>
+<td>不变</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>：LN(3x + 5) = [−1.3416, −0.4472, 0.4472, 1.3416]，和 LN(x) 一样；RMSNorm(3x) 和 RMSNorm(x) 一样，但 RMSNorm(x + 5) = [0.6831, 0.8783, 1.0735, 1.2687]，变了。</p>
+<p>RMSNorm 论文（L18–L50）的论点：LayerNorm 成功主要靠缩放不变性（让训练不受权重尺度影响），重新居中贡献不大；去掉减均值省一次归约，速度快 7%–64%。Llama、Qwen 等现代 LLM 都用 RMSNorm。</p>
+<p><strong>一句话</strong>：LN 对平移和缩放都不变，RMSNorm 只对缩放不变；实践中缩放不变性是关键，所以 RMSNorm 够用而且更快。</p>
+<h3 id="2026-11-25_1">第三步：归一化的梯度：去掉“看不见”的方向（2026-11-25）</h3>
+<p>既然 LN 对“沿 𝟙 平移”和“沿 x 缩放”不变，损失对这两个方向的导数就是 0：梯度自动和它们正交（和第 36 章 BatchNorm 是同一个式子，只是在特征维而不是 batch 维上算）：</p>
+<div class="arithmatex">\[\frac{\partial L}{\partial x} = \frac1\sigma\Big(g - \bar g\mathbf 1 - y\cdot\overline{g\,y}\Big),\quad y = \text{LN}(x)\]</div>
+<p><strong>例子</strong>（x = [2, 4, 6, 8]，上游梯度 [1, −2, 0.5, 3]）：∂L/∂x = [0.7379, −0.9839, −0.246, 0.4919]；分量和 −1.1 × 10⁻¹⁶，和 y 的内积 2.5 × 10⁻¹⁶（都是 0）。</p>
+<p>后果：LN 之前那一层的权重 W 整体放大，输出不变、梯度变小（σ 在分母）：权重越大有效学习率越小，这是一种自稳定机制，也是 weight decay 在有归一化的网络里主要起“调有效学习率”作用的原因。</p>
+<p><strong>一句话</strong>：LN 的梯度投影掉了 𝟙 和 y 两个方向，并除以 σ；前面权重越大，有效步长越小。</p>
+<h3 id="pre-ln-post-ln2026-11-25">第四步：Pre-LN 与 Post-LN：残差流的大小（2026-11-25）</h3>
+<p><strong>Post-LN</strong>（原版 Transformer）：<span class="arithmatex">\(x_{l+1} = \text{LN}(x_l + F(x_l))\)</span>。<strong>Pre-LN</strong>（GPT-2 以后几乎所有模型）：<span class="arithmatex">\(x_{l+1} = x_l + F(\text{LN}(x_l))\)</span>。</p>
+<p><strong>例子</strong>（d = 512，残差分支 F 是随机线性层、输出方差约等于输入方差，看残差流每个分量的方差）：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>1</th>
+<th>4</th>
+<th>8</th>
+<th>12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pre-LN</td>
+<td>2.0</td>
+<td>5.0</td>
+<td>8.99</td>
+<td>12.84</td>
+</tr>
+<tr>
+<td>Post-LN</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+<p>Pre-LN 每层把一个方差约 1 的东西<strong>加</strong>到残差流上，方差约 1 + L 线性增长；Post-LN 每层都被拉回 1。</p>
+<p><img alt="残差流方差随层数的变化" src="../figures/39-normalization-residual.png" />
+<em>图 39-2 · 横轴层数，纵轴残差流方差；Pre-LN（蓝）沿 1 + L 直线增长，Post-LN（橙）恒为 1</em></p>
+<p><strong>梯度</strong>（Pre-LN 论文 Theorem 1，L338–L352）：初始化时，Post-LN 最后一层参数的梯度是 O(d√ln d)，和层数无关、偏大；Pre-LN 是 O(d√(ln d / L))，随层数变小。所以 Post-LN 必须先用很小的学习率预热（warmup），否则一开始就发散；Pre-LN 可以不预热、训得更稳。代价：Pre-LN 后面的层对残差流的相对贡献越来越小（残差流越来越大），深层的“有效深度”打折扣，这是 DeepNet、各种残差缩放方法想补的。</p>
+<p><strong>场景代码</strong>：Pre-LN 的 Transformer 块（PyTorch 写法，示意结构；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">class Block(nn.Module):
+    def forward(self, x):
+        x = x + self.attn(self.norm1(x))    # Pre-LN：先归一化再进分支，残差路径上没有 LN
+        x = x + self.mlp(self.norm2(x))
+        return x                            # 整个网络最后再加一个 final_norm
+</code></pre>
+<p><strong>一句话</strong>：Post-LN 每层归一化、残差流稳定但梯度大、需要预热；Pre-LN 残差路径干净、梯度随层数缩小、训得稳，代价是残差流方差约 1 + L 增长。</p>
+<h3 id="layernorm">动画演示：一个向量被 LayerNorm 拉到圆上</h3>
+<p><img alt="归一化与信号传播" src="../animations/39-normalization.gif" /></p>
+<p>可交互版：<a href="../animations/39-normalization.html">animations/39-normalization.html</a>（下拉切换“LayerNorm / RMSNorm / 残差流”；滑块调平移量、缩放量或层数）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>LayerNorm：d = 3，视线沿 [1, 1, 1]（和图 39-1 一样）；灰点是输入在平面上的投影，蓝点是 LN 输出，落在半径 √3 的虚线圆上；拖平移 c 两个点都不动，拖缩放 α 只有灰点沿半径移动（第一、二步）；</li>
+<li>RMSNorm：拖平移 c 时蓝点会移动（不减均值，平移改变输出），拖缩放时不动（第二步）；</li>
+<li>残差流：两条线是 Pre-LN 和 Post-LN 的方差随层数变化（第四步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：x = [1, 1, 1, 5]，算 LN(x) 和 RMSNorm(x)。各自的长度是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：说出一个 RMSNorm 和 LayerNorm 输出相同的条件。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：Pre-LN 的残差分支输出方差改成 0.1（比如残差分支的最后一层乘了一个小系数），24 层后残差流的方差大约是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>LayerNorm 先投影再拉到半径根号 d；<br />
+LN 平移缩放都不变，RMSNorm 只管缩放、少一步更快；<br />
+梯度投影掉看不见的方向，权重越大步子越小；<br />
+Post-LN 每层拉回、梯度大要预热；<br />
+Pre-LN 残差干净、方差一加加到 1 加 L。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST130（LayerNorm 的几何、RMSNorm 少了什么）、ST131（归一化的不变性与梯度结构）、ST132（Pre-LN vs Post-LN：残差流方差、梯度、预热）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Pre-LN 论文（Xiong 2020）</td>
+<td>§3（Theorem 1，L338–L352）、§3.4 实验</td>
+<td>为什么 Post-LN 需要预热</td>
+</tr>
+<tr>
+<td>★ RMSNorm（Zhang &amp; Sennrich 2019）</td>
+<td>§1–3（L18–L50）</td>
+<td>去掉重新居中的理由</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/transformer-visual/lessons/19-layernorm.html">《从零读懂 Transformer》第 19 章 LayerNorm</a></td>
+<td>全章</td>
+<td>直觉版和动画</td>
+</tr>
+<tr>
+<td>LayerNorm（Ba 2016）</td>
+<td>§3、§5（不变性分析）</td>
+<td>原始定义和不变性表</td>
+</tr>
+<tr>
+<td><a href="../lessons/36-cnn-training.html">第 36 章 CNN 训练的数学</a></td>
+<td>第四、五步</td>
+<td>BatchNorm 的梯度、残差的梯度流</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>投影矩阵</strong>：减均值 = <span class="arithmatex">\((I - \frac1d\mathbf 1\mathbf 1^\top)x\)</span>，对称幂等。</li>
+<li><strong>长度</strong>：<span class="arithmatex">\(\|x - \bar x\mathbf 1\|^2 = d\sigma^2\)</span> ⇒ <span class="arithmatex">\(\|\text{LN}(x)\|^2 = d\)</span>。</li>
+<li><strong>不变性 ⇒ 梯度正交</strong>：若 f(x + c𝟙) = f(x) 对所有 c 成立，对 c 求导得 ∇f·𝟙 = 0；缩放不变同理得 ∇f·x = 0。</li>
+<li><strong>Pre-LN 方差累加</strong>：x_{l+1} = x_l + F_l，F_l 和 x_l 近似不相关时 Var 相加。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\text{LN}(x) = (x - \bar x)/\sigma\)</span></td>
+<td>LayerNorm（不含 γ、β）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{RMSNorm}(x) = x/\text{RMS}(x)\)</span></td>
+<td>RMSNorm</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\|\text{LN}(x)\| = \sqrt d\)</span></td>
+<td>半径</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\partial L/\partial x = (g - \bar g - y\,\overline{gy})/\sigma\)</span></td>
+<td>LN 的梯度</td>
+</tr>
+<tr>
+<td>Pre-LN：<span class="arithmatex">\(x + F(\text{LN}(x))\)</span>；Post-LN：<span class="arithmatex">\(\text{LN}(x + F(x))\)</span></td>
+<td>两种放法</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch39_normalization.py</code>，配套测试 <code>tests/test_ch39.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch39_normalization.py  
+uv run pytest tests/test_ch39.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 几何</td>
+<td>减均值、除 σ</td>
+<td><code>layernorm(X)</code>、<code>rmsnorm(X)</code></td>
+<td>长度都是 2</td>
+</tr>
+<tr>
+<td>第二步 不变性</td>
+<td>平移、缩放</td>
+<td><code>layernorm(3 * X + 5)</code></td>
+<td>不变</td>
+</tr>
+<tr>
+<td>第三步 梯度</td>
+<td>投影</td>
+<td><code>ln_grad(X, g)</code></td>
+<td>Σ = 0、⊥ y</td>
+</tr>
+<tr>
+<td>第四步 残差流</td>
+<td>Pre / Post</td>
+<td><code>residual_variance(12, mode)</code></td>
+<td>12.84 vs 1.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">(x - m) / np.sqrt(((x - m) ** 2).mean(-1, keepdims=True) + eps)    # LayerNorm
+x / np.sqrt((x ** 2).mean(-1, keepdims=True) + eps)                 # RMSNorm
+x = x + layernorm(x) @ w if mode == &quot;pre&quot; else layernorm(x + x @ w) # Pre-LN / Post-LN
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>eps 默认取 0</strong>：为了让“长度正好 √d”“梯度和精确正交”这些性质在数值上成立；真实实现里 eps ≈ 1e-5，防止 σ = 0。</li>
+<li><strong>残差分支用 1/√d 的随机矩阵</strong>：保证 F 的输出方差约等于输入方差（第 36 章的初始化），所以 Pre-LN 每层正好加 1。</li>
+<li><strong>没有算梯度范数</strong>：“Pre-LN / Post-LN 12 层的梯度范数对比”留给自己做（里程碑 ME-M24）。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>在 Post-LN 版本里把 <code>layernorm</code> 换成 <code>rmsnorm</code>，方差还是 1 吗？</li>
+<li>给 Pre-LN 的残差分支乘 1/√(2L)（GPT-2 的做法），看 12 层后的方差。</li>
+</ol><nav class="pager"><a href="38-position-encoding.html">← 第 38 章 · 位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="40-tensor-math.html">第 40 章 · 张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>
