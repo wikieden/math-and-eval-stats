@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 25 章 · LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html" class="cur"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="25-lqr-riccati-riccati">第 25 章 · LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</h1><div class="run"><a class="btn" href="../animations/25-lqr-riccati.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch25_lqr_riccati.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch25_lqr_riccati.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch25_lqr_riccati.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：LQR 的增益 K 是怎么来的？为什么最优总代价正好是 xᵀPx？有限时域和无限时域的解有什么关系？Q、R 怎么调？什么时候 LQR 也救不了？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/24-policy-gradient.html">第 24 章 策略梯度推导</a> · 下一章：<a href="../lessons/26-trajopt-mpc.html">第 26 章 轨迹优化与 MPC</a><br />
+对应原文：Underactuated Robotics LQR 章 <code>robot-motion-rl/materials/text/underactuated-lqr.txt</code>（连续时间代数 Riccati 方程 L13–L16；有限时域 LQR L41–L45；离散时间 Riccati 差分方程与 DARE L64–L66）<br />
+本章缩写：LQR = Linear Quadratic Regulator（线性 / 二次 / 调节器）；DP = Dynamic Programming（动态规划）；DARE = Discrete-time Algebraic Riccati Equation（离散时间 / 代数 / Riccati 方程，Riccati 是意大利数学家）；HJB = Hamilton–Jacobi–Bellman（三位数学家的姓：连续时间的 Bellman 方程）；Q、R = 状态代价、控制代价的权重；Q_f = 终端代价；P（原文写 S）= 值函数的二次型矩阵；K = 反馈增益。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：动态规划往回推：值函数一直是二次型（2026-11-25）</h3>
+<p><strong>类比：倒着排行程。</strong> 先想最后一天怎么过最划算，再推倒数第二天，一直推回今天。每一天的"剩余行程最低花费"只取决于你那天在哪。</p>
+<p>系统 <span class="arithmatex">\(x_{k+1} = Ax_k + Bu_k\)</span>，代价 <span class="arithmatex">\(\sum_k (x_k^\top Qx_k + u_k^\top Ru_k) + x_N^\top Q_fx_N\)</span>。猜测 <span class="arithmatex">\(k+1\)</span> 步以后的最优代价是 <span class="arithmatex">\(x^\top P_{k+1}x\)</span>，那么第 k 步要解</p>
+<div class="arithmatex">\[\min_u\ x^\top Qx + u^\top Ru + (Ax + Bu)^\top P_{k+1}(Ax + Bu)\]</div>
+<p>对 u 求导令为 0：</p>
+<div class="arithmatex">\[u^* = -K_kx,\quad K_k = (R + B^\top P_{k+1}B)^{-1}B^\top P_{k+1}A\]</div>
+<p>代回去，剩下的还是 x 的二次型，系数就是 <strong>Riccati 差分方程</strong>（Underactuated L66）：</p>
+<div class="arithmatex">\[P_k = Q + A^\top P_{k+1}A - A^\top P_{k+1}B\,(R + B^\top P_{k+1}B)^{-1}B^\top P_{k+1}A,\quad P_N = Q_f\]</div>
+<p><strong>例子</strong>（标量 <span class="arithmatex">\(x_{k+1} = 1.2x_k + u_k\)</span>，Q = R = 1，Q_f = 1，N = 10；a = 1.2 意味着不控制就发散）：</p>
+<table>
+<thead>
+<tr>
+<th>k</th>
+<th>9</th>
+<th>8</th>
+<th>5</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P_k</td>
+<td>1.7200</td>
+<td>1.9106</td>
+<td>1.9520</td>
+<td>1.9522</td>
+</tr>
+<tr>
+<td>K_k</td>
+<td>0.6000</td>
+<td>—</td>
+<td>—</td>
+<td>0.7935</td>
+</tr>
+</tbody>
+</table>
+<p>P₉ 手算：1 + 1.44 × 1 − (1.2 × 1)²/(1 + 1) = 1.72；K₉ = 1.2/(1 + 1) = 0.6。</p>
+<p><img alt="Riccati 往回推：P_k 从终端值迅速收敛" src="../figures/25-lqr-riccati-backward.png" />
+<em>图 25-1 · 横轴时间步 k（从右往左算），纵轴 P_k；两条线是终端代价 Q_f = 1 和 Q_f = 10，往回推几步后都收敛到同一个 P∞</em></p>
+<p><strong>一句话</strong>：动态规划往回推，二次代价 + 线性系统让值函数一直是 xᵀP_kx，P_k 满足 Riccati 差分方程，增益 K_k 由 P_{k+1} 给出。</p>
+<h3 id="p-riccati-2026-11-25">第二步：无限时域：P 收敛到代数 Riccati 方程的不动点（2026-11-25）</h3>
+<p>把时域拉长，P_k 往回推会收敛到一个不再变的 P∞，它满足去掉下标的方程，就是 DARE（Underactuated L66 末尾）：</p>
+<div class="arithmatex">\[P = Q + A^\top PA - A^\top PB(R + B^\top PB)^{-1}B^\top PA\]</div>
+<p><strong>例子</strong>：上面的标量系统，方程化成 <span class="arithmatex">\(P^2 - 1.44P - 1 = 0\)</span>（<span class="arithmatex">\(b^2P^2 + (r - a^2r - qb^2)P - qr = 0\)</span>），正根 P∞ = 1.9522，K∞ = 0.7935，闭环系数 a − bK = 0.4065（|·| &lt; 1，稳了）。往回推 1、2、5、10 步：1.7200、1.9106、1.9520、1.9522，几步就收敛。</p>
+<p>连续时间的版本是 <span class="arithmatex">\(0 = PA + A^\top P - PBR^{-1}B^\top P + Q\)</span>（Underactuated L16），代数 Riccati 方程；有限时域版本是微分 Riccati 方程，它的稳态就是无限时域解（L45）。</p>
+<p><strong>和第 23 章的关系</strong>：Riccati 递推就是 Bellman 最优算子作用在"二次型值函数"上；P∞ 是它的不动点，和值迭代收敛到 V* 是一回事。</p>
+<p><strong>一句话</strong>：无限时域 LQR 的 P 是 Riccati 递推的不动点（DARE）；实际控制器常用这个常数增益 K∞。</p>
+<h3 id="x0tp0x02026-11-25">第三步：最优总代价就是 x₀ᵀP₀x₀（2026-11-25）</h3>
+<p><strong>类比：P 是一张"报价单"。</strong> 告诉它现在的位置，它直接报出"从这里开始，以后都按最优开，总共要花多少"。</p>
+<p><strong>例子</strong>：x₀ = 2，P₀ × 4 = 7.8089；按 K₀ … K₉ 闭环真跑一遍，把每步代价加起来也是 7.8089。换成固定增益：</p>
+<table>
+<thead>
+<tr>
+<th>增益</th>
+<th>总代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最优 K_k</td>
+<td><strong>7.8089</strong></td>
+</tr>
+<tr>
+<td>K = 0.6</td>
+<td>8.4998</td>
+</tr>
+<tr>
+<td>K = 1.0</td>
+<td>8.3333</td>
+</tr>
+<tr>
+<td>K = 1.2（一步就把 x 拉到 0）</td>
+<td>9.7600</td>
+</tr>
+</tbody>
+</table>
+<p>K = 1.2 让 x 一步归零，但第一步花了 1.44 × 4 的控制代价；最优解是"边拉边省力"。</p>
+<p><strong>一句话</strong>：Riccati 的 P 是值函数本身：xᵀPx = 从 x 出发的最优总代价，任何别的增益都只会更贵。</p>
+<h3 id="qr-2026-11-25">第四步：Q、R 怎么调（2026-11-25）</h3>
+<p>只有 Q/R 的比值有意义（同乘一个数，最优 K 不变）。</p>
+<p><strong>例子</strong>（标量系统，Q = 1）：</p>
+<table>
+<thead>
+<tr>
+<th>R</th>
+<th>P∞</th>
+<th>K</th>
+<th>闭环极点 a − bK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.01（控制很便宜）</td>
+<td>1.0143</td>
+<td>1.1883</td>
+<td>0.0117（几乎一步归零）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1.9522</td>
+<td>0.7935</td>
+<td>0.4065</td>
+</tr>
+<tr>
+<td>100（控制很贵）</td>
+<td>47.1221</td>
+<td>0.3844</td>
+<td>0.8156（慢慢回来，但仍稳）</td>
+</tr>
+</tbody>
+</table>
+<p>R 再大，K 也不会小到让闭环发散：只要系统可控（下一步），LQR 总给出稳定的闭环，它至少会花"刚好把不稳定模态拉住"的力气。</p>
+<p><strong>场景代码</strong>：机器人里实际这么调（scipy 是真实库调用；这几行写法和第 21 章代码一致）：</p>
+<pre><code class="language-python">from scipy.linalg import solve_discrete_are
+Q = np.diag([10.0, 1.0])          # 位置误差比速度误差重要 10 倍
+R = np.array([[0.1]])             # 力矩便宜一点：响应更快
+P = solve_discrete_are(Ad, Bd, Q, R)
+K = np.linalg.solve(R + Bd.T @ P @ Bd, Bd.T @ P @ Ad)
+</code></pre>
+<p><img alt="不同 R 下的闭环轨迹" src="../figures/25-lqr-riccati-r.png" />
+<em>图 25-2 · 从 x₀ = 2 出发，R = 0.01、1、100 三种无限时域 LQR 的状态 x_k（上）和控制 u_k（下）；R 越小第一步出力越大、回零越快</em></p>
+<p><strong>一句话</strong>：Q/R 的比值决定激进程度：R 小 → 增益大、收敛快、力矩大；R 大 → 温和但仍稳定。</p>
+<h3 id="lqr-2026-11-25">第五步：可控性：控制量够不着的模态，LQR 也救不了（2026-11-25）</h3>
+<p><strong>可控性矩阵</strong> <span class="arithmatex">\(\mathcal C = [B, AB, \dots, A^{n-1}B]\)</span> 满秩（= n）时，控制量能把状态推到任何地方。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>系统</th>
+<th>秩</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>双积分器 A = [[1, 0.1], [0, 1]]，B = [0, 0.1]</td>
+<td>2</td>
+<td>可控：力影响速度，速度影响位置</td>
+</tr>
+<tr>
+<td>A = diag(1.2, 0.5)，B = [0, 1]</td>
+<td>1</td>
+<td>第一个状态完全不受 u 影响，而且按 1.2 倍发散</td>
+</tr>
+</tbody>
+</table>
+<p>第二个系统的 DARE 没有稳定化解：怎么调 Q、R 都没用。更弱的条件"可镇定"（不可控的模态本身是稳定的）就够 LQR 用了（Underactuated L16："有唯一正定解当且仅当系统可镇定"）。</p>
+<p><strong>一句话</strong>：先查可控性（或可镇定性）：执行器够不着的不稳定方向，任何控制器都救不了，要改硬件或改状态定义。</p>
+<h3 id="riccati">动画演示：Riccati 往回推，闭环往前走</h3>
+<p><img alt="LQR 与 Riccati" src="../animations/25-lqr-riccati.gif" /></p>
+<p>可交互版：<a href="../animations/25-lqr-riccati.html">animations/25-lqr-riccati.html</a>（滑块调往回推的步数和 log₁₀ R）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上半部分：从右往左一格一格算 P_k，柱子高度是 P_k，几步就和虚线 P∞ 一样高（第一、二步）；</li>
+<li>下半部分：用算出来的增益从 x₀ = 2 往前跑，柱子是每步代价，右上角累计总代价 = P₀x₀²（第三步）；</li>
+<li>拖 R：R 小时第一根代价柱（控制代价）很高、之后几乎为 0；R 大时代价摊得很长（第四步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：标量系统 a = 1、b = 1、Q = 1、R = 1、Q_f = 0。往回推两步，写出 P_{N−1}、P_{N−2} 和 K_{N−2}。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：同一个系统（a = 1、b = 1、Q = R = 1）的无限时域 P∞ 和 K∞ 是多少？闭环系数是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：A = [[1, 1], [0, 1]]，B = [1, 0]ᵀ（力直接作用在位置上，不作用在速度上）。可控吗？说出哪个方向够不着，以及这个方向自己会不会发散。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>倒着排行程，值函数一直是二次型，Riccati 往回推；<br />
+推到不动就是 DARE，常数增益 K 拿去用；<br />
+xᵀPx 是报价单，别的增益只会更贵；<br />
+Q 比 R 定激进；够不着的不稳模态谁也救不了。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST86（Riccati 差分方程从动态规划怎么推出来）、ST87（DARE、P 是值函数、有限与无限时域的关系）、ST88（Q/R 的作用与可控性）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Underactuated Robotics LQR 章</td>
+<td>L13–L16（连续 ARE）、L41–L45（有限时域）、L64–L66（离散 Riccati）</td>
+<td>本章公式的出处，含 HJB 推导</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/robot-motion-rl/lessons/12-lqr.html">《机器人运控与强化学习》第 12 章 LQR</a></td>
+<td>全章</td>
+<td>在机器人上怎么用、怎么调</td>
+</tr>
+<tr>
+<td><a href="../lessons/21-dynamics-control.html">第 21 章 动力系统与控制</a></td>
+<td>第四、五步</td>
+<td>LQR 的第一次出场、和 Bellman 的关系</td>
+</tr>
+<tr>
+<td><a href="../lessons/23-mdp-bellman.html">第 23 章 MDP 与 Bellman</a></td>
+<td>第二、三步</td>
+<td>Riccati 递推 = Bellman 算子作用在二次型上</td>
+</tr>
+<tr>
+<td>Boyd《Convex Optimization》</td>
+<td>§4.4（二次规划）</td>
+<td>把 LQR 看成一个 QP（第 26 章会用）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>二次型对 u 求最小</strong>：<span class="arithmatex">\(\min_u u^\top Mu + 2u^\top b\)</span> 在 <span class="arithmatex">\(u = -M^{-1}b\)</span>，最小值 <span class="arithmatex">\(-b^\top M^{-1}b\)</span>；M = R + BᵀPB 正定（R ≻ 0）保证唯一。</li>
+<li><strong>为什么值函数保持二次型</strong>：二次型 + 线性代入 + 对 u 取最小（Schur 补）都保持二次型。</li>
+<li><strong>DARE 的解</strong>：(A, B) 可镇定、(A, Q^{1/2}) 可检测时，有唯一的半正定稳定化解，Riccati 递推从任何 P_N ⪰ 0 出发都收敛到它。</li>
+<li><strong>可控性</strong>：<span class="arithmatex">\(x_n = A^nx_0 + \sum A^{n-1-k}Bu_k\)</span>，能到达的方向就是 <span class="arithmatex">\([B, AB, \dots]\)</span> 的列空间。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(K_k = (R + B^\top P_{k+1}B)^{-1}B^\top P_{k+1}A\)</span></td>
+<td>第 k 步增益</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P_k = Q + A^\top P_{k+1}A - A^\top P_{k+1}B(\cdot)^{-1}B^\top P_{k+1}A\)</span></td>
+<td>Riccati 差分方程</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P = Q + A^\top PA - A^\top PB(R + B^\top PB)^{-1}B^\top PA\)</span></td>
+<td>DARE</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(J^*(x_0) = x_0^\top P_0x_0\)</span></td>
+<td>最优总代价</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{rank}[B, AB, \dots, A^{n-1}B] = n\)</span></td>
+<td>可控</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch25_lqr_riccati.py</code>，配套测试 <code>tests/test_ch25.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch25_lqr_riccati.py  
+uv run pytest tests/test_ch25.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 往回推</td>
+<td>Riccati 差分</td>
+<td><code>finite_horizon(10)</code></td>
+<td>P₉ = 1.72，P₀ = 1.9522</td>
+</tr>
+<tr>
+<td>第二步 无限时域</td>
+<td>DARE 正根</td>
+<td><code>dare_scalar()</code></td>
+<td>1.9522，K = 0.7935</td>
+</tr>
+<tr>
+<td>第三步 总代价</td>
+<td>x₀ᵀP₀x₀</td>
+<td><code>rollout_cost(2.0, ks)</code></td>
+<td>7.8089</td>
+</tr>
+<tr>
+<td>第四步 调 R</td>
+<td>DARE(r)</td>
+<td><code>dare_scalar(r=0.01)</code></td>
+<td>K = 1.1883</td>
+</tr>
+<tr>
+<td>第五步 可控性</td>
+<td>秩</td>
+<td><code>ctrb_rank(A, B)</code></td>
+<td>2 / 1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">k = a * b * p / (r + b * b * p)                                  # 用下一步的 p 算这一步的增益
+p_new = q + a * a * p - (a * b * p) ** 2 / (r + b * b * p)        # Riccati 差分方程（标量版）
+c2, c1, c0 = b * b, r - a * a * r - q * b * b, -q * r             # DARE 化成二次方程，取正根
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>列表倒序</strong>：往回推时先算出 P_N、P_{N−1}…，代码最后 <code>[::-1]</code> 翻成按时间顺序，K_k 和 P_{k+1} 才对得上。</li>
+<li><strong>增益用的是下一步的 P</strong>：<code>riccati_step(p)</code> 里同一个 p 同时算 K 和新 p，这个 p 是 P_{k+1}。</li>
+<li><strong>标量 DARE 取正根</strong>：二次方程两个根一正一负，负根不对应任何"代价"，代码直接取 <code>+sqrt</code>。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 Q_f 改成 100，看 P_k 要往回推几步才收敛到同一个 P∞。</li>
+<li>把 a 改成 0.8（自己就稳定），R 调到 1000，K 会变成多少？为什么这时可以几乎不控制？</li>
+</ol><nav class="pager"><a href="24-policy-gradient.html">← 第 24 章 · 策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="26-trajopt-mpc.html">第 26 章 · 轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

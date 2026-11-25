@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="340" viewBox="0 0 860 340">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">最优传输计划 vs 熵正则（ε = 1）的计划</text>
+<text x="16.0" y="330.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">源 0、1、2 → 汇 0.5、1.5、2.5，代价 = 距离²，圆面积 ∝ 运输量。精确计划只有 5 格非零；Sinkhorn 的计划几乎每格都有。</text>
+<text x="250.0" y="60.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">线性规划精确解：代价 1.25</text>
+<text x="170.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">0.5</text>
+<text x="250.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">1.5</text>
+<text x="330.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">2.5</text>
+<text x="125.0" y="128.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<rect x="135.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="170.0" cy="124.0" r="24.596747752497684" fill="#2563eb" stroke="#2563eb" stroke-width="1.4"/>
+<rect x="215.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="250.0" cy="124.0" r="30.124740662784134" fill="#2563eb" stroke="#2563eb" stroke-width="1.4"/>
+<rect x="295.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<text x="125.0" y="198.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">1</text>
+<rect x="135.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<rect x="215.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="250.0" cy="194.0" r="17.39252713092609" fill="#2563eb" stroke="#2563eb" stroke-width="1.4"/>
+<rect x="295.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="330.0" cy="194.0" r="24.596747752497684" fill="#2563eb" stroke="#2563eb" stroke-width="1.4"/>
+<text x="125.0" y="268.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">2</text>
+<rect x="135.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<rect x="215.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<rect x="295.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="330.0" cy="264.0" r="24.596747752497684" fill="#2563eb" stroke="#2563eb" stroke-width="1.4"/>
+<text x="650.0" y="60.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">Sinkhorn ε = 1：代价 1.41</text>
+<text x="570.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">0.5</text>
+<text x="650.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">1.5</text>
+<text x="730.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">2.5</text>
+<text x="525.0" y="128.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<rect x="535.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="570.0" cy="124.0" r="23.85399304501347" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="615.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="650.0" cy="124.0" r="28.164446860660497" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="695.0" y="94.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="730.0" cy="124.0" r="12.257689364831833" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<text x="525.0" y="198.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">1</text>
+<rect x="535.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="570.0" cy="194.0" r="5.940285147496606" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="615.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="650.0" cy="194.0" r="19.065224012376664" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="695.0" y="164.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="730.0" cy="194.0" r="22.555049231268452" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<text x="525.0" y="268.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">2</text>
+<rect x="535.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="570.0" cy="264.0" r="0.8366768640760622" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="615.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="650.0" cy="264.0" r="7.299394933206975" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+<rect x="695.0" y="234.0" width="70.0" height="60.0" rx="2" fill="#fff" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<circle cx="730.0" cy="264.0" r="23.473789758161015" fill="#ea580c" stroke="#ea580c" stroke-width="1.4"/>
+</svg>

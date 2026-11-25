@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 26 章 · 轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html" class="cur"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="26-mpc-qp-ilqr-mppi">第 26 章 · 轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</h1><div class="run"><a class="btn" href="../animations/26-trajopt-mpc.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch26_trajopt_mpc.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch26_trajopt_mpc.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch26_trajopt_mpc.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：MPC 每个周期解的那个优化问题长什么样？加了力矩限位以后 LQR 为什么不够用？"稠密"和"稀疏"两种写法差在哪？非线性系统怎么办（iLQR）？MPPI 的指数加权是从哪推出来的？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/25-lqr-riccati.html">第 25 章 LQR 与 Riccati</a> · 下一章：<a href="../lessons/27-diffusion-derivation.html">第 27 章 扩散模型推导</a><br />
+对应原文：Underactuated Robotics 轨迹优化章 <code>robot-motion-rl/materials/text/underactuated-trajopt.txt</code>（直接转录 L18–L19、直接打靶 L24–L25、两者的取舍与带状稀疏 L27–L33、MPC L106–L113、iLQR / DDP L174–L178）；MPPI 论文 <code>cs285-deep-rl/materials/text/papers/mppi-1707.02342.txt</code>（自由能下界 L236–L243、最优分布 §A）<br />
+本章缩写：MPC = Model Predictive Control（模型 / 预测 / 控制）；QP = Quadratic Programming（二次规划）；iLQR = iterative LQR（迭代线性二次调节器）；DDP = Differential Dynamic Programming（微分动态规划）；MPPI = Model Predictive Path Integral（模型预测路径积分）；N = 预测时域步数；H、f = QP 的二次项矩阵、一次项；λ = MPPI 的温度；ESS = Effective Sample Size（有效样本数）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="qp2026-11-25">第一步：稠密 QP（直接打靶）：把状态消掉，只剩控制量（2026-11-25）</h3>
+<p><strong>类比：只记"每一步踩多少油门"，位置靠回放算出来。</strong></p>
+<p>线性系统往前展开（Underactuated L25）：</p>
+<div class="arithmatex">\[x_k = A^kx_0 + \sum_{j&lt;k}A^{k-1-j}Bu_j \quad\Rightarrow\quad X = S_xx_0 + S_uU\]</div>
+<p>代进二次代价，得到只含 U 的无约束 QP：</p>
+<div class="arithmatex">\[\min_U\ U^\top HU + 2x_0f^\top U,\quad H = S_u^\top\bar QS_u + \bar R,\ f = S_u^\top\bar QS_x\]</div>
+<p><strong>例子</strong>（第 25 章的标量系统 a = 1.2、b = 1，Q = R = Q_f = 1，N = 10，x₀ = 2）：解出 u₀ = −1.5871；第 25 章有限时域 Riccati 的 −K₀x₀ = −1.5871，<strong>同一个最优解</strong>。H 是 10×10 的满矩阵，条件数 204.3。</p>
+<p><strong>一句话</strong>：无约束时，"把状态消掉解 QP"和"Riccati 往回推"给出同一条最优轨迹；QP 的好处是能加约束。</p>
+<h3 id="riccati-qp-2026-11-25">第二步：加约束：Riccati 写不出来，QP 照样解（2026-11-25）</h3>
+<p>真实机器人有力矩限位、关节限位、摩擦锥。加上盒约束 |u| ≤ 1：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>u₀</th>
+<th>u₁</th>
+<th>u₂</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无约束</td>
+<td>−1.5871</td>
+<td>−0.6451</td>
+<td>−0.2622</td>
+</tr>
+<tr>
+<td></td>
+<td>u</td>
+<td>≤ 1</td>
+<td>−1.0000</td>
+</tr>
+</tbody>
+</table>
+<p>前两步顶到限位，后面"补"一点（u₂ 比无约束时用力更大）：约束改变的不只是被截断的那一步。直接把无约束解截断到 ±1 不是最优解。</p>
+<p><strong>MPC</strong>（Underactuated L106–L113）：每个控制周期用最新测量的 x 解一次这个 QP，只执行 u₀，下个周期再解。时域在往前滚，所以也叫滚动时域控制。</p>
+<p><img alt="盒约束下的最优控制序列" src="../figures/26-trajopt-mpc-box.png" />
+<em>图 26-1 · 蓝：无约束最优 u_k；橙：|u| ≤ 1 时的最优 u_k；虚线是限位。前两步贴着限位，第三步比无约束更用力</em></p>
+<p><strong>一句话</strong>：MPC = 每个周期解一个带约束的 QP、只执行第一步；约束一加，Riccati 的闭式就没了，但 QP 求解器照样快。</p>
+<h3 id="qp2026-11-25_1">第三步：稀疏 QP（直接转录）：保留状态当变量（2026-11-25）</h3>
+<p><strong>类比：把每一天的位置也写进计划表，用"相邻两天必须连得上"的约束把它们串起来。</strong></p>
+<div class="arithmatex">\[\min_{x, u}\ \sum_k x_k^\top Qx_k + u_k^\top Ru_k\quad\text{s.t.}\ x_{k+1} = Ax_k + Bu_k\]</div>
+<p>变量多了一倍，但每条约束只碰 3 个变量（Underactuated L19、L33："带状"稀疏，和 Riccati 利用的是同一个结构）。</p>
+<p><strong>例子</strong>（标量系统，非零元个数）：</p>
+<table>
+<thead>
+<tr>
+<th>N</th>
+<th>稠密 H</th>
+<th>稀疏 Hessian + 等式约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>49</td>
+</tr>
+<tr>
+<td>50</td>
+<td>2500</td>
+<td>249</td>
+</tr>
+<tr>
+<td>200</td>
+<td>40000</td>
+<td>999</td>
+</tr>
+</tbody>
+</table>
+<p>稠密按 N² 长，稀疏按 N 长；稠密还要算 A^k（a = 1.2 时 1.2²⁰⁰ ≈ 7 × 10¹⁵，数值很差，原文说的 "tail wagging the dog"，L28）。OSQP、HPIPM 这类求解器专门吃稀疏结构。</p>
+<p><strong>场景代码</strong>：用 cvxpy 写直接转录（真实库调用；本书环境没装 cvxpy，没跑过）：</p>
+<pre><code class="language-python">import cvxpy as cp
+x, u = cp.Variable((N + 1, n)), cp.Variable((N, m))
+cons = [x[0] == x0] + [x[k + 1] == A @ x[k] + B @ u[k] for k in range(N)] + [cp.abs(u) &lt;= u_max]
+cost = sum(cp.quad_form(x[k], Q) + cp.quad_form(u[k], R) for k in range(N)) + cp.quad_form(x[N], Qf)
+cp.Problem(cp.Minimize(cost), cons).solve(solver=cp.OSQP)
+u_apply = u.value[0]                                   # MPC 只执行第一步
+</code></pre>
+<p><strong>一句话</strong>：直接转录变量多但稀疏、数值好、能并行；直接打靶变量少但稠密、长时域病态。</p>
+<h3 id="ilqr-lqr2026-11-25">第四步：iLQR：非线性系统就沿着当前轨迹反复做 LQR（2026-11-25）</h3>
+<p><strong>类比：开山路，每次只把眼前这一段路近似成直线，规划完开一遍，再按新的路线重新近似。</strong></p>
+<ol>
+<li>用当前控制序列往前滚，得到名义轨迹；</li>
+<li>沿轨迹线性化动力学（A_k、B_k）、二次化代价；</li>
+<li>往回推一个 Riccati 式的递推，得到前馈修正 k_k 和反馈增益 K_k；</li>
+<li>带线搜索往前滚：<span class="arithmatex">\(u_k = \bar u_k + \alpha k_k + K_k(x_k - \bar x_k)\)</span>；代价下降就接受，回到 1。</li>
+</ol>
+<p>（Underactuated L174–L178；DDP 再多保留动力学的二阶项）</p>
+<p><strong>例子</strong>（编的非线性系统 <span class="arithmatex">\(x_{k+1} = x_k + 0.1(\sin x_k + u_k)\)</span>，x₀ = 2，N = 30，Q = R = 1）：</p>
+<table>
+<thead>
+<tr>
+<th>轮次</th>
+<th>0（u = 0）</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>总代价</td>
+<td>238.78</td>
+<td>100.95</td>
+<td>81.28</td>
+<td>80.38</td>
+<td>80.32</td>
+<td>80.32</td>
+</tr>
+</tbody>
+</table>
+<p>几轮就收敛（局部二次收敛）。iLQR 只保证找到局部最优，而且原生不支持约束（L177），约束一般靠罚函数或改用直接转录。</p>
+<p><img alt="iLQR：每轮的轨迹和总代价" src="../figures/26-trajopt-mpc-ilqr.png" />
+<em>图 26-2 · 左：第 0、1、2、6 轮的状态轨迹（u = 0 时 x 往上漂；之后越来越快地回到 0）；右：每轮总代价</em></p>
+<p><strong>一句话</strong>：iLQR = 沿名义轨迹线性化 + 二次化，往回推出修正和反馈，往前滚并线搜索，反复到收敛。</p>
+<h3 id="mppi-exp2026-11-25">第五步：MPPI：最优控制分布是"先验 × exp(−代价/λ)"（2026-11-25）</h3>
+<p><strong>类比：派一群人各自随机试一条路线，花费越少的人说话分量越重，最后按分量平均。</strong></p>
+<p>MPPI 把问题换成：在所有控制分布 q 里，最小化 E_q[代价] + λ·KL(q ‖ p)（p 是采样用的先验控制分布）。这个问题有闭式解（MPPI 论文 L236–L243 的自由能下界，取等号时）：</p>
+<div class="arithmatex">\[q^*(u) \propto p(u)\,\exp(-S(u)/\lambda)\]</div>
+<p>采样实现：从 p 抽 K 条控制序列，权重 <span class="arithmatex">\(w_i \propto \exp(-S_i/\lambda)\)</span>，新控制 = 加权平均（第 16 章第四步就是这个更新）。</p>
+<p><strong>例子</strong>（一步问题：p = N(0, 1)，代价 S(u) = (1 + u)²）：q* 还是高斯，精度 1 + 2/λ，均值 −(2/λ)/(1 + 2/λ)：</p>
+<table>
+<thead>
+<tr>
+<th>λ</th>
+<th>闭式最优均值</th>
+<th>10 万样本加权估计</th>
+<th>有效样本数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>−0.6667</td>
+<td>−0.6660</td>
+<td>57053</td>
+</tr>
+<tr>
+<td>0.1</td>
+<td>−0.9524</td>
+<td>−0.9525</td>
+<td>19169</td>
+</tr>
+</tbody>
+</table>
+<p>λ → 0：只信最好的那条（贪心，有效样本少、噪声大）；λ → ∞：退回先验。</p>
+<p><strong>一句话</strong>：MPPI 解的是"代价 + λ·KL"的问题，最优分布 ∝ 先验 × e^{−S/λ}，采样加权平均就是它的蒙特卡洛估计。</p>
+<h3 id="mpc">动画演示：MPC 滚动时域</h3>
+<p><img alt="轨迹优化与 MPC" src="../animations/26-trajopt-mpc.gif" /></p>
+<p>可交互版：<a href="../animations/26-trajopt-mpc.html">animations/26-trajopt-mpc.html</a>（滑块调控制周期 k 和限位 u_max）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>每一帧是一个控制周期：灰色是这次 QP 规划出来的 10 步预测，只有蓝色的第一步真正执行，橙色是已经执行过的历史（第二步）；</li>
+<li>下一帧从新的状态重新规划，预测窗口往前挪一格；</li>
+<li>把 u_max 调小：前几步控制量贴着限位，状态回来得更慢（第二步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：标量系统 a = 1、b = 1，N = 2，Q = R = 1，Q_f = 1。写出 S_x、S_u 和 H（2×2）。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：状态维数 n、控制维数 m、时域 N，直接打靶有几个决策变量？直接转录有几个变量、几条等式约束？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：MPPI 有 4 条候选，代价 [1, 2, 3, 10]，λ = 1。算权重（保留 3 位）。λ 改成 10 呢？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>只记油门是打靶，稠密而病态；连状态一起记是转录，稀疏又稳当；<br />
+无约束时 QP 和 Riccati 同解，加了限位只能靠 QP；<br />
+MPC 每拍解一次、只走第一步；<br />
+非线性就 iLQR：线性化、往回推、往前滚；<br />
+MPPI：先验乘 e 的负代价除 λ。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST89（稠密 vs 稀疏 QP、MPC 只执行第一步）、ST90（iLQR 的四步循环）、ST91（MPPI 的最优分布与 λ 的作用）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Underactuated Robotics 轨迹优化章</td>
+<td>L18–L33（转录与打靶）、L106–L113（MPC）、L174–L178（iLQR / DDP）</td>
+<td>本章主线的出处</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/robot-motion-rl/lessons/14-convex-mpc.html">《机器人运控与强化学习》第 14 章 凸 MPC</a>、<a href="https://wikieden.github.io/robot-motion-rl/lessons/15-ilqr-mppi.html">第 15 章 iLQR 与 MPPI</a></td>
+<td>全章</td>
+<td>四足机器人上的真实用法</td>
+</tr>
+<tr>
+<td>MPPI 论文（Williams 2017）</td>
+<td>§III（自由能下界）、§A（最优分布）</td>
+<td>指数加权的推导</td>
+</tr>
+<tr>
+<td><a href="../lessons/15-constrained-convex-qp.html">第 15 章 约束与凸优化</a></td>
+<td>第三、四步</td>
+<td>KKT、QP 标准形</td>
+</tr>
+<tr>
+<td><a href="../lessons/16-monte-carlo-sampling.html">第 16 章 蒙特卡洛与采样</a></td>
+<td>第四步</td>
+<td>CEM 与 MPPI 的采样实现</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>打靶的展开</strong>：<span class="arithmatex">\(x_k = A^kx_0 + \sum_{j&lt;k}A^{k-1-j}Bu_j\)</span>，X 对 U 线性，所以代价对 U 是二次的。</li>
+<li><strong>QP 与 Riccati 同解</strong>：两者解的是同一个凸问题；Riccati 是利用带状结构的高效消元（等价于对 KKT 矩阵做块三对角分解）。</li>
+<li><strong>MPPI 的变分形式</strong>：<span class="arithmatex">\(\min_q E_q[S] + \lambda\text{KL}(q\|p)\)</span> 的解 <span class="arithmatex">\(q^* \propto pe^{-S/\lambda}\)</span>，最小值 <span class="arithmatex">\(= -\lambda\log E_p[e^{-S/\lambda}]\)</span>（自由能）。</li>
+<li><strong>iLQR 的局部收敛</strong>：在最优解附近，Gauss-Newton 式的二次近似让收敛很快；离得远时靠线搜索保证下降。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(X = S_xx_0 + S_uU\)</span></td>
+<td>打靶展开</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\min_U U^\top HU + 2x_0f^\top U\)</span></td>
+<td>稠密 QP</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(x_{k+1} = Ax_k + Bu_k\)</span> 作为约束</td>
+<td>直接转录</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(u_k = \bar u_k + \alpha k_k + K_k(x_k - \bar x_k)\)</span></td>
+<td>iLQR 前向更新</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(q^*(u) \propto p(u)e^{-S(u)/\lambda}\)</span></td>
+<td>MPPI 最优分布</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch26_trajopt_mpc.py</code>，配套测试 <code>tests/test_ch26.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch26_trajopt_mpc.py  
+uv run pytest tests/test_ch26.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 稠密 QP</td>
+<td>H U = −f x₀</td>
+<td><code>solve_unconstrained()</code></td>
+<td>u₀ = −1.5871</td>
+</tr>
+<tr>
+<td>第二步 盒约束</td>
+<td>L-BFGS-B</td>
+<td><code>solve_box(1.0)</code></td>
+<td>[−1, −1, −0.5396]</td>
+</tr>
+<tr>
+<td>第三步 稀疏</td>
+<td>非零元计数</td>
+<td><code>nnz_counts(50)</code></td>
+<td>2500 vs 249</td>
+</tr>
+<tr>
+<td>第四步 iLQR</td>
+<td>往回推 + 线搜索</td>
+<td><code>ilqr()</code></td>
+<td>238.78 → 80.32</td>
+</tr>
+<tr>
+<td>第五步 MPPI</td>
+<td>指数加权</td>
+<td><code>mppi_one_step(lam=0.1)</code></td>
+<td>−0.9525</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">su[k, j] = a ** (k - j) * b                                  # 打靶：u_j 对 x_{k+1} 的影响
+qx = 2*q*xs[k] + ak*vx; qu = 2*r*u[k] + bk*vx                # iLQR：Q 函数的一阶项
+kff[k], kfb[k] = -qu / quu, -qux / quu                       # 前馈修正、反馈增益
+w = np.exp(-(s - s.min()) / lam)                             # MPPI：先减最小值再取指数（第 22 章）
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>盒约束 QP 用 L-BFGS-B 解</strong>：它原生支持变量上下界；真正的 MPC 会用 OSQP 这类专门的 QP 求解器，速度快几个数量级。</li>
+<li><strong>iLQR 的线搜索从 α = 1 往下试</strong>：代价没下降就把步长减半，4 次都不行就停（这个例子每轮第一次就成功）。</li>
+<li><strong>MPPI 权重先减最小代价</strong>：e^{−S/λ} 在 λ 小时会下溢成 0，减掉 min S 后最好的那条权重是 1，比例不变。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>solve_box</code> 的限位改成 0.5，看前几步贴着限位。</li>
+<li>把 iLQR 的 x₀ 改成 3（离 sin x 的另一个平衡点 π 很近），看收敛到哪、要几轮。</li>
+</ol><nav class="pager"><a href="25-lqr-riccati.html">← 第 25 章 · LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="27-diffusion-derivation.html">第 27 章 · 扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

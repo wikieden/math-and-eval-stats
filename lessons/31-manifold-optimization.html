@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 31 章 · 微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html" class="cur"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="31">第 31 章 · 微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</h1><div class="run"><a class="btn" href="../animations/31-manifold-optimization.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch31_manifold_optimization.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch31_manifold_optimization.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch31_manifold_optimization.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：参数被约束在一个"弯曲的面"上（单位向量、旋转矩阵、正交矩阵）时，梯度下降该怎么做？切空间、黎曼梯度、收缩映射各是什么？测地线距离和直线距离差多少？和第 19 章的李群是什么关系？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/30-functional-analysis.html">第 30 章 泛函分析入门</a> · 下一章：<a href="../lessons/32-stochastic-calculus.html">第 32 章 随机微积分</a><br />
+对应原文：Boumal《An Introduction to Optimization on Smooth Manifolds》<code>math-and-eval-stats/materials/text/books/boumal-optimization-on-manifolds.txt</code>（球面上的 Rayleigh 商例子 L876–L893；§3.6 收缩映射，定义 3.47 L2740；§3.8 黎曼梯度 L2888；第 4 章 §4.3 黎曼梯度下降，球面上的例子 L1682）<br />
+本章缩写：S² = 三维空间里的单位球面；T_xM = 流形 M 在 x 处的切空间；P_x = 到切空间的正交投影；R_x(v) = 收缩映射（retraction）；Exp_x = 指数映射（沿测地线走）；grad f = 黎曼梯度；SO(3) = 三维旋转群（第 18、19 章）；skew(M) = (M − Mᵀ)/2，反对称部分。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：切空间与投影（2026-11-25）</h3>
+<p><strong>类比：站在地球上某一点，脚下那块"看起来是平的"地面就是切平面。</strong> 在切平面上可以随便加减向量、算梯度；地球本身是弯的，不能直接加。</p>
+<p>单位球面 <span class="arithmatex">\(S^2 = \{x : \|x\| = 1\}\)</span> 在 x 处的切空间是所有和 x 垂直的向量：<span class="arithmatex">\(T_xS^2 = \{v : x^\top v = 0\}\)</span>。把任意向量投影到切空间：</p>
+<div class="arithmatex">\[P_x(w) = (I - xx^\top)w\]</div>
+<p><strong>例子</strong>：x = [0, 0, 1]（北极），w = [1, 2, 3]：P_x w = [1, 2, 0]，和 x 的内积 0。沿法向（x 方向）的分量被去掉了，那个方向会"离开球面"。</p>
+<p><strong>一句话</strong>：切空间是流形在一点处的"平面近似"，投影 I − xxᵀ 去掉法向分量，留下沿流形能走的方向。</p>
+<h3 id="2026-11-25_1">第二步：收缩映射：从切空间回到流形（2026-11-25）</h3>
+<p>在切平面上走了一步 v，人已经离开球面了，要"拉回来"。两种办法：</p>
+<ul>
+<li><strong>指数映射</strong>：沿大圆（测地线）走长度 ‖v‖：<span class="arithmatex">\(\text{Exp}_x(v) = \cos\|v\|\,x + \sin\|v\|\,\frac{v}{\|v\|}\)</span>；</li>
+<li><strong>收缩映射</strong>（Boumal 定义 3.47，L2740）：任何满足"R_x(0) = x、在 0 处导数是恒等"的映射都行，最简单的是<strong>走完再归一化</strong>：<span class="arithmatex">\(R_x(v) = \frac{x + v}{\|x + v\|}\)</span>。</li>
+</ul>
+<p><strong>例子</strong>（x = 北极，v 沿 x 轴）：</p>
+<table>
+<thead>
+<tr>
+<th>‖v‖</th>
+<th>归一化 vs 指数映射的差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.3</td>
+<td>8.5 × 10⁻³</td>
+</tr>
+<tr>
+<td>0.1</td>
+<td>3.3 × 10⁻⁴</td>
+</tr>
+<tr>
+<td>0.01</td>
+<td>3.3 × 10⁻⁷</td>
+</tr>
+</tbody>
+</table>
+<p>‖v‖ 缩 10 倍，差缩约 1000 倍：两者到二阶都一致（这个例子里差是 O(‖v‖³)）。优化只需要一阶一致，所以用便宜的归一化就够。</p>
+<p><strong>一句话</strong>：收缩映射把切空间里的一步拉回流形，只要一阶和指数映射一致就行；球面上用"走完再归一化"。</p>
+<h3 id="2026-11-25_2">第三步：测地线：流形上的"直线"（2026-11-25）</h3>
+<p><strong>类比：从北京飞纽约走大圆航线，不是在地图上画直线（第 19 章 SLERP）。</strong></p>
+<p>球面上两点的测地线距离是夹角 arccos(xᵀy)；弦长 ‖x − y‖ 是穿过球体内部的直线。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>夹角</th>
+<th>测地线</th>
+<th>弦长</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10°</td>
+<td>0.1745</td>
+<td>0.1743</td>
+</tr>
+<tr>
+<td>90°</td>
+<td>1.5708</td>
+<td>1.4142</td>
+</tr>
+<tr>
+<td>180°</td>
+<td>3.1416</td>
+<td>2.0000</td>
+</tr>
+</tbody>
+</table>
+<p>离得近时两者几乎相同（局部看流形是平的）；离得远差别很大。用弦长当损失（比如单位向量、四元数的 L2 损失）在小误差时没问题，大误差时梯度和"真实转角"不成比例。</p>
+<p><img alt="球面上的切平面、测地线与收缩" src="../figures/31-manifold-optimization-sphere.png" />
+<em>图 31-1 · 过北极的大圆截面：灰虚线是切线（切空间），橙色是切向量 v，绿点是归一化收缩的落点，紫色弧是沿测地线走 ‖v‖ 的指数映射</em></p>
+<p><strong>一句话</strong>：测地线是流形上的最短路径；近处它和弦长一样，远处差很多。</p>
+<h3 id="2026-11-25_3">第四步：黎曼梯度下降（2026-11-25）</h3>
+<p><strong>三步一循环</strong>（Boumal §3.8 L2888、§4.3）：</p>
+<ol>
+<li>算欧氏梯度 ∇f(x)（就像流形不存在）；</li>
+<li>投影到切空间，得到黎曼梯度 <span class="arithmatex">\(\text{grad}f(x) = P_x\nabla f(x)\)</span>（嵌入子流形、用继承的内积时成立）；</li>
+<li>沿负（或正）梯度走一步，再收缩回流形：<span class="arithmatex">\(x \leftarrow R_x(-\eta\,\text{grad}f(x))\)</span>。</li>
+</ol>
+<p><strong>例子</strong>：在球面上最大化 Rayleigh 商 xᵀAx（Boumal L876–L893 的经典例子；最大值 = A 的最大特征值，最优点 = 对应特征向量），A = [[3, 1, 0], [1, 2, 0.5], [0, 0.5, 1]]，从 [1, 1, 1]/√3 出发、步长 0.2：</p>
+<ul>
+<li>16 次收敛到 x = [0.836, 0.5392, 0.1019]，xᵀAx = 3.644973 = 最大特征值；</li>
+<li>前几次 xᵀAx：3.0、3.5843、3.642、3.6449、3.645，每一步都在球面上（‖x‖ = 1）；</li>
+<li>对照：不投影、不收缩，直接在 R³ 里做梯度上升 20 步，‖x‖ = 5.5 × 10⁷（xᵀAx 无上界，一路冲出去）。</li>
+</ul>
+<p><img alt="黎曼梯度上升的轨迹" src="../figures/31-manifold-optimization-rgd.png" />
+<em>图 31-2 · 左：迭代点在球面上的投影轨迹，收向最大特征向量；右：xᵀAx 随迭代收敛到最大特征值（虚线）</em></p>
+<p><strong>场景代码</strong>：用 PyTorch 的参数化把约束"藏进"网络（真实库调用；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">import torch.nn.utils.parametrizations as P
+layer = torch.nn.Linear(64, 64)
+P.orthogonal(layer)              # 权重始终是正交矩阵（Stiefel 流形），内部用指数映射 / Cayley 变换参数化
+# 或者自己做：每步之后 w.data = w.data / w.data.norm()   —— 就是球面上的“走完再归一化”
+</code></pre>
+<p><strong>一句话</strong>：黎曼梯度下降 = 欧氏梯度 → 投影到切空间 → 走一步 → 收缩回流形；不这么做，约束就会被破坏。</p>
+<h3 id="so3-2026-11-25">第五步：和李群接上：SO(3) 也是流形（2026-11-25）</h3>
+<p>SO(3) 是嵌在 3×3 矩阵空间里的流形，切空间是 <span class="arithmatex">\(T_R = \{R\Omega : \Omega\text{ 反对称}\}\)</span>（第 19 章：反对称矩阵 ↔ 轴角向量）。把欧氏梯度 G 投影到切空间：</p>
+<div class="arithmatex">\[\text{grad}f(R) = R\,\text{skew}(R^\top G),\quad\text{skew}(M) = \frac{M - M^\top}2\]</div>
+<p>收缩可以用 <span class="arithmatex">\(R\,\text{Exp}(\delta)\)</span>（第 19 章的 ⊕），也可以用 QR 分解、极分解。</p>
+<p><strong>例子</strong>：R = I，G = [[0, 1, 0], [0, 0, 0], [2, 0, 0]]：黎曼梯度 = skew(G) = [[0, 0.5, −1], [−0.5, 0, 0], [1, 0, 0]]，反对称，对应一个轴角向量。</p>
+<table>
+<thead>
+<tr>
+<th>流形</th>
+<th>切空间</th>
+<th>常用收缩</th>
+<th>在哪用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>球面 Sⁿ</td>
+<td>xᵀv = 0</td>
+<td>归一化</td>
+<td>单位向量、归一化嵌入</td>
+</tr>
+<tr>
+<td>SO(3)</td>
+<td>RΩ，Ω 反对称</td>
+<td>R·Exp(δ)、QR</td>
+<td>位姿估计、BA</td>
+</tr>
+<tr>
+<td>Stiefel（列正交矩阵）</td>
+<td>XᵀV 反对称</td>
+<td>QR、极分解</td>
+<td>正交权重、Muon（第 43 章）</td>
+</tr>
+<tr>
+<td>正定矩阵</td>
+<td>对称矩阵</td>
+<td>指数映射</td>
+<td>协方差估计</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：李群是有群结构的流形；SO(3) 上的黎曼梯度就是 R·skew(RᵀG)，收缩就是第 19 章的 R ⊕ δ。</p>
+<h3 id="_2">动画演示：在球面上爬向最大特征向量</h3>
+<p><img alt="微分几何与流形优化" src="../animations/31-manifold-optimization.gif" /></p>
+<p>可交互版：<a href="../animations/31-manifold-optimization.html">animations/31-manifold-optimization.html</a>（滑块调迭代次数和步长；勾选"不投影不收缩"）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>为了画得清楚，动画用二维的单位圆 S¹ 和 A = [[3, 1], [1, 2]]，做法和球面完全一样：黑点是当前的 x，虚线是切线，橙色箭头是黑点处的黎曼梯度（贴着切线），绿点是“走一步再归一化”的落点（第四步）；</li>
+<li>右边曲线是 xᵀAx，几步就贴到最大特征值；</li>
+<li>勾选"不投影不收缩"：点径直冲出圆盘，‖x‖ 爆炸（第四步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：x = [1, 0, 0]，w = [3, 4, 5]。写出 P_x w，并说明为什么不能直接沿 w 走。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：两个单位向量的弦长是 1，测地线距离是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：在球面上<strong>最小化</strong> xᵀAx，最优点是什么？黎曼梯度下降的更新式要怎么改？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>脚下的平地是切空间，投影去掉法向；<br />
+切空间里走一步，收缩拉回流形，归一化就够；<br />
+测地线近处像直线，远处差很多；<br />
+欧氏梯度、投影、走一步、收缩回来；<br />
+李群也是流形，SO(3) 上是 R 乘 skew。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST105（切空间、投影与收缩映射）、ST106（黎曼梯度下降三步；不投影不收缩会怎样）、ST107（SO(3) 上的黎曼梯度与常见流形表）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Boumal</td>
+<td>第 3 章（嵌入子流形：§3.6 收缩 L2740、§3.8 黎曼梯度 L2888）</td>
+<td>本章所有定义</td>
+</tr>
+<tr>
+<td>★ Boumal</td>
+<td>第 4 章（§4.3 黎曼梯度下降；球面例子 L1682）</td>
+<td>收敛性与步长</td>
+</tr>
+<tr>
+<td>Boumal</td>
+<td>§7（常见流形：球面、Stiefel、SO(n)、正定矩阵）</td>
+<td>每种流形的投影和收缩公式</td>
+</tr>
+<tr>
+<td><a href="../lessons/19-lie-groups.html">第 19 章 李群入门</a></td>
+<td>全章</td>
+<td>Exp / Log、⊕</td>
+</tr>
+<tr>
+<td>Barfoot《State Estimation for Robotics》</td>
+<td>矩阵李群章</td>
+<td>机器人里的流形优化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>嵌入子流形的切空间</strong>：若 M = {x : h(x) = 0}，则 T_xM = ker Dh(x)；球面 h = ‖x‖² − 1，Dh = 2xᵀ。</li>
+<li><strong>黎曼梯度</strong>：满足 ⟨grad f, v⟩ = Df(x)[v] 对所有切向量 v；继承欧氏内积时等于欧氏梯度的切向投影。</li>
+<li><strong>收缩映射的条件</strong>：R_x(0) = x，DR_x(0) = 恒等；二阶收缩还要求加速度为 0（和测地线二阶一致）。</li>
+<li><strong>Rayleigh 商的临界点</strong>：grad = 2(Ax − (xᵀAx)x) = 0 ⇔ x 是特征向量。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(P_x = I - xx^\top\)</span></td>
+<td>球面切空间投影</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(R_x(v) = (x + v)/\|x + v\|\)</span></td>
+<td>球面收缩</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{Exp}_x(v) = \cos\|v\|x + \sin\|v\|v/\|v\|\)</span></td>
+<td>球面指数映射</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(d(x, y) = \arccos(x^\top y)\)</span></td>
+<td>测地线距离</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{grad}f(R) = R\,\text{skew}(R^\top G)\)</span></td>
+<td>SO(3) 上的黎曼梯度</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch31_manifold_optimization.py</code>，配套测试 <code>tests/test_ch31.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch31_manifold_optimization.py  
+uv run pytest tests/test_ch31.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 投影</td>
+<td>(I − xxᵀ)w</td>
+<td><code>proj(x, w)</code></td>
+<td>[1, 2, 0]</td>
+</tr>
+<tr>
+<td>第二步 收缩 vs 指数</td>
+<td>差的阶</td>
+<td><code>retract</code>、<code>exp_map</code></td>
+<td>3.3e-4 → 3.3e-7</td>
+</tr>
+<tr>
+<td>第三步 测地线</td>
+<td>arccos</td>
+<td><code>geodesic(x, y)</code></td>
+<td>1.5708 vs 1.4142</td>
+</tr>
+<tr>
+<td>第四步 RGD</td>
+<td>投影 + 收缩</td>
+<td><code>rgd(x0)</code></td>
+<td>16 次，3.644973</td>
+</tr>
+<tr>
+<td>第五步 SO(3)</td>
+<td>R·skew(RᵀG)</td>
+<td><code>so3_tangent(R, G)</code></td>
+<td>反对称矩阵</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">g = proj(x, 2 * A_MAT @ x)            # 欧氏梯度 2Ax 投影到切空间
+x = retract(x, lr * g)                # 走一步再归一化（梯度上升，求最大）
+m = r.T @ g; r @ ((m - m.T) / 2)      # SO(3) 上的黎曼梯度
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>停止条件看黎曼梯度的范数</strong>：欧氏梯度 2Ax 在最优点不为 0（它指向法向），只有投影后的部分才会变成 0。</li>
+<li><strong><code>proj</code> 写成 v − x(x·v)</strong>：不构造 3×3 的 I − xxᵀ 矩阵，高维时省内存和计算。</li>
+<li><strong><code>naive_gd</code> 的 ‖x‖ 爆炸是指数级的</strong>：沿最大特征向量的分量每步乘 1 + 0.4 × 3.64 ≈ 2.46，20 步约 6 × 10⁷ 倍，和打印的 5.5 × 10⁷ 同一量级。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把步长改成 1.0 和 0.01，看收敛次数怎么变；步长太大时会不会振荡？</li>
+<li>把 A 的最大两个特征值改得很接近，收敛变慢多少？</li>
+</ol><nav class="pager"><a href="30-functional-analysis.html">← 第 30 章 · 泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="32-stochastic-calculus.html">第 32 章 · 随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

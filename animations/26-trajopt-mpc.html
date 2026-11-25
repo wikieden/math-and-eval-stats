@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>轨迹优化与 MPC</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 26 章 · MPC：每个周期解一次 QP、只执行第一步</h1>
+<p class="sub">配套讲义：<a href="../lessons/26-trajopt-mpc.html">第 26 章 · 轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a>。标量系统 x_{k+1} = 1.2·x_k + u_k，Q = R = 1，预测时域 10 步，从 x = 2 出发。每个控制周期用当前状态解一个带 |u| ≤ u_max 的 QP（投影梯度法），只执行第一步。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="k">控制周期</label><input type="range" id="k" min="0" max="12" step="1" value="0"><span id="kv">0</span><label for="um">限位 u_max</label><input type="range" id="um" min="0.3" max="2.0" step="0.1" value="1.0"><span id="umv">1.0</span></div>
+<p class="note">看点：① 灰色是这一周期规划出来的 10 步预测（上：状态，下：控制），橙色是已经执行的历史；② 下一周期从新状态重新规划，窗口往前挪一格；③ u_max 调小：前几步控制贴着限位，状态回来得更慢；u_max 太小（< 0.4）时连 1.2 倍的发散都拉不住。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['k','um'],F=[[0,1],[1,1],[2,1],[3,1],[6,1],[12,1],[12,0.5],[12,0.3]];
+const a=1.2,N=10;
+const H=[],Su=[];for(let i=0;i<N;i++){Su.push([]);for(let j=0;j<N;j++)Su[i].push(j<=i?a**(i-j):0)}
+for(let i=0;i<N;i++){H.push([]);for(let j=0;j<N;j++){let s=i==j?1:0;for(let k=0;k<N;k++)s+=Su[k][i]*Su[k][j];H[i].push(s)}}
+const fv=[];for(let i=0;i<N;i++){let s=0;for(let k=0;k<N;k++)s+=Su[k][i]*a**(k+1);fv.push(s)}
+let LMAX=0;{let v=Array(N).fill(1);for(let it=0;it<200;it++){const w=H.map(r=>r.reduce((s,h,j)=>s+h*v[j],0));const n=Math.hypot(...w);v=w.map(x=>x/n);LMAX=n}}
+function qp(x0,um){let u=Array(N).fill(0);const st=1/LMAX;for(let it=0;it<3000;it++){const g=H.map((r,i)=>r.reduce((s,h,j)=>s+h*u[j],0)+fv[i]*x0);u=u.map((v,i)=>Math.max(-um,Math.min(um,v-st*g[i])))}return u}
+function render(k,um){let x=2;const hx=[x],hu=[];let plan=null;for(let c=0;c<=k;c++){const u=qp(x,um);if(c==k){plan=u;break}hu.push(u[0]);x=a*x+u[0];hx.push(x)}
+ const px=[x];plan.forEach(u=>px.push(a*px[px.length-1]+u));
+ cap(`周期 ${k}：x = ${x.toFixed(3)}，这次规划的 u₀ = ${plan[0].toFixed(3)}（u_max = ${(+um).toFixed(1)}）`);
+ frame(40,40,600,150);const M=CL(PM(40,40,600,150,[0,23],[-0.5,3]),40,40,600,150);frame(40,215,600,120);const M2=PM(40,215,600,120,[0,23],[-2.1,0.3]);
+ T('状态 x',44,56,'start','s');T('控制 u',44,231,'start','s');const z=M(0,0),z2=M2(0,0);L(40,z[1],640,z[1],'var(--line)',1);L(40,z2[1],640,z2[1],'var(--line)',1);
+ [um,-um].forEach(v=>{const y=M2(0,v)[1];if(y>215&&y<335)L(40,y,640,y,'var(--bad)',1,'4 4')});
+ P(hx.map((v,i)=>M(i,v)),'var(--warm)',2.5);P(px.map((v,i)=>M(k+i,v)),'var(--muted)',2,'5 4');
+ hu.forEach((v,i)=>{const q1=M2(i+0.1,Math.max(v,-2.1)),q2=M2(i+0.9,0);R(q1[0],q2[1],q2[0]-q1[0],q1[1]-q2[1],'var(--warm)',.8)});
+ plan.forEach((v,i)=>{const q1=M2(k+i+0.1,Math.max(v,-2.1)),q2=M2(k+i+0.9,0);R(q1[0],q2[1],q2[0]-q1[0],q1[1]-q2[1],i?'var(--muted)':'var(--accent)',i?.35:.9)});
+ const kx=M(k,0)[0];L(kx,40,kx,335,'var(--accent)',1,'3 3');T('现在',kx+4,200,'start','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

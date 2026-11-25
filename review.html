@@ -779,8 +779,302 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <p>策略迭代：精确评估（解线性方程）+ 贪心改进，策略个数有限且每轮不变差，有限步停下（本章 3 轮）；每轮贵、轮数少。值迭代每轮便宜、轮数多。</p>
 <p>口诀：次数约 log 除 1 减 γ；策略迭代评估加贪心，几轮就停。</p>
 </details>
+<h2 id="_12">控制、生成模型推导与严格理论</h2>
+<h3 id="st86-lqr-riccati">ST86 · 离散时间 LQR 的 Riccati 差分方程是怎么从动态规划推出来的？</h3>
+<p>来源：<a href="lessons/25-lqr-riccati.html">第 25 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>猜 k + 1 步以后的最优代价是 xᵀP_{k+1}x，第 k 步解 <span class="arithmatex">\(\min_u x^\top Qx + u^\top Ru + (Ax + Bu)^\top P_{k+1}(Ax + Bu)\)</span>。对 u 求导为 0：<span class="arithmatex">\(u = -K_kx\)</span>，<span class="arithmatex">\(K_k = (R + B^\top P_{k+1}B)^{-1}B^\top P_{k+1}A\)</span>。代回去还是二次型：</p>
+<p><span class="arithmatex">\(P_k = Q + A^\top P_{k+1}A - A^\top P_{k+1}B(R + B^\top P_{k+1}B)^{-1}B^\top P_{k+1}A\)</span>，<span class="arithmatex">\(P_N = Q_f\)</span>。</p>
+<p>例：a = 1.2、b = 1、Q = R = Q_f = 1：P₉ = 1.72，K₉ = 0.6。</p>
+<p>口诀：倒着排行程，二次型一路保持，增益用下一步的 P。</p>
+</details>
+<h3 id="st87-dare-p">ST87 · DARE 是什么？为什么说 P 就是值函数？有限时域和无限时域的解是什么关系？</h3>
+<p>来源：<a href="lessons/25-lqr-riccati.html">第 25 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>DARE 是 Riccati 递推的不动点：<span class="arithmatex">\(P = Q + A^\top PA - A^\top PB(R + B^\top PB)^{-1}B^\top PA\)</span>。可镇定时往回推会收敛到它（标量例子几步就到 P∞ = 1.9522）。</p>
+<p>x₀ᵀP₀x₀ 是从 x₀ 出发、以后都最优的总代价（例：7.8089，闭环跑一遍加起来也是它；换别的固定增益只会更大）。无限时域解是有限时域解在时域拉长时的稳态，实际控制器常用常数增益 K∞。Riccati 递推就是 Bellman 算子作用在二次型值函数上。</p>
+<p>口诀：推到不动就是 DARE，xᵀPx 是报价单。</p>
+</details>
+<h3 id="st88-lqr-qr">ST88 · LQR 里 Q、R 怎么影响结果？可控性为什么重要？</h3>
+<p>来源：<a href="lessons/25-lqr-riccati.html">第 25 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>只有 Q/R 的比值有意义。R 小：增益大、收敛快、第一步力矩大（R = 0.01 时闭环极点 0.0117）；R 大：温和，但只要可控仍然稳定（R = 100 时 0.8156）。</p>
+<p>可控性矩阵 [B, AB, …, A^{n−1}B] 满秩才能把状态推到任意地方。执行器够不着的不稳定模态（如 A = diag(1.2, 0.5)、B = [0, 1]）任何控制器都救不了；LQR 有稳定化解的条件是可镇定。</p>
+<p>口诀：Q 比 R 定激进；够不着的不稳模态谁也救不了。</p>
+</details>
+<h3 id="st89-mpc-qp-riccati">ST89 · MPC 的 QP 有哪两种写法？各有什么优缺点？加约束后为什么不能再用 Riccati？</h3>
+<p>来源：<a href="lessons/26-trajopt-mpc.html">第 26 章</a> 第一至三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>直接打靶（稠密）：用 <span class="arithmatex">\(X = S_xx_0 + S_uU\)</span> 消掉状态，只剩 U，H 是 N×N 满矩阵；变量少，但长时域要算 Aᵏ、病态，不好并行。</p>
+<p>直接转录（稀疏）：状态也当变量，动力学写成等式约束；变量多但带状稀疏（非零元按 N 增长），数值好、能并行。</p>
+<p>无约束时 QP 解和 Riccati 一样（例：u₀ = −1.5871）；加了 |u| ≤ 1 之类的约束就没有闭式了，只能解 QP。MPC 每个周期用最新状态解一次、只执行第一步。</p>
+<p>口诀：只记油门是打靶，连状态一起记是转录；MPC 每拍只走第一步。</p>
+</details>
+<h3 id="st90-ilqr">ST90 · iLQR 的一轮包含哪几步？它有什么局限？</h3>
+<p>来源：<a href="lessons/26-trajopt-mpc.html">第 26 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 用当前控制序列往前滚出名义轨迹；② 沿轨迹线性化动力学（A_k、B_k）、二次化代价；③ 往回推 Riccati 式的递推，得到前馈修正 k_k 和反馈增益 K_k；④ 带线搜索往前滚：<span class="arithmatex">\(u_k = \bar u_k + \alpha k_k + K_k(x_k - \bar x_k)\)</span>，代价下降才接受。</p>
+<p>局限：只保证局部最优；原生不支持约束（要罚函数或换直接转录）。DDP 再保留动力学的二阶项。例：代价 238.8 → 80.3，几轮收敛。</p>
+<p>口诀：线性化、往回推、往前滚，线搜索兜底。</p>
+</details>
+<h3 id="st91-mppi">ST91 · MPPI 的指数加权是从什么问题推出来的？温度 λ 起什么作用？</h3>
+<p>来源：<a href="lessons/26-trajopt-mpc.html">第 26 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>解的是 <span class="arithmatex">\(\min_q E_q[S] + \lambda\,\text{KL}(q\|p)\)</span>（p 是采样用的先验控制分布），闭式解 <span class="arithmatex">\(q^*(u) \propto p(u)e^{-S(u)/\lambda}\)</span>。采样实现：从 p 抽候选，权重 ∝ e^{−S/λ}，加权平均。</p>
+<p>λ → 0 只信最好的那条（贪心、有效样本少、噪声大）；λ → ∞ 退回先验。例：p = N(0, 1)、S = (1 + u)²，λ = 1 时最优均值 −2/3，λ = 0.1 时 −0.9524。</p>
+<p>口诀：先验乘 e 的负代价除 λ。</p>
+</details>
+<h3 id="st92-ddpm-qx_t-x_0-qx_t1-x_t-x_0">ST92 · DDPM 的前向闭式 q(x_t | x_0) 和后验 q(x_{t−1} | x_t, x_0) 各是什么？</h3>
+<p>来源：<a href="lessons/27-diffusion-derivation.html">第 27 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>前向：<span class="arithmatex">\(q(x_t\mid x_0) = \mathcal N(\sqrt{\bar\alpha_t}x_0, (1 - \bar\alpha_t)I)\)</span>，<span class="arithmatex">\(\bar\alpha_t = \prod\alpha_s\)</span>（高斯噪声叠加还是高斯）。</p>
+<p>后验：<span class="arithmatex">\(\mathcal N(\tilde\mu_t, \tilde\beta_tI)\)</span>，<span class="arithmatex">\(\tilde\mu_t = \frac{\sqrt{\bar\alpha_{t-1}}\beta_t}{1 - \bar\alpha_t}x_0 + \frac{\sqrt{\alpha_t}(1 - \bar\alpha_{t-1})}{1 - \bar\alpha_t}x_t\)</span>，<span class="arithmatex">\(\tilde\beta_t = \frac{1 - \bar\alpha_{t-1}}{1 - \bar\alpha_t}\beta_t\)</span>。t 小时 x₀ 的权重大，t 大时几乎只看 x_t；网络要替代的就是那个未知的 x₀。</p>
+<p>口诀：噪声叠加一步到位；知道 x₀ 后验就有闭式。</p>
+</details>
+<h3 id="st93-elbo-ddpm">ST93 · ELBO 是怎么化简成“预测噪声的均方误差”的？DDPM 的简化损失丢掉了什么？</h3>
+<p>来源：<a href="lessons/27-diffusion-derivation.html">第 27 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>ELBO 拆成每步的 KL(q(x_{t−1}|x_t, x_0) ‖ p_θ(x_{t−1}|x_t))；方差相同的高斯之间 KL = 均值差² / (2σ²)。把 x₀ 写成 (x_t − √(1−ᾱ)ε)/√ᾱ 并让网络用同样形式输出均值，均值差 ∝ ε − ε_θ，得 <span class="arithmatex">\(w_t\|\epsilon - \epsilon_\theta\|^2\)</span>，<span class="arithmatex">\(w_t = \beta_t^2/(2\sigma_t^2\alpha_t(1 - \bar\alpha_t))\)</span>。</p>
+<p>简化损失把 w_t 全设成 1。严格权重集中在很小的 t（t = 1 时 0.5，之后约 0.005–0.01），丢掉它反而样本质量更好。</p>
+<p>口诀：ELBO 化成加权噪声差，丢掉权重是简化损失。</p>
+</details>
+<h3 id="st94-tweedie-scorex0">ST94 · Tweedie 公式是什么？它怎么把预测噪声、score、x₀ 连起来？</h3>
+<p>来源：<a href="lessons/27-diffusion-derivation.html">第 27 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(x_t = \sqrt{\bar\alpha_t}x_0 + \sqrt{1 - \bar\alpha_t}\epsilon\)</span> 时 <span class="arithmatex">\(\mathbb E[x_0\mid x_t] = (x_t + (1 - \bar\alpha_t)\nabla\log p_t(x_t))/\sqrt{\bar\alpha_t}\)</span>。</p>
+<p>于是 <span class="arithmatex">\(\epsilon_\theta \approx -\sqrt{1 - \bar\alpha_t}\nabla\log p_t\)</span>，<span class="arithmatex">\(\hat x_0 = (x_t - \sqrt{1 - \bar\alpha_t}\epsilon_\theta)/\sqrt{\bar\alpha_t}\)</span>：三种参数化可以互相换算。</p>
+<p>口诀：预测噪声、score、x₀，Tweedie 一线牵。</p>
+</details>
+<h3 id="st95-ddim">ST95 · DDIM 的更新式是什么？为什么步数很少时样本会“塌”成平均？</h3>
+<p>来源：<a href="lessons/27-diffusion-derivation.html">第 27 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(x_s = \sqrt{\bar\alpha_s}\hat x_0 + \sqrt{1 - \bar\alpha_s}\epsilon_\theta(x_t, t)\)</span>（η = 0，不加新噪声，确定性，可以跳步；是概率流 ODE 的一种离散）。</p>
+<p>1 步时 x̂₀ = E[x₀ | x_T]，x_T 几乎没有信息，所有样本都得到数据均值（例：数据 N(2, 0.5²)，1 步标准差 0.0016，50 步 0.4695）。即使网络完美，步数少也会错：误差来自积分本身。</p>
+<p>口诀：DDIM 先猜终点再跳步，步太少只剩平均。</p>
+</details>
+<h3 id="st96-flow-matching">ST96 · flow matching 的边际速度场是什么？为什么只用条件目标就能学到它？</h3>
+<p>来源：<a href="lessons/28-flow-matching.html">第 28 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>线性插值 <span class="arithmatex">\(x_t = (1 - t)x_0 + tx_1\)</span>，边际速度场 <span class="arithmatex">\(u_t(x) = \mathbb E[x_1 - x_0\mid x_t = x]\)</span>：单条路径是直线，平均后流线是弯的。</p>
+<p>条件目标 <span class="arithmatex">\(\mathbb E\|v_\theta(x_t, t) - (x_1 - x_0)\|^2\)</span> 的最优解是条件期望（均方误差的性质），就是 u_t；它和边际目标只差一个与 θ 无关的常数，梯度相同（Lipman Theorem 2）。例：回归得到 3.2021 − 1.2020x，闭式 3.2 − 1.2x。</p>
+<p>口诀：一对样本连直线，回归的最优是条件期望。</p>
+</details>
+<h3 id="st97-flow-matching-rectified-flow">ST97 · flow matching 少步采样为什么会偏？rectified flow 怎么解决？</h3>
+<p>来源：<a href="lessons/28-flow-matching.html">第 28 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>速度场是对所有可能终点的平均，流线弯；Euler 步数少就“抄近路”。例：1 步时 u₀(x) = 2 − x，所有样本落在同一点 2。</p>
+<p>Rectified flow：用训练好的 ODE 把 x₀ 推到 x₁′，用 (x₀, x₁′) 重新配对再训（reflow）。新配对下路径是直线、不交叉，速度沿路径不变，1 步就准。它和最优传输配对是同一个想法：E‖x₁ − x₀‖² 从独立配对的 5.27 降到 OT 配对的 4.27 = W₂²。</p>
+<p>口诀：流线弯，步少抄近路；reflow 重新配对拉直线。</p>
+</details>
+<h3 id="st98-0">ST98 · π0 的动作头怎么训练、怎么采样？时间 τ 为什么不均匀采样？</h3>
+<p>来源：<a href="lessons/28-flow-matching.html">第 28 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>路径 <span class="arithmatex">\(A^\tau = \tau A + (1 - \tau)\epsilon\)</span>（τ = 0 是噪声），网络回归 A − ε；推理从 N(0, I) 出发，Euler 10 步（δ = 0.1），观测前缀的 KV 缓存只算一次。</p>
+<p>训练时 <span class="arithmatex">\((s - \tau)/s \sim \text{Beta}(1.5, 1)\)</span>，s = 0.999：偏向噪声多的一端（E[τ] ≈ 0.40）。理由：动作强依赖观测，“给定观测预测平均动作”本身就难，要多练；τ &gt; s 的区间不需要（步长大于 1 − s）。</p>
+<p>口诀：噪声连动作、回归速度、十步 Euler，多练噪声端。</p>
+</details>
+<h3 id="st99-">ST99 · σ-代数是什么？为什么说它表示“信息”？期望的“分层蛋糕”写法是什么？</h3>
+<p>来源：<a href="lessons/29-measure-probability.html">第 29 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>σ-代数是能谈概率的事件集合：含全集、对补集和可数并封闭。由一个划分生成的 σ-代数恰好是 2^{块数} 个事件；“给定到 t 为止的观测”就是一个 σ-代数 F_t，信息越多 σ-代数越大。连续空间上不能给所有子集定义长度，所以必须挑一个事件集合。</p>
+<p>非负随机变量 <span class="arithmatex">\(\mathbb E[X] = \int_0^\infty P(X &gt; t)dt\)</span>（Lebesgue 积分按值域切片）：骰子 Σ P(X &gt; t) = 3.5，Exp(1) 积分 = 1。</p>
+<p>口诀：σ-代数是问卷也是信息，期望是 P(X &gt; t) 的积分。</p>
+</details>
+<h3 id="st100-radon-nikodym-ppo">ST100 · 什么是 Radon-Nikodym 导数？它和重要性采样、PPO 比率有什么关系？什么时候不存在？</h3>
+<p>来源：<a href="lessons/29-measure-probability.html">第 29 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>若 Q(A) = 0 ⇒ P(A) = 0（P 对 Q 绝对连续），存在 dP/dQ 使 <span class="arithmatex">\(P(A) = \int_A\frac{dP}{dQ}dQ\)</span>。平时说的密度是对 Lebesgue 测度的 RN 导数。</p>
+<p>换测度：<span class="arithmatex">\(\mathbb E_P[g] = \mathbb E_Q[g\cdot dP/dQ]\)</span>，重要性权重 p/q、PPO 的 π_new/π_old 都是它。例：P = N(1, 1)、Q = N(0, 1) 时 dP/dQ = e^{x − 1/2}。</p>
+<p>不存在：P 在 Q 测度为 0 的地方有质量（如点质量对连续分布），这也是支撑不重叠时 KL = ∞ 的原因。</p>
+<p>口诀：密度是换测度的汇率。</p>
+</details>
+<h3 id="st101">ST101 · 条件期望为什么是投影？依概率收敛和期望收敛有什么区别？给一个反例。</h3>
+<p>来源：<a href="lessons/29-measure-probability.html">第 29 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>E[X | G] 是 G-可测、且对每个 B ∈ G 满足 E[X·1_B] = E[E[X|G]·1_B] 的随机变量；几何上是 X 在 G-可测函数子空间上的正交投影（均方误差最小，残差和所有可用信息正交）。骰子按“哪一对”：[1.5, 1.5, 3.5, 3.5, 5.5, 5.5]。</p>
+<p>反例：<span class="arithmatex">\(X_n = n\cdot1\{U &lt; 1/n\}\)</span>：P(X_n ≠ 0) = 1/n → 0（依概率、甚至几乎处处收敛到 0），但 E[X_n] 恒为 1。罕见但巨大的事件撑住期望（重尾）。LLN 管“会收敛”，CLT 管“按 1/√n、形状正态”。</p>
+<p>口诀：条件期望是投影；依概率收敛期望未必收敛。</p>
+</details>
+<h3 id="st102-banach">ST102 · 为什么说无穷维里“收敛”必须说清用哪个范数？Banach 空间是什么？</h3>
+<p>来源：<a href="lessons/30-functional-analysis.html">第 30 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>有限维里所有范数等价，无穷维不是。例：xⁿ 在 [0, 1] 上 sup 范数恒为 1，L² 范数 1/√(2n + 1) → 0。</p>
+<p>Banach 空间 = 完备的赋范空间（Cauchy 序列一定有极限）。连续函数配 sup 范数是 Banach 空间；配 L² 范数不是：陡峭的 sigmoid 在 L² 下收敛到不连续的阶跃函数（k = 1000 时距离 0.0197）。很多存在性、收敛性定理都需要完备。</p>
+<p>口诀：无穷维里尺子不等价，完备才没有洞。</p>
+</details>
+<h3 id="st103-hilbert-banach-parseval">ST103 · Hilbert 空间比 Banach 空间多了什么？Parseval 等式说什么？积分算子的谱是什么？</h3>
+<p>来源：<a href="lessons/30-functional-analysis.html">第 30 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Hilbert 空间有内积，于是有角度、正交、投影和正交基展开。Parseval：<span class="arithmatex">\(\|f\|^2 = \sum|c_k|^2\)</span>，截断误差 = 丢掉的系数平方和（方波取 5 项：误差² 0.2538）。</p>
+<p>积分算子 <span class="arithmatex">\((Kf)(x) = \int k(x, y)f(y)dy\)</span> 是“无穷维矩阵”，对称核给出实特征值和正交特征函数。例：min(x, y) 核的特征值 1/((j − ½)²π²) = 0.4053、0.0450、0.0162，衰减快，前几个特征函数就够（函数版 PCA）。</p>
+<p>口诀：有内积就有投影；积分算子是无穷维矩阵。</p>
+</details>
+<h3 id="st104-banach-rkhs">ST104 · Banach 不动点定理说什么？RKHS 的表示定理为什么重要？</h3>
+<p>来源：<a href="lessons/30-functional-analysis.html">第 30 章</a> 第五、六步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>完备度量空间上的压缩映射（‖Tx − Ty‖ ≤ q‖x − y‖，q &lt; 1）有唯一不动点，从任何起点迭代误差 ≤ qᵏ × 初始误差。例：x ← cos x 收敛到 0.739085，后期每步比值 ≈ |sin x*| = 0.674；值迭代是 q = γ 的例子。</p>
+<p>RKHS 里取值是内积 f(x) = ⟨f, k(x, ·)⟩。表示定理：<span class="arithmatex">\(\min\sum(y_i - f(x_i))^2 + \lambda\|f\|^2\)</span> 的解是 <span class="arithmatex">\(\sum\alpha_ik(x_i, \cdot)\)</span>，<span class="arithmatex">\(\alpha = (K + \lambda I)^{-1}y\)</span>：无穷维问题只要解一个 n×n 方程（核岭回归、高斯过程、NTK）。</p>
+<p>口诀：压缩映射唯一不动点，核方法只要 n 个系数。</p>
+</details>
+<h3 id="st105">ST105 · 流形的切空间、投影、收缩映射各是什么？球面上怎么写？</h3>
+<p>来源：<a href="lessons/31-manifold-optimization.html">第 31 章</a> 第一至三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>切空间：流形在一点的线性近似，球面上 <span class="arithmatex">\(T_x = \{v : x^\top v = 0\}\)</span>；投影 <span class="arithmatex">\(P_x = I - xx^\top\)</span> 去掉法向分量。</p>
+<p>收缩映射：把切空间里的一步拉回流形，只要求 R_x(0) = x、一阶是恒等；球面上用“走完再归一化”(x + v)/‖x + v‖，和指数映射（沿大圆走）差 O(‖v‖³)（‖v‖ = 0.1 时 3.3e-4，0.01 时 3.3e-7）。</p>
+<p>测地线距离 arccos(xᵀy)：近处和弦长几乎一样，远处差很多（90° 时 1.571 vs 1.414）。</p>
+<p>口诀：脚下平地是切空间，切空间走一步，收缩拉回来。</p>
+</details>
+<h3 id="st106">ST106 · 黎曼梯度下降怎么做？不投影不收缩会怎样？</h3>
+<p>来源：<a href="lessons/31-manifold-optimization.html">第 31 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 算欧氏梯度；② 投影到切空间得黎曼梯度（嵌入子流形、继承欧氏内积时）；③ 走一步再收缩回流形。</p>
+<p>例：球面上最大化 xᵀAx，16 次收敛到最大特征向量（3.644973），每步都在球面上。不投影不收缩直接在 R³ 里走：xᵀAx 无上界，20 步 ‖x‖ ≈ 5.5 × 10⁷，约束被破坏。</p>
+<p>口诀：欧氏梯度、投影、走一步、收缩回来。</p>
+</details>
+<h3 id="st107-so3">ST107 · SO(3) 上的黎曼梯度怎么算？常见流形的切空间和收缩各是什么？</h3>
+<p>来源：<a href="lessons/31-manifold-optimization.html">第 31 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>SO(3) 的切空间是 {RΩ : Ω 反对称}；欧氏梯度 G 投影成 <span class="arithmatex">\(R\,\text{skew}(R^\top G)\)</span>，skew(M) = (M − Mᵀ)/2；收缩用 R·Exp(δ)（第 19 章的 ⊕）、QR 或极分解。</p>
+<table>
+<thead>
+<tr>
+<th>流形</th>
+<th>切空间</th>
+<th>收缩</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>球面</td>
+<td>xᵀv = 0</td>
+<td>归一化</td>
+</tr>
+<tr>
+<td>SO(3)</td>
+<td>RΩ，Ω 反对称</td>
+<td>R·Exp(δ)、QR</td>
+</tr>
+<tr>
+<td>Stiefel</td>
+<td>XᵀV 反对称</td>
+<td>QR、极分解</td>
+</tr>
+<tr>
+<td>正定矩阵</td>
+<td>对称矩阵</td>
+<td>指数映射</td>
+</tr>
+</tbody>
+</table>
+<p>口诀：李群也是流形，SO(3) 上是 R 乘 skew。</p>
+</details>
+<h3 id="st108-dw2-dt">ST108 · 布朗运动的二次变差是什么？为什么说 (dW)² = dt？</h3>
+<p>来源：<a href="lessons/32-stochastic-calculus.html">第 32 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>布朗运动 W₀ = 0、增量独立、<span class="arithmatex">\(W_{t+h} - W_t \sim \mathcal N(0, h)\)</span>。把 [0, t] 切细，Σ(ΔW)² 的均值是 t、方差 2t²/n → 0，所以确定地收敛到 t（例：切 10000 段时 0.9995 ± 0.0144）。</p>
+<p>光滑函数的二次变差是 0；布朗运动不为 0，这是 Itô 微积分和普通微积分不同的根源。速记：dt·dt = 0，dt·dW = 0，dW·dW = dt。</p>
+<p>口诀：醉汉走路方差等于时间，(dW)² 等于 dt。</p>
+</details>
+<h3 id="st109-ito-ito-em">ST109 · Itô 积分为什么取左端点？Itô 引理比普通链式法则多了什么？EM 方法的收敛阶是多少？</h3>
+<p>来源：<a href="lessons/32-stochastic-calculus.html">第 32 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>左端点只用“现在之前”的信息，不偷看未来，积分是鞅、期望为 0。<span class="arithmatex">\(\int_0^TW\,dW = (W_T^2 - T)/2\)</span>（左端点），中点取法（Stratonovich）得 W_T²/2，两者差 ½Σ(ΔW)² → T/2。</p>
+<p>Itô 引理：<span class="arithmatex">\(d\varphi(X) = \varphi'dX + \frac12\varphi''g^2dt\)</span>，多出 ½φ″g²dt。例：E[e^{W_t}] = e^{t/2}；几何布朗运动解里的 −σ²/2。</p>
+<p>Euler-Maruyama <span class="arithmatex">\(X \leftarrow X + fh + g\Delta W\)</span> 的强收敛阶是 1/2（步数 ×100，误差约 ÷10）。</p>
+<p>口诀：Itô 取左端不偷看，链式法则多半个二阶导乘 g²，EM 强阶只一半。</p>
+</details>
+<h3 id="st110-fokker-planck">ST110 · Fokker-Planck 方程描述什么？漂移和扩散各起什么作用？</h3>
+<p>来源：<a href="lessons/32-stochastic-calculus.html">第 32 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>SDE dX = f dt + g dW 描述单个粒子；Fokker-Planck 描述密度的演化：<span class="arithmatex">\(\partial_tp = -\partial_x(fp) + \frac12\partial_x^2(g^2p)\)</span>。漂移项整体搬运密度，扩散项把它抹开；g = 0 时就是连续性方程。</p>
+<p>例：dX = 1·dt + 0.5·dW，X₀ = 0，解是 N(t, 0.25t)；t = 2 时 EM 模拟均值 2.0034、方差 0.4984。</p>
+<p>口诀：SDE 管粒子，FP 管密度，漂移搬、扩散抹。</p>
+</details>
+<h3 id="st111-sde-ode">ST111 · 反向 SDE 和概率流 ODE 各是什么？它们和扩散模型采样的关系？</h3>
+<p>来源：<a href="lessons/32-stochastic-calculus.html">第 32 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>前向 dx = f dt + g dW 的时间反演（Anderson 1982）：<span class="arithmatex">\(dx = [f - g^2\nabla\log p_t]dt + g\,d\bar W\)</span>（从 T 往 0 走）。概率流 ODE：<span class="arithmatex">\(dx/dt = f - \frac12g^2\nabla\log p_t\)</span>，没有噪声，但每个时刻的边际分布相同。</p>
+<p>两者都只需要 score，扩散模型的 ε 预测就是 score 预测；DDPM 式采样对应反向 SDE，DDIM / DPM-Solver 对应概率流 ODE。例：数据 N(0, 0.5²)、前向 dX = dW，两种方法往回走后标准差 0.5057、0.5040。</p>
+<p>口诀：有了 score 能倒放：SDE 带噪声，概率流 ODE 不带。</p>
+</details>
+<h3 id="st112-w2">ST112 · 一维最优传输怎么求？高斯之间的 W₂ 是多少？</h3>
+<p>来源：<a href="lessons/33-optimal-transport.html">第 33 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>凸代价（如距离²）下一维最优映射是单调的：两边各自排序、一一对应（交叉的配对交换后不会更差）。<span class="arithmatex">\(W_2^2 = \int_0^1|F_\mu^{-1}(u) - F_\nu^{-1}(u)|^2du\)</span>。</p>
+<p>一维高斯：<span class="arithmatex">\(W_2 = \sqrt{(m_0 - m_1)^2 + (s_0 - s_1)^2}\)</span>；N(0, 1) → N(2, 0.5²) 是 √4.25 = 2.0616。</p>
+<p>口诀：一维排序就是最优，单调不交叉。</p>
+</details>
+<h3 id="st113-kantorovich-sinkhorn">ST113 · Kantorovich 问题是什么？Sinkhorn 怎么解熵正则版本？ε 起什么作用？</h3>
+<p>来源：<a href="lessons/33-optimal-transport.html">第 33 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Kantorovich：找传输计划 P（允许拆开运），<span class="arithmatex">\(\min\sum C_{ij}P_{ij}\)</span>，行和 = a、列和 = b、P ≥ 0，是线性规划；最优计划在顶点上，最多 n + m − 1 个非零元。</p>
+<p>熵正则 <span class="arithmatex">\(\min\sum CP - \epsilon H(P)\)</span> 的解是 <span class="arithmatex">\(P = \text{diag}(u)K\text{diag}(v)\)</span>，K = e^{−C/ε}；Sinkhorn 交替 <span class="arithmatex">\(u \leftarrow a/(Kv)\)</span>、<span class="arithmatex">\(v \leftarrow b/(K^\top u)\)</span>，只有矩阵向量乘、可微、GPU 快。</p>
+<p>ε 大：计划更模糊、代价偏高、迭代少；ε → 0 逼近精确解，但迭代多、K 会下溢（要在 log 域算）。</p>
+<p>口诀：Kantorovich 允许拆，熵正则交替缩行列。</p>
+</details>
+<h3 id="st114-wasserstein-kl-flow-matching">ST114 · 为什么支撑不重叠时 Wasserstein 比 KL 好用？位移插值和 flow matching 有什么关系？</h3>
+<p>来源：<a href="lessons/33-optimal-transport.html">第 33 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>δ₀ 和 δ_θ：θ ≠ 0 时 KL = ∞、对 θ 没有梯度；W₁ = |θ| 随 θ 光滑变化，告诉你往哪挪。高维数据集中在低维流形上，模型和数据一开始几乎不重叠，所以需要这类距离（WGAN 的出发点）。</p>
+<p>动态 OT（Benamou–Brenier）：最优流动让每个粒子沿直线匀速走到 T(x)，中间分布是位移插值（N(0, 1) → N(2, 0.5²) 时 t = 0.5 是 N(1, 0.75²) 一个峰；直接混合密度是两个峰）。用 OT 配对做 flow matching，路径就是位移插值，不交叉、少步就准。</p>
+<p>口诀：KL 不重叠就无穷，Wasserstein 量搬多远；动态 OT 走直线。</p>
+</details>
+<h3 id="st115-fisher">ST115 · Fisher 信息的两种写法是什么？为什么说它是“分布空间的尺子”？</h3>
+<p>来源：<a href="lessons/34-information-geometry.html">第 34 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(F = \mathbb E[\nabla\log p\,\nabla\log p^\top] = -\mathbb E[\nabla^2\log p]\)</span>：score 的方差 = 对数似然的平均曲率（score 期望为 0）。伯努利 F = 1/(p(1−p))：p = 0.9 时 11.11。Cramér-Rao：无偏估计方差 ≥ 1/(nF)。</p>
+<p>KL 的二阶展开：<span class="arithmatex">\(\text{KL}(p_\theta\|p_{\theta+\delta}) \approx \frac12\delta^\top F\delta\)</span>（零阶、一阶项都是 0），所以 F 就是按“分布差多少”量参数距离的度量。δ 小时很准（p = 0.5、δ = 0.01：0.000200 vs 0.000200），靠近边界时偏差变大。</p>
+<p>口诀：Fisher 是 score 的方差、似然的曲率；KL 局部是二次型。</p>
+</details>
+<h3 id="st116">ST116 · 自然梯度是什么？为什么它和参数化无关，而普通梯度不是？</h3>
+<p>来源：<a href="lessons/34-information-geometry.html">第 34 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>在“KL 不超过一个小量”的约束下找下降最快方向，得 <span class="arithmatex">\(\tilde\nabla = F^{-1}\nabla\ell\)</span>。换参数化时 F 和 ∇ 按雅可比一起变、相互抵消，所以对应同一个分布变化；普通梯度按参数的欧氏距离量步长，换个写法速度就变。</p>
+<p>例（拟合硬币 0.5 → 0.9）：p 坐标梯度上升 22 步，logit 坐标 2552 步，自然梯度（p 坐标里 = p̂ − p）步长 1 一步到位。</p>
+<p>口诀：自然梯度 F 逆乘梯度，换参数也不变。</p>
+</details>
+<h3 id="st117-trpo-ppo-softmax-fisher">ST117 · TRPO 的步长公式是什么？PPO 和信任域是什么关系？softmax 策略的 Fisher 有什么特点？</h3>
+<p>来源：<a href="lessons/34-information-geometry.html">第 34 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>TRPO：线性化目标、二次化 KL，<span class="arithmatex">\(\max g^\top\delta\)</span> s.t. <span class="arithmatex">\(\frac12\delta^\top F\delta \le \epsilon\)</span> ⇒ <span class="arithmatex">\(\delta = \sqrt{2\epsilon/(g^\top F^{-1}g)}\,F^{-1}g\)</span>；F⁻¹g 用共轭梯度算，再线搜索确认真实 KL。例：高斯策略 (μ, log σ)、σ = 0.5，F = diag(4, 2)，g = [1, 1]，ε = 0.01 → δ = [0.0408, 0.0816]。</p>
+<p>PPO 把比率截在 [1 − ε, 1 + ε]，比率接近 1 时 KL ≈ ½E[(r − 1)²]，是信任域的便宜替身；实现里常监控近似 KL 提前停止。</p>
+<p>softmax 对 logits 的 Fisher = diag(p) − ppᵀ，有零特征值（logits 同加常数策略不变），求逆要伪逆或加阻尼。</p>
+<p>口诀：TRPO 线性目标加二次 KL；PPO 截比率是替身；softmax 的 F 要加阻尼。</p>
+</details>
 <hr />
-<h2 id="_12">已掌握</h2>
+<h2 id="_13">已掌握</h2>
 <p>（暂无）</p>
 </main>
 <footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>

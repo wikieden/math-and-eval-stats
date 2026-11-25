@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 27 章 · 扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html" class="cur"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="27-elbo-tweedie-ddim">第 27 章 · 扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</h1><div class="run"><a class="btn" href="../animations/27-diffusion-derivation.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch27_diffusion_derivation.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch27_diffusion_derivation.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch27_diffusion_derivation.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：为什么加 t 步噪声可以一步加完？反向过程的"正确答案" q(x_{t−1} | x_t, x_0) 是什么？ELBO 怎么一路化简成"预测噪声的均方误差"？为什么预测噪声等于估 score？DDIM 为什么能跳步、不加噪声？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/26-trajopt-mpc.html">第 26 章 轨迹优化与 MPC</a> · 下一章：<a href="../lessons/28-flow-matching.html">第 28 章 Flow matching 推导</a><br />
+对应原文：DDPM <code>transformer-deep-dive/materials/text/papers/ddpm-2006.11239.txt</code>（前向闭式式 (4) L118、后验式 (6)(7) L132–L135、ε 参数化 L174–L175、式 (12) 与简化损失式 (14) L300–L308）；Luo 2022 <code>diffusion-models/materials/text/papers/luo-understanding-diffusion-unified-2208.11970.txt</code>（Tweedie 公式 L1031–L1038）；DDIM <code>diffusion-models/materials/text/papers/ddim-2010.02502.txt</code>（式 (12) L290、和 Euler 积分的类比 L348）<br />
+本章缩写：DDPM = Denoising Diffusion Probabilistic Models（去噪 / 扩散 / 概率模型）；DDIM = Denoising Diffusion Implicit Models（去噪扩散 / 隐式模型）；ELBO = Evidence Lower BOund（证据下界）；SNR = Signal-to-Noise Ratio（信噪比）；β_t = 第 t 步加的噪声方差；α_t = 1 − β_t；ᾱ_t = α₁⋯α_t；β̃_t = 后验方差；ε_θ = 网络预测的噪声；score = ∇ log p（对数密度的梯度）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="t-2026-11-25">第一步：前向闭式：t 步噪声一步加完（2026-11-25）</h3>
+<p><strong>类比：往一杯水里分 t 次滴墨水，和一次滴进"这 t 次加起来那么多"的墨水，结果分布一样。</strong></p>
+<p>每步 <span class="arithmatex">\(x_t = \sqrt{\alpha_t}x_{t-1} + \sqrt{\beta_t}\epsilon_t\)</span>。两个独立高斯噪声相加还是高斯，方差按系数平方加，展开 t 步得（DDPM 式 (4)，L118）：</p>
+<div class="arithmatex">\[q(x_t\mid x_0) = \mathcal N\big(\sqrt{\bar\alpha_t}\,x_0,\ (1 - \bar\alpha_t)I\big),\quad\bar\alpha_t = \prod_{s\le t}\alpha_s\]</div>
+<p><strong>例子</strong>（线性调度 β 从 10⁻⁴ 到 0.02，T = 1000）：</p>
+<table>
+<thead>
+<tr>
+<th>t</th>
+<th>ᾱ_t</th>
+<th>信号系数 √ᾱ</th>
+<th>噪声系数 √(1 − ᾱ)</th>
+<th>SNR = ᾱ/(1 − ᾱ)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.9999</td>
+<td>0.9999</td>
+<td>0.0100</td>
+<td>10⁴</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.8970</td>
+<td>0.9471</td>
+<td>0.3209</td>
+<td>8.71</td>
+</tr>
+<tr>
+<td>500</td>
+<td>0.0786</td>
+<td>0.2803</td>
+<td>0.9599</td>
+<td>0.085</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>0.00004</td>
+<td>0.0064</td>
+<td>1.0000</td>
+<td>4 × 10⁻⁵</td>
+</tr>
+</tbody>
+</table>
+<p>训练时随机抽一个 t、一步算出 x_t，不用真的走 t 步。</p>
+<p><strong>一句话</strong>：高斯噪声叠加还是高斯，x_t = √ᾱ_t x₀ + √(1 − ᾱ_t) ε 一步采到任意时刻。</p>
+<h3 id="qx_t1-x_t-x_02026-11-25">第二步：后验 q(x_{t−1} | x_t, x_0)：知道终点就知道上一步该在哪（2026-11-25）</h3>
+<p><strong>类比：知道一个人从家（x₀）出发、现在在路口（x_t），就能猜他上一分钟大概在哪。</strong></p>
+<p>用贝叶斯公式把三个高斯 <span class="arithmatex">\(q(x_t\mid x_{t-1})\)</span>、<span class="arithmatex">\(q(x_{t-1}\mid x_0)\)</span>、<span class="arithmatex">\(q(x_t\mid x_0)\)</span> 拼起来，配方后还是高斯（DDPM 式 (6)(7)，L132–L135）：</p>
+<div class="arithmatex">\[q(x_{t-1}\mid x_t, x_0) = \mathcal N(\tilde\mu_t, \tilde\beta_tI),\quad\tilde\mu_t = \frac{\sqrt{\bar\alpha_{t-1}}\beta_t}{1 - \bar\alpha_t}x_0 + \frac{\sqrt{\alpha_t}(1 - \bar\alpha_{t-1})}{1 - \bar\alpha_t}x_t,\quad\tilde\beta_t = \frac{1 - \bar\alpha_{t-1}}{1 - \bar\alpha_t}\beta_t\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>t</th>
+<th>x₀ 的系数</th>
+<th>x_t 的系数</th>
+<th>β̃_t</th>
+<th>β_t</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>0.5453</td>
+<td>0.4547</td>
+<td>0.000055</td>
+<td>0.000120</td>
+</tr>
+<tr>
+<td>500</td>
+<td>0.0031</td>
+<td>0.9941</td>
+<td>0.010031</td>
+<td>0.010040</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>0.0001</td>
+<td>0.9899</td>
+<td>0.020000</td>
+<td>0.020000</td>
+</tr>
+</tbody>
+</table>
+<p>t 小时 x₀ 的话语权大（快到终点了）；t 大时几乎只看 x_t。反向模型 <span class="arithmatex">\(p_\theta(x_{t-1}\mid x_t)\)</span> 要学的就是这个高斯，难点只在"不知道 x₀"。</p>
+<p><strong>一句话</strong>：给定 x₀ 时反向一步有闭式，均值是 x₀ 和 x_t 的加权；网络要做的就是替代那个未知的 x₀。</p>
+<h3 id="elbo-2026-11-25">第三步：ELBO 化简成预测噪声（2026-11-25）</h3>
+<p>ELBO 拆成每一步的 KL：<span class="arithmatex">\(\sum_t\text{KL}\big(q(x_{t-1}\mid x_t, x_0)\,\|\,p_\theta(x_{t-1}\mid x_t)\big)\)</span>。两个方差相同的高斯之间的 KL 只剩均值差：<span class="arithmatex">\(\|\tilde\mu_t - \mu_\theta\|^2/(2\sigma_t^2)\)</span>。</p>
+<p>把 <span class="arithmatex">\(x_0 = (x_t - \sqrt{1 - \bar\alpha_t}\,\epsilon)/\sqrt{\bar\alpha_t}\)</span> 代进 μ̃，并让网络用同样的形式输出 μ_θ（只是把 ε 换成 ε_θ），均值差正比于噪声差（DDPM L174–L175、式 (12)）：</p>
+<div class="arithmatex">\[\text{KL}_t = w_t\,\|\epsilon - \epsilon_\theta(x_t, t)\|^2,\quad w_t = \frac{\beta_t^2}{2\sigma_t^2\alpha_t(1 - \bar\alpha_t)}\]</div>
+<p><strong>例子</strong>（σ_t² = β_t）：</p>
+<table>
+<thead>
+<tr>
+<th>t</th>
+<th>1</th>
+<th>10</th>
+<th>100</th>
+<th>1000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w_t</td>
+<td>0.5001</td>
+<td>0.0737</td>
+<td>0.0101</td>
+<td>0.0102</td>
+</tr>
+</tbody>
+</table>
+<p>严格的 ELBO 权重主要压在很小的 t 上（几乎没噪声、对生成质量影响小）。DDPM 把 w_t 全换成 1，得到<strong>简化损失</strong>（式 (14)，L300）：<span class="arithmatex">\(\mathbb E_{t, x_0, \epsilon}\|\epsilon - \epsilon_\theta(x_t, t)\|^2\)</span>，样本质量反而更好（L308）。</p>
+<p><img alt="ELBO 每一项的权重随 t 的变化" src="../figures/27-diffusion-derivation-weights.png" />
+<em>图 27-1 · 纵轴 w_t（对数）；严格 ELBO 的权重集中在 t 很小的地方（t ≈ 350 处最低约 0.005），简化损失把整条线拉平成 1</em></p>
+<p><strong>一句话</strong>：ELBO 的每一项是"后验均值和模型均值的差"，ε 参数化后变成加权的噪声 MSE；DDPM 丢掉权重，就是现在人人在用的那个损失。</p>
+<h3 id="tweedie-score-x02026-11-25">第四步：Tweedie：预测噪声 = 估 score = 估 x₀（2026-11-25）</h3>
+<p><strong>Tweedie 公式</strong>（Luo 2022 L1031–L1038）：<span class="arithmatex">\(x_t = \sqrt{\bar\alpha_t}x_0 + \sqrt{1 - \bar\alpha_t}\epsilon\)</span> 时</p>
+<div class="arithmatex">\[\mathbb E[x_0\mid x_t] = \frac{x_t + (1 - \bar\alpha_t)\nabla\log p_t(x_t)}{\sqrt{\bar\alpha_t}}\]</div>
+<p>和第一步对照，得到三种等价的参数化：</p>
+<div class="arithmatex">\[\epsilon_\theta \approx -\sqrt{1 - \bar\alpha_t}\,\nabla\log p_t(x_t),\qquad\hat x_0 = \frac{x_t - \sqrt{1 - \bar\alpha_t}\,\epsilon_\theta}{\sqrt{\bar\alpha_t}}\]</div>
+<p><strong>例子</strong>（数据 N(2, 0.5²)，这时 p_t、score、E[x₀ | x_t] 都有闭式）：</p>
+<table>
+<thead>
+<tr>
+<th>t、x_t</th>
+<th>高斯共轭直接算 E[x₀ | x_t]</th>
+<th>Tweedie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100、1.5</td>
+<td>1.7148</td>
+<td>1.7148</td>
+</tr>
+<tr>
+<td>500、0.5</td>
+<td>1.9955</td>
+<td>1.9955</td>
+</tr>
+</tbody>
+</table>
+<p>t = 500 时噪声很大，x_t 几乎没信息，估计贴近数据均值 2。</p>
+<p><strong>一句话</strong>：预测噪声、预测 score、预测 x₀ 是同一件事的三种写法，Tweedie 公式把它们连起来。</p>
+<h3 id="ddim-x0-2026-11-25">第五步：DDIM：用 x̂₀ 跳步，不加新噪声（2026-11-25）</h3>
+<p><strong>类比：不是一步一步往回走，而是每次先猜终点在哪，再按"从终点出发到这个时刻"的配方直接跳过去。</strong></p>
+<p>DDIM（η = 0，式 (12)，L290）：</p>
+<div class="arithmatex">\[x_s = \sqrt{\bar\alpha_s}\,\hat x_0 + \sqrt{1 - \bar\alpha_s}\,\epsilon_\theta(x_t, t),\quad s &lt; t\]</div>
+<p>确定性（同一个 x_T 永远给出同一个结果），而且 s 可以离 t 很远：它是概率流 ODE 的一种离散（L348，第 32 章第五步）。</p>
+<p><strong>例子</strong>（数据 N(2, 0.5²)，用精确的 ε 预测，相当于"网络完美"）：</p>
+<table>
+<thead>
+<tr>
+<th>步数</th>
+<th>1</th>
+<th>2</th>
+<th>10</th>
+<th>50</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>样本均值</td>
+<td>2.0000</td>
+<td>1.9994</td>
+<td>1.9970</td>
+<td>1.9962</td>
+</tr>
+<tr>
+<td>样本标准差（目标 0.5）</td>
+<td>0.0016</td>
+<td>0.0712</td>
+<td>0.3685</td>
+<td>0.4695</td>
+</tr>
+</tbody>
+</table>
+<p>1 步时 x̂₀ = E[x₀ | x_T] 对所有样本都差不多等于 2：只得到"平均图"，多样性塌掉。步数越多越接近目标分布。即使网络完美，步数少也会出错：误差来自积分本身（第 22 章）。</p>
+<p><img alt="DDIM 步数和样本分布" src="../figures/27-diffusion-derivation-ddim.png" />
+<em>图 27-2 · 1、2、10、50 步 DDIM 的样本直方图和目标 N(2, 0.5²)（灰线）；1 步全挤在均值处</em></p>
+<p><strong>场景代码</strong>：diffusers 里换成 DDIM、少步采样（真实库调用；本书环境没装 diffusers，没跑过）：</p>
+<pre><code class="language-python">from diffusers import DDIMScheduler
+pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
+image = pipe(prompt, num_inference_steps=50, eta=0.0).images[0]   # eta=0：确定性 DDIM
+</code></pre>
+<p><strong>一句话</strong>：DDIM 每步先估 x̂₀、再按前向闭式跳到更早的时刻，不加噪声；步数少时退化成"平均答案"。</p>
+<h3 id="ddim">动画演示：前向加噪与 DDIM 往回走</h3>
+<p><img alt="扩散模型推导" src="../animations/27-diffusion-derivation.gif" /></p>
+<p>可交互版：<a href="../animations/27-diffusion-derivation.html">animations/27-diffusion-derivation.html</a>（下拉切换"前向 / DDIM"；滑块调 t 或步数）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>前向：t 从 0 到 1000，直方图从 N(2, 0.5²) 慢慢变成 N(0, 1)，右上角是 ᾱ_t 和 SNR（第一步）；</li>
+<li>DDIM：滑块是总步数；上方是 12 个样本从噪声走回数据的确定性轨迹，下方是 3000 个样本最后的直方图；步数少时挤成一团（第五步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：两步加噪 β₁ = 0.1、β₂ = 0.2，从 x₀ 到 x₂ 的分布是什么？（写出均值系数和方差）</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：t = 1 时（ᾱ₀ = 1），后验 q(x₀ | x₁, x₀) 的均值和方差是什么？为什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：某时刻 ᾱ_t = 0.64，x_t = 1.0，网络输出 ε_θ = 0.5。算 x̂₀ 和 score 的估计。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>噪声叠加还是高斯，一步采到任意 t；<br />
+知道 x₀ 后验就有闭式，网络替代那个 x₀；<br />
+ELBO 化成加权噪声差，丢掉权重是简化损失；<br />
+预测噪声、score、x₀，Tweedie 一线牵；<br />
+DDIM 先猜终点再跳步，步太少只剩平均。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST92（前向闭式与后验 q(x_{t−1} | x_t, x_0)）、ST93（ELBO 到简化损失）、ST94（Tweedie：噪声、score、x₀ 三种参数化）、ST95（DDIM 的更新式和步数少时的退化）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ DDPM（Ho 2020）</td>
+<td>§2（式 (1)–(8)）、§3.2（式 (11)–(14)）</td>
+<td>本章推导的原文</td>
+</tr>
+<tr>
+<td>★ Luo 2022</td>
+<td>ELBO 推导、Tweedie 一节（L1031 起）</td>
+<td>三种参数化的统一讲法</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/diffusion-from-scratch/lessons/03-forward.html">《从零读懂扩散模型》第 3–7 章</a></td>
+<td>前向、DDPM 训练与采样、DDIM</td>
+<td>直觉版和代码版</td>
+</tr>
+<tr>
+<td>DDIM（Song 2020）</td>
+<td>§4.1 式 (12)、§4.3</td>
+<td>非马尔可夫前向与 ODE 视角</td>
+</tr>
+<tr>
+<td><a href="../lessons/17-generative-math.html">第 17 章 生成模型的数学</a></td>
+<td>第一、二步</td>
+<td>ELBO、KL 的基础</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>高斯相加</strong>：独立的 <span class="arithmatex">\(aX + bY\)</span>（X、Y 标准正态）~ N(0, a² + b²)；递推 <span class="arithmatex">\(\alpha_t(1 - \bar\alpha_{t-1}) + \beta_t = 1 - \bar\alpha_t\)</span>。</li>
+<li><strong>高斯后验配方</strong>：两个关于 x_{t−1} 的高斯相乘，精度相加 <span class="arithmatex">\(1/\tilde\beta_t = \alpha_t/\beta_t + 1/(1 - \bar\alpha_{t-1})\)</span>，均值按精度加权。</li>
+<li><strong>等方差高斯的 KL</strong>：<span class="arithmatex">\(\text{KL}(\mathcal N(\mu_1, \sigma^2)\|\mathcal N(\mu_2, \sigma^2)) = \|\mu_1 - \mu_2\|^2/(2\sigma^2)\)</span>。</li>
+<li><strong>Tweedie</strong>：对 <span class="arithmatex">\(p(x_t) = \int\mathcal N(x_t; ax_0, s^2)p(x_0)dx_0\)</span> 求对数梯度，得 <span class="arithmatex">\(s^2\nabla\log p(x_t) = a\,\mathbb E[x_0\mid x_t] - x_t\)</span>。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(q(x_t\mid x_0) = \mathcal N(\sqrt{\bar\alpha_t}x_0, (1 - \bar\alpha_t)I)\)</span></td>
+<td>前向闭式</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde\mu_t\)</span>、<span class="arithmatex">\(\tilde\beta_t = \frac{1 - \bar\alpha_{t-1}}{1 - \bar\alpha_t}\beta_t\)</span></td>
+<td>后验</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbb E\|\epsilon - \epsilon_\theta(x_t, t)\|^2\)</span></td>
+<td>简化损失</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\epsilon_\theta = -\sqrt{1 - \bar\alpha_t}\nabla\log p_t\)</span></td>
+<td>噪声 ↔ score</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(x_s = \sqrt{\bar\alpha_s}\hat x_0 + \sqrt{1 - \bar\alpha_s}\epsilon_\theta\)</span></td>
+<td>DDIM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch27_diffusion_derivation.py</code>，配套测试 <code>tests/test_ch27.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch27_diffusion_derivation.py  
+uv run pytest tests/test_ch27.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 前向</td>
+<td>ᾱ_t</td>
+<td><code>abar(500)</code></td>
+<td>0.078587</td>
+</tr>
+<tr>
+<td>第二步 后验</td>
+<td>c₀、c_t、β̃</td>
+<td><code>posterior_coef(2)</code></td>
+<td>0.5453、0.4547</td>
+</tr>
+<tr>
+<td>第三步 权重</td>
+<td>w_t</td>
+<td><code>eps_weight(1)</code></td>
+<td>0.5001</td>
+</tr>
+<tr>
+<td>第四步 Tweedie</td>
+<td>两种算法</td>
+<td><code>tweedie_x0(1.5, 100)</code></td>
+<td>1.7148</td>
+</tr>
+<tr>
+<td>第五步 DDIM</td>
+<td>跳步</td>
+<td><code>ddim(10)</code></td>
+<td>标准差 0.3685</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">return np.sqrt(ab1) * b / (1 - ab), np.sqrt(a) * (1 - ab1) / (1 - ab), (1 - ab1) * b / (1 - ab)   # 后验
+x0 = (x - np.sqrt(1 - abar(t)) * e) / np.sqrt(abar(t))                                           # ε → x̂₀
+x = np.sqrt(abar(s)) * x0 + np.sqrt(1 - abar(s)) * e                                            # DDIM 跳到 s
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>下标从 1 开始</strong>：<code>abar(t)</code> 取 <code>ABAR[t − 1]</code>，并约定 ᾱ₀ = 1；DDIM 最后一步跳到 s = 0 时就是直接输出 x̂₀。</li>
+<li><strong>"完美网络"是解析式</strong>：数据是高斯，<code>eps_hat</code> 直接用精确 score 算，所以 DDIM 的误差全部来自步数（离散化），不是网络。</li>
+<li><strong>时间点取整</strong>：<code>np.linspace(T, 0, steps + 1).round()</code>，步数不整除 1000 时时间间隔不完全相等。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 β 调度换成余弦调度（Improved DDPM），重画第三步的 w_t 表。</li>
+<li>给 DDIM 加上 η &gt; 0（每步加一点噪声），看 10 步时的标准差怎么变。</li>
+</ol><nav class="pager"><a href="26-trajopt-mpc.html">← 第 26 章 · 轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="28-flow-matching.html">第 28 章 · Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 30 章 · 泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html" class="cur"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="30-banach-hilbert-rkhs">第 30 章 · 泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</h1><div class="run"><a class="btn" href="../animations/30-functional-analysis.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch30_functional_analysis.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch30_functional_analysis.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch30_functional_analysis.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：把"函数"当成"向量"有什么用？同一串函数为什么用一种范数看收敛、换一种就不收敛？Banach 空间、Hilbert 空间多了什么？积分算子的"特征值"是什么？为什么 Bellman 迭代一定收敛？核方法为什么能在无穷维空间里做回归？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/29-measure-probability.html">第 29 章 测度论概率入门</a> · 下一章：<a href="../lessons/31-manifold-optimization.html">第 31 章 微分几何与流形优化</a><br />
+对应原文：Hunter &amp; Nachtergaele《Applied Analysis》<code>math-and-eval-stats/materials/text/books/hunter-nachtergaele-applied-analysis/</code>：第 3 章压缩映射定理（ch3.txt 转录乱码，按 PDF 读）、第 5 章 Banach 空间（ch5.txt：§5.1 L20 起、例 5.3–5.4 L44–L51；§5.2 有界线性映射 L213；§5.4 有限维 Banach 空间 L774）、第 6 章 Hilbert 空间（ch6.txt 乱码，按 PDF 读）、第 8 章 Hilbert 空间上的有界算子（ch8.txt：§8.1 正交投影 L15、§8.4 自伴算子 L487）<br />
+本章缩写：‖·‖ = 范数（向量或函数的"长度"）；L² = 平方可积函数空间，‖f‖₂ = (∫f²)^{1/2}；sup 范数 ‖f‖∞ = max|f|；⟨f, g⟩ = 内积；RKHS = Reproducing Kernel Hilbert Space（再生核 Hilbert 空间）；k(x, y) = 核函数；λ（本章第六步）= 岭回归的正则化系数。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：范数：同一串函数，换把尺子，收敛与否就不一样（2026-11-25）</h3>
+<p><strong>类比：评价两张照片差多少。</strong> 可以看"最离谱的那个像素差多少"（sup 范数），也可以看"所有像素差的平方和"（L² 范数）。一张只有一个坏点的照片，前一种说"差很多"，后一种说"几乎一样"。</p>
+<p><strong>例子</strong>：f_n(x) = xⁿ 在 [0, 1] 上：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>sup 范数</th>
+<th>L² 范数 1/√(2n + 1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0.5774</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>0.2182</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1</td>
+<td>0.0705</td>
+</tr>
+</tbody>
+</table>
+<p>L² 下 f_n → 0；sup 范数下不收敛到 0（靠近 x = 1 那一小段一直是 1）。有限维空间里所有范数都等价（H&amp;N §5.4，L774），无穷维里不等价：<strong>说"收敛"必须说清用哪个范数</strong>。</p>
+<p><img alt="xⁿ 的两种范数" src="../figures/30-functional-analysis-norms.png" />
+<em>图 30-1 · xⁿ 在 n = 1、5、20、100 时的曲线；曲线下的“平方面积”越来越小（L² → 0），但每条在 x = 1 处都碰到 1（sup 范数恒为 1）</em></p>
+<p><strong>在哪用</strong>：图像生成用 L² 损失、对抗鲁棒性看 L∞ 扰动、最优传输（第 33 章）用 Wasserstein 距离，都是在选"尺子"。</p>
+<p><strong>一句话</strong>：函数也是向量，但无穷维里范数不等价；收敛、误差、鲁棒性都要先说用哪把尺子。</p>
+<h3 id="banach-2026-11-25">第二步：完备性：Banach 空间（2026-11-25）</h3>
+<p><strong>类比：有理数轴上有"洞"。</strong> 1, 1.4, 1.41, 1.414, … 越挨越近（Cauchy 序列），但极限 √2 不在有理数里。完备 = 没有洞。</p>
+<p><strong>Banach 空间</strong> = 完备的赋范空间（H&amp;N 定义 5.1，L25）。例子：[a, b] 上的连续函数配 sup 范数是 Banach 空间（例 5.3，L44–L47）；可微函数配 sup 范数就不是（例 5.4，L49–L51：可微函数的一致极限不一定可微），连续函数配 L² 范数也不是（下面的例子）。</p>
+<p><strong>例子</strong>：连续函数 <span class="arithmatex">\(f_k(x) = 1/(1 + e^{-k(x - 0.5)})\)</span> 越来越陡：</p>
+<table>
+<thead>
+<tr>
+<th>陡度 k</th>
+<th>10</th>
+<th>100</th>
+<th>1000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>到阶跃函数的 L² 距离</td>
+<td>0.1965</td>
+<td>0.0622</td>
+<td>0.0197</td>
+</tr>
+</tbody>
+</table>
+<p>这串连续函数在 L² 下越挨越近，极限却是不连续的阶跃函数：连续函数空间在 L² 下"有洞"，要把它补全成 L²。</p>
+<p><strong>为什么关心</strong>：很多存在性定理（最优解存在、迭代有极限）都要求完备；"神经网络能逼近某个函数"讨论的也是在哪个完备空间里逼近。</p>
+<p><strong>一句话</strong>：Banach 空间 = 完备的赋范空间，Cauchy 序列一定有极限；同一个函数集合换范数可能就不完备。</p>
+<h3 id="hilbert-2026-11-25">第三步：Hilbert 空间：有内积，就有角度、投影和正交展开（2026-11-25）</h3>
+<p><strong>Hilbert 空间</strong> = 内积诱导范数的 Banach 空间（如 L²：⟨f, g⟩ = ∫fg）。有了内积，就有正交、投影（H&amp;N §8.1，L15）、正交基展开、Parseval 等式。</p>
+<p><strong>例子</strong>：[−π, π] 上的方波 sign(x) 展开成正弦级数 <span class="arithmatex">\(\frac4\pi\sum_k\frac{\sin((2k - 1)x)}{2k - 1}\)</span>：</p>
+<table>
+<thead>
+<tr>
+<th>前几项</th>
+<th>L² 误差²</th>
+<th>Parseval 算的剩余能量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1.1902</td>
+<td>1.1902</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.2538</td>
+<td>0.2538</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.0509</td>
+<td>0.0509</td>
+</tr>
+</tbody>
+</table>
+<p>Parseval：总能量 = 各系数平方和；截断误差 = 没用上的系数的平方和。这就是"用前 k 个主成分 / 奇异向量逼近"的无穷维版本（第 12 章 SVD）。</p>
+<p><img alt="方波的 Fourier 逼近" src="../figures/30-functional-analysis-fourier.png" />
+<em>图 30-2 · 灰：方波；蓝、橙、绿：前 1、5、25 项；跳变处的过冲（Gibbs 现象）不消失，但 L² 误差趋于 0</em></p>
+<p><strong>一句话</strong>：Hilbert 空间有内积，于是有投影和正交展开；截断误差 = 丢掉的系数平方和（Parseval）。</p>
+<h3 id="2026-11-25_1">第四步：算子与谱：积分算子也有特征值（2026-11-25）</h3>
+<p><strong>类比：矩阵是"有限维的函数到函数的映射"，积分算子是"无穷维的矩阵"。</strong></p>
+<div class="arithmatex">\[(Kf)(x) = \int_0^1k(x, y)f(y)\,dy\]</div>
+<p>对称核给出自伴算子（H&amp;N §8.4，L487），有实特征值和正交特征函数，和对称矩阵的谱分解一样。</p>
+<p><strong>例子</strong>（k(x, y) = min(x, y)，布朗运动的协方差核）：离散成 1000×1000 矩阵求特征值，和解析值 <span class="arithmatex">\(1/((j - \tfrac12)^2\pi^2)\)</span> 对照：</p>
+<table>
+<thead>
+<tr>
+<th>j</th>
+<th>离散</th>
+<th>解析</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.4053</td>
+<td>0.4053</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.0450</td>
+<td>0.0450</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.0162</td>
+<td>0.0162</td>
+</tr>
+</tbody>
+</table>
+<p>特征值衰减得很快：布朗运动的路径几乎全部"能量"在前几个特征函数上（Karhunen–Loève 展开，就是函数版的 PCA）。</p>
+<p><strong>一句话</strong>：积分算子是无穷维矩阵，对称核有谱分解；特征值的衰减速度决定"用几个基函数就够"。</p>
+<h3 id="banach-2026-11-25_1">第五步：Banach 不动点定理（2026-11-25）</h3>
+<p><strong>定理</strong>（H&amp;N 第 3 章）：完备度量空间上的压缩映射 T（‖Tx − Ty‖ ≤ q‖x − y‖，q &lt; 1）有唯一不动点，从任何起点迭代都以 qᵏ 的速度收敛。第 23 章的值迭代就是它的一个例子（q = γ）。</p>
+<p><strong>例子</strong>：x ← cos x。在 [cos 1, 1] 上 |cos′x| = |sin x| ≤ sin 1 ≈ 0.84 &lt; 1，是压缩映射：</p>
+<ul>
+<li>不动点 0.739085；相邻差 0.46、0.317、0.203、0.139…，第 20 次 2.47 × 10⁻⁴；</li>
+<li>后期每次的比值 ≈ 0.6736 = |sin x*|：收敛速度由不动点处的导数决定。</li>
+</ul>
+<p><strong>为什么要"完备"</strong>：迭代序列是 Cauchy 序列，完备才保证极限在空间里（第二步）。</p>
+<p><strong>一句话</strong>：压缩映射在完备空间里有唯一不动点，迭代按 qᵏ 收敛；值迭代、Picard 迭代、很多"反复套直到不动"的算法都靠它。</p>
+<h3 id="rkhs-n-2026-11-25">第六步：RKHS 与核方法：表示定理把无穷维问题变成 n 维（2026-11-25）</h3>
+<p><strong>RKHS</strong>：一个函数的 Hilbert 空间，里面"在 x 点取值"可以写成内积：<span class="arithmatex">\(f(x) = \langle f, k(x, \cdot)\rangle\)</span>（再生性质）。每个正定核 k（如高斯核）对应一个 RKHS。</p>
+<p><strong>表示定理</strong>：<span class="arithmatex">\(\min_f\sum_i(y_i - f(x_i))^2 + \lambda\|f\|_H^2\)</span> 的解一定是 <span class="arithmatex">\(f = \sum_i\alpha_ik(x_i, \cdot)\)</span>，<span class="arithmatex">\(\alpha = (K + \lambda I)^{-1}y\)</span>。在无穷维空间里优化，答案只需要 n 个系数。</p>
+<p><strong>例子</strong>（20 个点，y = sin 2πx + 0.1 噪声，高斯核宽 0.2，λ = 10⁻³）：训练均方误差 0.0022，和真函数 sin 2πx 的均方误差 0.0063。</p>
+<p><strong>在哪用</strong>：高斯过程回归（就是核岭回归加上不确定性）、SVM、注意力 = 核平滑（第 37 章）、神经正切核（无限宽网络的训练等价于核回归）。</p>
+<p><strong>场景代码</strong>：scikit-learn 的核岭回归（真实库调用；本书环境没装 sklearn，没跑过）：</p>
+<pre><code class="language-python">from sklearn.kernel_ridge import KernelRidge
+model = KernelRidge(kernel=&quot;rbf&quot;, gamma=1 / (2 * 0.2 ** 2), alpha=1e-3).fit(x[:, None], y)
+y_hat = model.predict(grid[:, None])      # 内部就是 α = (K + λI)⁻¹y，再算 Σ α_i k(x_i, x)
+</code></pre>
+<p><strong>一句话</strong>：RKHS 里取值是内积，表示定理保证最优解是 n 个核函数的组合，于是无穷维回归只要解一个 n×n 线性方程。</p>
+<h3 id="_2">动画演示：范数之争与不动点迭代</h3>
+<p><img alt="泛函分析入门" src="../animations/30-functional-analysis.gif" /></p>
+<p>可交互版：<a href="../animations/30-functional-analysis.html">animations/30-functional-analysis.html</a>（下拉切换"xⁿ 的两种范数 / Fourier 逼近 / cos 不动点"；滑块调 n 或项数）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>xⁿ：n 变大，曲线贴向横轴，右上角 L² 范数变小但 sup 范数一直是 1（第一步）；</li>
+<li>Fourier：项数加多，蓝线越来越贴方波，跳变处的过冲始终在（第三步）；</li>
+<li>cos 不动点：蛛网图，折线在 y = cos x 和 y = x 之间来回，收向交点（第五步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：在 R² 里，‖x‖∞ ≤ ‖x‖₂ ≤ c‖x‖∞ 的最小常数 c 是多少？在 Rⁿ 里呢？这说明有限维和无穷维有什么不同？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：f(x) = x 在 [−π, π] 上的 L² 范数平方是多少？如果只保留它 Fourier 展开的第一项 2 sin x，剩余能量是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：x ← 0.5x + 1 是压缩映射吗？压缩系数是多少？从 x = 0 出发，要几步才能让误差小于 10⁻³？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>函数也是向量，无穷维里尺子不等价；<br />
+完备才没有洞，Cauchy 序列有归宿；<br />
+有内积就有投影，截断误差是丢掉的系数平方和；<br />
+积分算子是无穷维矩阵，特征值衰减定维数；<br />
+压缩映射唯一不动点，核方法只要 n 个系数。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST102（范数不等价、Banach 空间与完备性）、ST103（Hilbert 空间、Parseval、积分算子的谱）、ST104（Banach 不动点定理；RKHS 与表示定理）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Hunter &amp; Nachtergaele</td>
+<td>第 5 章 §5.1–5.4（ch5.txt L20–L918）</td>
+<td>Banach 空间、有界线性映射</td>
+</tr>
+<tr>
+<td>★ Hunter &amp; Nachtergaele</td>
+<td>第 6 章（读 PDF）、第 8 章 §8.1、§8.4（ch8.txt L15、L487）</td>
+<td>Hilbert 空间、投影、自伴算子</td>
+</tr>
+<tr>
+<td>Hunter &amp; Nachtergaele</td>
+<td>第 3 章（读 PDF）</td>
+<td>压缩映射定理的证明</td>
+</tr>
+<tr>
+<td><a href="../lessons/23-mdp-bellman.html">第 23 章 MDP 与 Bellman</a></td>
+<td>第三步</td>
+<td>不动点定理在 RL 里的用法</td>
+</tr>
+<tr>
+<td><a href="../lessons/12-svd-least-squares.html">第 12 章 SVD 与最小二乘</a></td>
+<td>全章</td>
+<td>有限维的投影与截断</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>范数等价</strong>：有限维中 <span class="arithmatex">\(c_1\|x\|_a \le \|x\|_b \le c_2\|x\|_a\)</span>；无穷维中不一定存在这样的常数。</li>
+<li><strong>投影定理</strong>：Hilbert 空间中闭子空间 M 上，每个 x 有唯一最近点 Px，且 x − Px ⊥ M。</li>
+<li><strong>Parseval</strong>：标准正交基 {e_k} 下 <span class="arithmatex">\(\|f\|^2 = \sum|\langle f, e_k\rangle|^2\)</span>。</li>
+<li><strong>Mercer 定理</strong>：连续正定核 <span class="arithmatex">\(k(x, y) = \sum\lambda_j\phi_j(x)\phi_j(y)\)</span>，λ_j、φ_j 是积分算子的特征值、特征函数。</li>
+<li><strong>表示定理</strong>：任何 f 都能写成"核函数张成的部分 + 正交补"，正交补部分不影响训练点上的取值、只增加范数，所以最优解里它为 0。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\|f\|_2 = (\int f^2)^{1/2}\)</span>，<span class="arithmatex">\(\|f\|_\infty = \max\lvert f\rvert\)</span></td>
+<td>两种常用范数</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\|f\|^2 = \sum_k\lvert c_k\rvert^2\)</span></td>
+<td>Parseval</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((Kf)(x) = \int k(x, y)f(y)dy\)</span></td>
+<td>积分算子</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\|Tx - Ty\| \le q\|x - y\|\)</span>，q &lt; 1</td>
+<td>压缩映射</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(f = \sum\alpha_ik(x_i, \cdot)\)</span>，<span class="arithmatex">\(\alpha = (K + \lambda I)^{-1}y\)</span></td>
+<td>表示定理 / 核岭回归</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch30_functional_analysis.py</code>，配套测试 <code>tests/test_ch30.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch30_functional_analysis.py  
+uv run pytest tests/test_ch30.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 范数</td>
+<td>1/√(2n + 1)</td>
+<td><code>xn_norms(10)</code></td>
+<td>0.2182</td>
+</tr>
+<tr>
+<td>第二步 完备性</td>
+<td>L² 距离</td>
+<td><code>step_gap(1000)</code></td>
+<td>0.0197</td>
+</tr>
+<tr>
+<td>第三步 Parseval</td>
+<td>误差 = 剩余能量</td>
+<td><code>square_wave_error(5)</code></td>
+<td>0.2538</td>
+</tr>
+<tr>
+<td>第四步 谱</td>
+<td>离散特征值</td>
+<td><code>brownian_kernel_eigs()</code></td>
+<td>0.4053, 0.0450, 0.0162</td>
+</tr>
+<tr>
+<td>第五步 不动点</td>
+<td>x ← cos x</td>
+<td><code>cos_fixed_point()</code></td>
+<td>0.739085</td>
+</tr>
+<tr>
+<td>第六步 RKHS</td>
+<td>(K + λI)⁻¹y</td>
+<td><code>kernel_ridge()</code></td>
+<td>0.0022、0.0063</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">np.linalg.eigvalsh(np.minimum.outer(x, x) / m)                  # 积分算子 → 矩阵（中点法，每格权重 1/m）
+alpha = np.linalg.solve(k(x, x) + lam * np.eye(n), y)            # 表示定理的系数
+fg = k(g, x) @ alpha                                             # f(x) = Σ α_i k(x_i, x)
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>积分要乘网格宽度</strong>：离散化积分算子时矩阵要除以 m（每个格子宽 1/m），否则特征值会大 m 倍。</li>
+<li><strong>L² 距离用 <code>np.trapezoid</code> 在 20 万个点上数值积分</strong>：阶跃函数在 0.5 处不连续，网格要够细，否则 k = 1000 的结果不准。</li>
+<li><strong>Parseval 的剩余能量</strong>：方波的总能量 ∫sign² = 2π，每项 b_k sin 的能量是 π b_k²，代码用这两个数相减。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把核岭回归的 λ 改成 1 和 10⁻⁸，看欠拟合和过拟合。</li>
+<li>把核换成 k(x, y) = min(x, y) − xy（布朗桥），离散特征值和 1/(j²π²) 比一比。</li>
+</ol><nav class="pager"><a href="29-measure-probability.html">← 第 29 章 · 测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="31-manifold-optimization.html">第 31 章 · 微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

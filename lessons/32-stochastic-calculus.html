@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 32 章 · 随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html" class="cur"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="32-ito-ito-euler-maruyamafokker-planck-sde-ode">第 32 章 · 随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</h1><div class="run"><a class="btn" href="../animations/32-stochastic-calculus.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch32_stochastic_calculus.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch32_stochastic_calculus.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch32_stochastic_calculus.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：为什么 (dW)² = dt？Itô 积分为什么一定要取左端点？Itô 引理比普通链式法则多出来的那一项是什么？SDE 怎么数值求解、误差多大？Fokker-Planck 方程描述什么？扩散模型的"反向 SDE"和"概率流 ODE"是怎么来的？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/31-manifold-optimization.html">第 31 章 微分几何与流形优化</a> · 下一章：<a href="../lessons/33-optimal-transport.html">第 33 章 最优传输</a><br />
+对应原文：Särkkä &amp; Solin《Applied Stochastic Differential Equations》<code>math-and-eval-stats/materials/text/books/sarkka-solin-applied-sde.txt</code>（布朗运动 L1502–L1508、Euler-Maruyama L2231、§4.2 Itô 公式 L2572–L2618、§5.2 Fokker-Planck-Kolmogorov 方程 L3308–L3327）；Score SDE <code>diffusion-models/materials/text/papers/score-sde-2011.13456.txt</code>（反向 SDE 式 (6) L249–L252、概率流 ODE 式 (13) L448–L450）<br />
+本章缩写：SDE = Stochastic Differential Equation（随机微分方程）；W_t = 布朗运动（维纳过程）；EM = Euler-Maruyama（两位数学家的姓：SDE 的欧拉法）；FP = Fokker-Planck（两位物理学家的姓）；GBM = Geometric Brownian Motion（几何布朗运动）；f、g = 漂移系数、扩散系数；score = ∇log p_t；PF ODE = probability flow ODE（概率流常微分方程）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="dw2-dt2026-11-25">第一步：布朗运动：(dW)² = dt（2026-11-25）</h3>
+<p><strong>类比：醉汉走路。</strong> 每一小步方向随机、步长按 √dt 缩放；走 t 时间后离起点的方差是 t（Särkkä &amp; Solin L1502–L1508）。</p>
+<p>布朗运动 W_t：W₀ = 0；增量独立；<span class="arithmatex">\(W_{t+h} - W_t \sim \mathcal N(0, h)\)</span>。增量的平方 <span class="arithmatex">\((\Delta W)^2\)</span> 的期望是 h，方差 2h²，加起来</p>
+<div class="arithmatex">\[\sum(\Delta W)^2 \to t\quad(\text{二次变差})\]</div>
+<p><strong>例子</strong>（[0, 1] 切成 n 段，2000 条路径）：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>Σ(ΔW)² 的均值</th>
+<th>标准差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>0.9921</td>
+<td>0.4435</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1.0024</td>
+<td>0.1377</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>0.9995</td>
+<td>0.0144</td>
+</tr>
+</tbody>
+</table>
+<p>切得越细，Σ(ΔW)² 越确定地等于 t：这就是速记法 (dW)² = dt 的意思。普通光滑函数的 Σ(Δx)² → 0；布朗运动太"毛"了，它的二次变差不为 0。</p>
+<p><strong>一句话</strong>：布朗运动的增量 ~ N(0, dt)，平方加起来确定地等于时间，(dW)² = dt 是一切 Itô 计算的起点。</p>
+<h3 id="ito-2026-11-25">第二步：Itô 积分：为什么取左端点（2026-11-25）</h3>
+<p><span class="arithmatex">\(\int_0^TW\,dW\)</span> 按 Riemann 和算，取左端点还是中点结果不同（普通积分不会这样，这里因为第一步的二次变差不为 0）：</p>
+<table>
+<thead>
+<tr>
+<th>取法</th>
+<th>极限</th>
+<th>期望</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>左端点 <span class="arithmatex">\(\sum W_k\Delta W_k\)</span>（Itô）</td>
+<td><span class="arithmatex">\((W_T^2 - T)/2\)</span></td>
+<td>0</td>
+</tr>
+<tr>
+<td>中点 <span class="arithmatex">\(\sum\frac{W_k + W_{k+1}}2\Delta W_k\)</span>（Stratonovich）</td>
+<td><span class="arithmatex">\(W_T^2/2\)</span></td>
+<td>T/2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>（n = 1000，4000 条路径，T = 1）：左端点和的均值 0.0167（理论 0），中点和的均值 0.5165（理论 0.5）；左端点和与 (W_T² − T)/2 的最大差 0.0931（只差离散化误差）。</p>
+<p><strong>为什么取左端点</strong>：左端点 W_k 只用到"现在之前"的信息，不偷看未来（第 29 章的 σ-代数 F_t）。这样 Itô 积分的期望是 0（是鞅），对应"用当前状态决定下一步"的物理和算法过程。</p>
+<p><strong>一句话</strong>：Itô 积分取左端点、不偷看未来，期望为 0；代价是链式法则要改（下一步）。</p>
+<h3 id="ito-2026-11-25_1">第三步：Itô 引理：链式法则多一项（2026-11-25）</h3>
+<p>对 <span class="arithmatex">\(dX = f\,dt + g\,dW\)</span> 和光滑函数 φ，泰勒展开到二阶，用 (dW)² = dt、dt·dW = 0、(dt)² = 0（Särkkä &amp; Solin §4.2，L2572–L2618）：</p>
+<div class="arithmatex">\[d\varphi(X) = \varphi'(X)\,dX + \tfrac12\varphi''(X)\,g^2\,dt\]</div>
+<p>多出来的 ½φ″g² dt 就是普通链式法则没有的项。</p>
+<p><strong>例子 1</strong>：<span class="arithmatex">\(E[e^{W_1}]\)</span>。用普通链式法则会以为 <span class="arithmatex">\(e^W\)</span> 的期望和 <span class="arithmatex">\(e^{E[W]} = 1\)</span> 一样；Itô 引理给 <span class="arithmatex">\(d e^W = e^W dW + \frac12e^Wdt\)</span>，期望按 e^{t/2} 增长。40 万样本：1.6508（理论 e^{0.5} = 1.6487）。</p>
+<p><strong>例子 2</strong>：几何布朗运动 <span class="arithmatex">\(dX = \mu X\,dt + \sigma X\,dW\)</span>。对 log X 用 Itô 引理，得精确解 <span class="arithmatex">\(X_T = \exp((\mu - \sigma^2/2)T + \sigma W_T)\)</span>（中间那个 −σ²/2 就是多出来的项）。拿它检验 Euler-Maruyama（<span class="arithmatex">\(X \leftarrow X + fh + g\Delta W\)</span>，Särkkä &amp; Solin L2231）：</p>
+<table>
+<thead>
+<tr>
+<th>步数</th>
+<th>10</th>
+<th>100</th>
+<th>1000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>强误差 E|X^EM − X|</td>
+<td>0.1807</td>
+<td>0.0618</td>
+<td>0.0194</td>
+</tr>
+</tbody>
+</table>
+<p>步数 ×100，误差约 ÷10：EM 的强收敛阶是 1/2（ODE 的欧拉法是 1 阶，第 22 章）。</p>
+<p><strong>一句话</strong>：Itô 引理 = 链式法则 + ½φ″g² dt；EM 是 SDE 的欧拉法，强收敛阶只有 1/2。</p>
+<h3 id="fokker-planck2026-11-25">第四步：Fokker-Planck：密度怎么随时间流动（2026-11-25）</h3>
+<p><strong>类比：一滴墨水在流动的水里：漂移项把它整体冲走，扩散项把它化开。</strong></p>
+<p>SDE 描述单个粒子，Fokker-Planck 方程描述整个密度（Särkkä &amp; Solin §5.2，L3308–L3327）：</p>
+<div class="arithmatex">\[\frac{\partial p}{\partial t} = -\frac{\partial}{\partial x}(fp) + \frac12\frac{\partial^2}{\partial x^2}(g^2p)\]</div>
+<p>没有扩散（g = 0）时就是第 17 章的连续性方程。</p>
+<p><strong>例子</strong>（dX = 1·dt + 0.5·dW，X₀ = 0，跑到 t = 2）：FP 方程的解是 N(μt, σ²t) = N(2, 0.5)；2 万条 EM 路径的均值 2.0034、方差 0.4984。</p>
+<p><img alt="布朗运动样本路径与 Fokker-Planck 的密度" src="../figures/32-stochastic-calculus-paths.png" />
+<em>图 32-1 · 灰线是 dX = dt + 0.5dW 的 30 条样本路径；蓝色是 Fokker-Planck 解 N(t, 0.25t) 在 t = 0.5、1、2 处的 ±2σ 范围</em></p>
+<p><strong>一句话</strong>：SDE 管粒子，Fokker-Planck 管密度：漂移搬运、扩散抹开；去掉扩散就是连续性方程。</p>
+<h3 id="sde-ode2026-11-25">第五步：反向 SDE 与概率流 ODE（2026-11-25）</h3>
+<p><strong>反向 SDE</strong>（Anderson 1982，Score SDE 式 (6)，L249–L252）：前向 <span class="arithmatex">\(dx = f\,dt + g\,dW\)</span> 的时间反演是</p>
+<div class="arithmatex">\[dx = [f - g^2\nabla\log p_t(x)]\,dt + g\,d\bar W\]</div>
+<p>（时间从 T 往 0 走）。只要知道每个时刻的 score ∇log p_t，就能把噪声"倒放"回数据：这就是扩散模型的采样（第 27 章的 ε 预测就是 score 预测）。</p>
+<p><strong>概率流 ODE</strong>（式 (13)，L448–L450）：</p>
+<div class="arithmatex">\[\frac{dx}{dt} = f - \tfrac12g^2\nabla\log p_t(x)\]</div>
+<p>没有噪声，但每个时刻的边际分布和 SDE 一样（它的 Fokker-Planck 方程和 SDE 的相同）。DDIM、DPM-Solver 解的就是它。</p>
+<p><strong>例子</strong>（数据 N(0, 0.5²)，前向 dX = dW 跑到 T = 1，于是 p_t = N(0, 0.25 + t)、score = −x/(0.25 + t) 精确已知；从 N(0, 1.25) 往回走 500 步）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>t = 0 时的样本标准差（目标 0.5）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>反向 SDE</td>
+<td>0.5057</td>
+</tr>
+<tr>
+<td>概率流 ODE</td>
+<td>0.5040</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="反向 SDE 与概率流 ODE 的轨迹" src="../figures/32-stochastic-calculus-reverse.png" />
+<em>图 32-2 · 从 t = 1 往回走到 0：左边反向 SDE 的轨迹抖动、会交叉；右边概率流 ODE 的轨迹光滑、互不交叉；两边终点的分布相同</em></p>
+<p><strong>场景代码</strong>：Score SDE 式的反向采样一步（PyTorch 写法，示意结构；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">for t in torch.linspace(T, 0, steps)[:-1]:
+    s = score_net(x, t)                                   # ≈ ∇log p_t(x)，等价于 −ε_θ/√(1 − ᾱ)
+    x = x + (g(t) ** 2 * s - f(x, t)) * dt                # 反向 SDE 的漂移（往回走）
+    x = x + g(t) * math.sqrt(dt) * torch.randn_like(x)    # 概率流 ODE 去掉这一行、漂移里的 g² 乘 ½
+</code></pre>
+<p><strong>一句话</strong>：有了 score，前向加噪的 SDE 可以倒着跑（反向 SDE），也可以换成没有噪声、边际相同的概率流 ODE；扩散模型采样就是二选一。</p>
+<h3 id="_2">动画演示：粒子与密度</h3>
+<p><img alt="随机微积分" src="../animations/32-stochastic-calculus.gif" /></p>
+<p>可交互版：<a href="../animations/32-stochastic-calculus.html">animations/32-stochastic-calculus.html</a>（下拉切换"前向扩散 / 反向 SDE / 概率流 ODE"；滑块调时间 t）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>前向扩散：一群粒子从 N(0, 0.5²) 出发随机游走，右边的直方图越来越宽（第一、四步）；</li>
+<li>反向 SDE：从宽的分布往回走，粒子一边抖一边收拢；</li>
+<li>概率流 ODE：同样的起点，粒子沿光滑曲线收拢，最后直方图和反向 SDE 一样（第五步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：把 [0, T] 切成 n 段，Σ|ΔW|（一阶变差，“路径总长度”）的期望是多少？n → ∞ 时会怎样？这说明布朗路径有什么性质？（用 Z ~ N(0, 1) 时 E|Z| = √(2/π)）</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：用 Itô 引理求 d(W_t²)，并由此说明 E[W_t²] = t。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：前向 dX = dW，数据是 N(0, 1)。写出 p_t、score 和概率流 ODE；从 t = T 的 x_T 出发，概率流 ODE 的解析解是什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>醉汉走路方差等于时间，(dW)² 等于 dt；<br />
+Itô 取左端不偷看，期望为零；<br />
+链式法则多半个二阶导乘 g²；EM 强阶只一半；<br />
+SDE 管粒子，FP 管密度，漂移搬、扩散抹；<br />
+有了 score 能倒放：反向 SDE 带噪声，概率流 ODE 不带。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST108（布朗运动与二次变差）、ST109（Itô 积分与 Itô 引理；EM 的收敛阶）、ST110（Fokker-Planck 方程）、ST111（反向 SDE 与概率流 ODE）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Särkkä &amp; Solin</td>
+<td>第 2–4 章（布朗运动、Itô 积分、§4.2 Itô 公式 L2572）</td>
+<td>本章前三步</td>
+</tr>
+<tr>
+<td>★ Särkkä &amp; Solin</td>
+<td>第 5 章（§5.2 Fokker-Planck L3308）、第 8 章（数值解）</td>
+<td>密度方程与 SDE 数值方法</td>
+</tr>
+<tr>
+<td>★ Score SDE（Song 2021）</td>
+<td>§2–3（式 (6) L251）、§4.3（式 (13) L448）</td>
+<td>反向 SDE、概率流 ODE</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/diffusion-from-scratch/lessons/10-sde.html">《从零读懂扩散模型》第 10 章 SDE</a></td>
+<td>全章</td>
+<td>扩散模型的 SDE 统一视角</td>
+</tr>
+<tr>
+<td><a href="../lessons/17-generative-math.html">第 17 章 生成模型的数学</a></td>
+<td>第五步</td>
+<td>连续性方程</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>Itô 乘法表</strong>：dt·dt = 0，dt·dW = 0，dW·dW = dt。</li>
+<li><strong>Itô 等距</strong>：<span class="arithmatex">\(\mathbb E[(\int g\,dW)^2] = \mathbb E\int g^2dt\)</span>。</li>
+<li><strong>EM 的收敛阶</strong>：强阶（路径误差）1/2，弱阶（期望误差）1；Milstein 格式加一项 ½gg′((ΔW)² − h) 可把强阶提到 1。</li>
+<li><strong>反向 SDE 的来源</strong>：对前向 FP 方程做时间反演，把扩散项拆成"往回的扩散 + 由 score 给出的漂移修正"。</li>
+<li><strong>概率流 ODE 的边际相同</strong>：把 FP 方程里的 ½g²∂²p 写成 −∂(½g²p∇log p)，扩散项就变成了漂移项。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\sum(\Delta W)^2 \to t\)</span></td>
+<td>二次变差</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\int_0^TW\,dW = (W_T^2 - T)/2\)</span></td>
+<td>Itô 积分的例子</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(d\varphi = \varphi'dX + \frac12\varphi''g^2dt\)</span></td>
+<td>Itô 引理</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\partial_tp = -\partial_x(fp) + \frac12\partial_x^2(g^2p)\)</span></td>
+<td>Fokker-Planck</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(dx = [f - g^2\nabla\log p_t]dt + g\,d\bar W\)</span></td>
+<td>反向 SDE</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(dx/dt = f - \frac12g^2\nabla\log p_t\)</span></td>
+<td>概率流 ODE</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch32_stochastic_calculus.py</code>，配套测试 <code>tests/test_ch32.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch32_stochastic_calculus.py  
+uv run pytest tests/test_ch32.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 二次变差</td>
+<td>Σ(ΔW)²</td>
+<td><code>quadratic_variation(10000)</code></td>
+<td>0.9995 ± 0.0144</td>
+</tr>
+<tr>
+<td>第二步 Itô vs Strat</td>
+<td>左端 / 中点</td>
+<td><code>ito_vs_strat()</code></td>
+<td>0.0167、0.5165</td>
+</tr>
+<tr>
+<td>第三步 Itô 引理</td>
+<td>E[e^W]</td>
+<td><code>exp_w_mean()</code></td>
+<td>1.6508</td>
+</tr>
+<tr>
+<td>第三步 EM</td>
+<td>强误差</td>
+<td><code>gbm_strong_error(1000)</code></td>
+<td>0.0194</td>
+</tr>
+<tr>
+<td>第四步 FP</td>
+<td>N(μt, σ²t)</td>
+<td><code>drift_bm()</code></td>
+<td>2.0034、0.4984</td>
+</tr>
+<tr>
+<td>第五步 反向</td>
+<td>SDE / ODE</td>
+<td><code>reverse("sde")</code>、<code>reverse("ode")</code></td>
+<td>0.5057、0.5040</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">ito = (w[:, :-1] * dw).sum(axis=1)                                  # 左端点和
+x = x + mu * x * h + sigma * x * dw[:, k]                           # Euler-Maruyama
+exact = np.exp((mu - sigma ** 2 / 2) * t + sigma * dw.sum(axis=1))  # 同一条布朗路径的精确解
+x = x + sc * h + rng.normal(0, np.sqrt(h), reps)                    # 反向 SDE 往回走一步（f = 0、g = 1）
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>强误差要用同一条布朗路径</strong>：EM 和精确解都用同一组 <code>dw</code>，比较的是"同一条路径上"的差；换了随机数就只能比分布（弱误差）。</li>
+<li><strong>往回走时 dt 取正数</strong>：代码让 k 从 n 递减、步长 h &gt; 0，所以反向 SDE 的漂移写成 <code>+ sc * h</code>（前向 f = 0，−g²·score 乘 −dt 变正号）。</li>
+<li><strong>Itô 和 Stratonovich 的差正好是 ½Σ(ΔW)²</strong>：中点和 − 左端点和 = ½Σ(ΔW_k)²，由第一步知道它 → T/2。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>给 <code>gbm_strong_error</code> 加 Milstein 修正项 ½σ²x((ΔW)² − h)，看强误差的收敛阶变成多少。</li>
+<li>把 <code>reverse</code> 的步数从 500 降到 5，反向 SDE 和概率流 ODE 哪个偏得多？</li>
+</ol><nav class="pager"><a href="31-manifold-optimization.html">← 第 31 章 · 微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="33-optimal-transport.html">第 33 章 · 最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

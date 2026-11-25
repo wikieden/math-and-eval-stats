@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>信息几何</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 34 章 · 同一个问题，三种步法</h1>
+<p class="sub">配套讲义：<a href="../lessons/34-information-geometry.html">第 34 章 · 信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a>。拟合硬币：数据正面比例 p̂ = 0.9，从 p = 0.5 出发，最大化平均对数似然。p 坐标的梯度上升、logit 坐标的梯度上升、自然梯度（F⁻¹∇，在 p 坐标里等于 p̂ − p）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">方法</label><select id="md"><option value="0">p 坐标梯度</option><option value="1">logit 坐标梯度</option><option value="2">自然梯度</option></select><label for="k">迭代次数</label><input type="range" id="k" min="0" max="30" step="1" value="0"><span id="kv">0</span><label for="lr">步长</label><input type="range" id="lr" min="0.05" max="1" step="0.05" value="0.05"><span id="lrv">0.05</span></div>
+<p class="note">看点：① 上方参数轴上的点是当前 p，箭头是这一步；下方柱子是对应的伯努利分布，虚线框是目标 0.9 / 0.1；② logit 坐标（步长 0.05）：越接近 0.9 箭头越短，30 步还差得远（要两千多步）；③ 自然梯度把步长调到 1：一步跳到 0.9。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','k','lr'],F=[[0,0,0.05],[0,3,0.05],[0,10,0.05],[0,30,0.05],[1,10,0.05],[1,30,0.05],[2,0,1],[2,1,1]];
+function step(md,p,lr){if(md==0)return Math.min(Math.max(p+lr*(0.9-p)/(p*(1-p)),1e-4),1-1e-4);if(md==1){const e=Math.log(p/(1-p))+lr*(0.9-p);return 1/(1+Math.exp(-e))}return p+lr*(0.9-p)}
+function render(md,k,lr){let p=0.5;const hs=[p];for(let i=0;i<k;i++){p=step(md,p,lr);hs.push(p)}const nx=step(md,p,lr);
+ const X=v=>60+v*560;L(60,90,620,90,'var(--line)',2);[0,0.25,0.5,0.75,1].forEach(v=>{L(X(v),85,X(v),95,'var(--muted)',1);T(String(v),X(v),112,'middle','s')});
+ L(X(0.9),70,X(0.9),100,'var(--bad)',1.5,'4 3');T('p̂ = 0.9',X(0.9),64,'middle','s');hs.forEach(v=>C(X(v),90,3,'var(--muted)',.6));C(X(p),90,7,'var(--accent)',1);if(Math.abs(nx-p)>1e-4)AR(X(p),78,X(nx),78,'var(--warm)',2);
+ const kl=0.9*Math.log(0.9/p)+0.1*Math.log(0.1/(1-p));cap(`${['p 坐标梯度','logit 坐标梯度','自然梯度'][md]}，步长 ${(+lr).toFixed(2)}，${k} 步：p = ${p.toFixed(4)}，KL(p̂ ‖ p) = ${kl.toFixed(5)}`);
+ const base=320,sc=170;[[1-p,0.1,'反面'],[p,0.9,'正面']].forEach((d,i)=>{const x=220+i*160;R(x,base-sc*d[0],90,sc*d[0],'var(--accent)',.7);el('rect',{x,y:base-sc*d[1],width:90,height:sc*d[1],fill:'none',stroke:'var(--bad)','stroke-dasharray':'5 4','stroke-width':1.5},sv);T(d[2]+' '+d[0].toFixed(3),x+45,base+16,'middle','s')})}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

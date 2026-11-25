@@ -2,7 +2,7 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 24 章 · 24 个动画（GIF + 可交互页面）· 57 张静态图 · 85 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 66 章大纲 · 已写 34 章 · 34 个动画（GIF + 可交互页面）· 77 张静态图 · 117 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
 > 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
 
 ## 这本书讲什么
@@ -63,16 +63,16 @@
 | 22 | [数值计算](https://wikieden.github.io/math-and-eval-stats/lessons/22-numerics.html) | Euler / Heun / RK4 与扩散采样步数；logsumexp；float16 / bfloat16；病态问题 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/22-numerics.gif) | ST79–ST82 | ✅ 讲解（练习待作答） |
 | 23 | [MDP 与 Bellman 的完整推导](https://wikieden.github.io/math-and-eval-stats/lessons/23-mdp-bellman.html) | 值函数、Bellman 期望 / 最优方程、压缩映射与值迭代收敛 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/23-mdp-bellman.gif) | ST83–ST85 | ✅ 讲解（练习待作答） |
 | 24 | [策略梯度推导](https://wikieden.github.io/math-and-eval-stats/lessons/24-policy-gradient.html) | 似然比搬梯度；环境项消失；基线不偏降方差；PPO 只截得利侧；GRPO 组内归一化 | [REINFORCE 与基线](https://wikieden.github.io/math-and-eval-stats/animations/24-reinforce-baseline.gif) | ST27–ST30 | ✅ 讲解（练习待作答） |
-| 25 | LQR 与 Riccati | 动态规划推 Riccati、有限 / 无限时域、可控性 | — | — | ⬜ |
-| 26 | 轨迹优化与 MPC | 线性化后写成 QP（稠密 / 稀疏形式）、iLQR 的二阶展开与回传、MPPI 的路径积分推导 | — | — | ⬜ |
-| 27 | 扩散模型推导 | 前向闭式、后验 $q(x_{t-1}\mid x_t,x_0)$、ELBO 到噪声预测损失、DDIM、Tweedie 公式与 score | — | — | ⬜ |
-| 28 | Flow matching 推导 | 概率路径、条件与边际目标等价、rectified flow、π0 动作头的训练与采样 | — | — | ⬜ |
-| 29 | 测度论概率入门 | σ-代数、测度、Lebesgue 积分与期望、密度 = Radon-Nikodym 导数、条件期望、收敛方式与大数定律 / CLT 的严格陈述 | — | — | ⬜ |
-| 30 | 泛函分析入门 | 赋范空间、Banach / Hilbert 空间、算子与谱、Banach 不动点定理（Bellman 收敛）、再生核 Hilbert 空间（RKHS）与核方法 | — | — | ⬜ |
-| 31 | 微分几何与流形优化 | 流形、切空间、黎曼度量、测地线、黎曼梯度与收缩映射（retraction）、和第 19 章李群接上 | — | — | ⬜ |
-| 32 | 随机微积分 | 布朗运动、Itô 积分与 Itô 引理、SDE 的数值解、Fokker-Planck 方程、反向时间 SDE、概率流 ODE | — | — | ⬜ |
-| 33 | 最优传输 | Monge / Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输与 flow matching 的联系 | — | — | ⬜ |
-| 34 | 信息几何 | Fisher 信息、自然梯度、KL 的局部二阶近似、TRPO / PPO 的信任域视角 | — | — | ⬜ |
+| 25 | [LQR 与 Riccati](https://wikieden.github.io/math-and-eval-stats/lessons/25-lqr-riccati.html) | 动态规划推 Riccati、有限 / 无限时域、可控性 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/25-lqr-riccati.gif) | ST86–ST88 | ✅ 讲解（练习待作答） |
+| 26 | [轨迹优化与 MPC](https://wikieden.github.io/math-and-eval-stats/lessons/26-trajopt-mpc.html) | 线性化后写成 QP（稠密 / 稀疏形式）、iLQR 的二阶展开与回传、MPPI 的路径积分推导 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/26-trajopt-mpc.gif) | ST89–ST91 | ✅ 讲解（练习待作答） |
+| 27 | [扩散模型推导](https://wikieden.github.io/math-and-eval-stats/lessons/27-diffusion-derivation.html) | 前向闭式、后验 $q(x_{t-1}\mid x_t,x_0)$、ELBO 到噪声预测损失、DDIM、Tweedie 公式与 score | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/27-diffusion-derivation.gif) | ST92–ST95 | ✅ 讲解（练习待作答） |
+| 28 | [Flow matching 推导](https://wikieden.github.io/math-and-eval-stats/lessons/28-flow-matching.html) | 概率路径、条件与边际目标等价、rectified flow、π0 动作头的训练与采样 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/28-flow-matching.gif) | ST96–ST98 | ✅ 讲解（练习待作答） |
+| 29 | [测度论概率入门](https://wikieden.github.io/math-and-eval-stats/lessons/29-measure-probability.html) | σ-代数、测度、Lebesgue 积分与期望、密度 = Radon-Nikodym 导数、条件期望、收敛方式与大数定律 / CLT 的严格陈述 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/29-measure-probability.gif) | ST99–ST101 | ✅ 讲解（练习待作答） |
+| 30 | [泛函分析入门](https://wikieden.github.io/math-and-eval-stats/lessons/30-functional-analysis.html) | 赋范空间、Banach / Hilbert 空间、算子与谱、Banach 不动点定理（Bellman 收敛）、再生核 Hilbert 空间（RKHS）与核方法 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/30-functional-analysis.gif) | ST102–ST104 | ✅ 讲解（练习待作答） |
+| 31 | [微分几何与流形优化](https://wikieden.github.io/math-and-eval-stats/lessons/31-manifold-optimization.html) | 流形、切空间、黎曼度量、测地线、黎曼梯度与收缩映射（retraction）、和第 19 章李群接上 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/31-manifold-optimization.gif) | ST105–ST107 | ✅ 讲解（练习待作答） |
+| 32 | [随机微积分](https://wikieden.github.io/math-and-eval-stats/lessons/32-stochastic-calculus.html) | 布朗运动、Itô 积分与 Itô 引理、SDE 的数值解、Fokker-Planck 方程、反向时间 SDE、概率流 ODE | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/32-stochastic-calculus.gif) | ST108–ST111 | ✅ 讲解（练习待作答） |
+| 33 | [最优传输](https://wikieden.github.io/math-and-eval-stats/lessons/33-optimal-transport.html) | Monge / Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输与 flow matching 的联系 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/33-optimal-transport.gif) | ST112–ST114 | ✅ 讲解（练习待作答） |
+| 34 | [信息几何](https://wikieden.github.io/math-and-eval-stats/lessons/34-information-geometry.html) | Fisher 信息、自然梯度、KL 的局部二阶近似、TRPO / PPO 的信任域视角 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/34-information-geometry.gif) | ST115–ST117 | ✅ 讲解（练习待作答） |
 | 35 | 卷积的数学 | 卷积 = 稀疏共享权重的线性映射（Toeplitz）、互相关与卷积、尺寸公式（填充 / 步长 / 空洞）、感受野、卷积定理与 FFT、im2col = 矩阵乘法 | — | — | ⬜ |
 | 36 | CNN 训练的数学 | 卷积的反向传播与转置卷积、Xavier / He 初始化的方差推导、BatchNorm 的统计与梯度、残差的梯度流 | — | — | ⬜ |
 | 37 | 注意力的数学 | 缩放点积与 $\sqrt{d}$ 的方差推导、softmax 温度与饱和、注意力 = 核平滑 / 软检索、多头的低秩视角、因果 mask | — | — | ⬜ |
