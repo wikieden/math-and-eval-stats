@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ELBO 与连续性方程</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 17 章 · ELBO 和 KL 的拔河；速度场推着密度走</h1>
+<p class="sub">配套讲义：<a href="../lessons/17-generative-math.html">第 17 章 · 生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a>。ELBO：z ~ N(0, 1)，x | z ~ N(z, 0.5²)，观测 x = 1.2；真后验 N(0.96, 0.447²)。连续性方程：x_t = (1 − t)·x₀ + t·x₁，x₀ ~ N(0, 1)，x₁ ~ N(2, 0.5²)。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">ELBO</option><option value="1">连续性方程</option></select><label for="a">q 的均值 / 时间 t</label><input type="range" id="a" min="0" max="2" step="0.02" value="0"><span id="av">0</span><label for="b">q 的标准差</label><input type="range" id="b" min="0.1" max="1.5" step="0.01" value="1"><span id="bv">1</span></div>
+<p class="note">看点：① 下方那根柱子的总高度是 log p(x)，不随 q 变；分成 ELBO（蓝）和 KL（红）两段，此消彼长；② q 和真后验重合时 KL 段消失；③ 连续性方程：t 从 0 播到 1，密度平滑地从 N(0, 1) 变成 N(2, 0.5²)，箭头是速度场。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','a','b'],F=[[0,0,1],[0,1.5,0.3],[0,0.96,0.447],[1,0,1],[1,0.4,1],[1,0.8,1],[1,1.0,1]];
+const SX=0.5,X=1.2,lnN=(x,m,s)=>-0.5*Math.log(2*Math.PI*s*s)-0.5*((x-m)/s)**2;
+function render(md,a,b){if(md==0){const m=a,s=b,pm=X/1.25,ps=Math.sqrt(0.2);const lp=lnN(X,0,Math.sqrt(1.25));const el=-0.5*Math.log(2*Math.PI*SX*SX)-((X-m)**2+s*s)/(2*SX*SX)-0.5*(m*m+s*s-1-Math.log(s*s));const kl=lp-el;
+ cap(`q = N(${m.toFixed(2)}, ${s.toFixed(2)}²)：log p(x) = ${lp.toFixed(3)} = ELBO ${el.toFixed(3)} + KL ${kl.toFixed(3)}`);frame(40,40,600,170);const M=PM(40,40,600,170,[-2,3],[0,2]);
+ const c0=[],c1=[];for(let i=0;i<=200;i++){const z=-2+5*i/200;c0.push(M(z,Math.exp(lnN(z,pm,ps))));c1.push(M(z,Math.min(Math.exp(lnN(z,m,s)),2)))}P(c0,'var(--muted)',2.5);P(c1,'var(--warm)',2);
+ const sc=40;R(80,230,Math.min(-el,12)*sc,30,'var(--accent)');R(80+Math.min(-el,12)*sc,230,0,30,'var(--bad)');T('−ELBO（越短越好）',80,224,'start','s');R(80,290,-lp*sc,30,'var(--muted)',.5);T('−log p(x)：固定不变；两根条之差就是 KL',80,284,'start','s')}
+ else{const t=Math.min(a,1),mu=2*t,sd=Math.sqrt((1-t)**2+0.25*t*t),dsd=(-(1-t)+0.25*t)/sd;cap(`t = ${t.toFixed(2)}：p_t = N(${mu.toFixed(2)}, ${sd.toFixed(2)}²)`);frame(40,40,600,280);const M=PM(40,40,600,280,[-3,4],[0,0.85]);
+ const c=[];for(let i=0;i<=200;i++){const x=-3+7*i/200;c.push(M(x,Math.exp(lnN(x,mu,sd))))}P(c,'var(--accent)',2.5);for(let x=-2.5;x<=3.5;x+=0.5){const v=2+dsd/sd*(x-mu),q=M(x,0.05);AR(q[0],q[1],q[0]+v*15,q[1],'var(--warm)',1.4)}}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

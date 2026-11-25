@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数学与实验统计 · 讲义目录 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html" class="cur">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="_1">数学与实验统计 · 讲义目录</h1>
+<blockquote>
+<p>66 章大纲 · 已写 19 章 · 19 个动画（GIF + 可交互页面）· 47 张静态图 · 68 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）<br />
+在线阅读：<a href="https://wikieden.github.io/math-and-eval-stats/">https://wikieden.github.io/math-and-eval-stats/</a>（连载中，写完一批发布一批）</p>
+</blockquote>
+<h2 id="_2">这本书讲什么</h2>
+<p>从"30 次试验成功 21 次"这一个数字讲起：它有多准、两个这样的数怎么比、要测多少次才分得出高下、配对和多任务时怎么算、怎么定 A/B 判定规则，最后落到批判地读 loss 曲线和消融表。后 15 章从 Physical AI 的算法倒推数学：VLA 和动作头要的概率、高斯、KL 与生成模型数学，训练要的线代、自动微分与优化，运控要的 QP 与 Riccati，感知要的旋转、李群与 Kalman，扩散采样要的 ODE 积分器。再往下两篇：深入篇（第 23–34 章）把 RL、LQR / MPC、扩散与 flow 的推导写完整，补测度论、泛函、流形、随机微积分、最优传输、信息几何；应用篇（第 35–66 章）讲 CNN、Transformer、PyTorch 张量背后的数学，现代 LLM 的 scaling law、μP、Muon / SOAP、MoE、分布式账本、KV cache、FlashAttention、量化、投机解码、DPO / GRPO，以及导航感知（多视几何、SLAM、VIO、规划、NeRF / 3DGS）、多模态融合和 VLN。哪个算法用到哪块数学，见 Physical AI 数学需求地图。</p>
+<ul>
+<li><strong>适合谁</strong>：要审实验、做评测、拍板"新模型能不能上"的人。只需要高中数学；缺的概率知识在第 1 章和第 8 章现场补。</li>
+<li><strong>读完能做什么</strong>：当场回答 算法总监路线 · 达标自测 第 1 题（21/30 对 18/30，为什么下不了结论、要测多少次）；给团队的成功率表配上正确的区间；审一张消融表；做 学习计划 的里程碑 ME-M1–M36；读 π0 的 flow 动作头、PPO 的重要性比率、ESKF 的四元数扰动、凸 MPC 的 QP 时，知道每一步数学在干什么。</li>
+<li><strong>怎么读</strong>：按章顺序读；只想学 VLA 或运动控制的，按 <a href="../lessons/appendix-reading-paths.html">章节索引</a> 挑章读。每章先看讲解和动画，再自己做练习，最后用复习卡片隔几天考自己。</li>
+</ul>
+<h2 id="_3">讲解的特点</h2>
+<ul>
+<li><strong>一次一小步</strong>：每个概念按"白话类比 → 公式（每个符号说清楚怎么读）→ 小数字亲手算一遍"讲。</li>
+<li><strong>能用图讲的都用图讲</strong>：数量不设上限。关键机制做成可交互页面（▶ 播放、→ 单步、↺ 重来，有参数的配滑块），讲义里嵌 GIF；数字之间的关系画成图表，结构和流程画成静态图。</li>
+<li><strong>对照原文</strong>：讲到原文的地方标本地文本行号（如 NIST §7.2.4.1 L22–L27），引用原句。</li>
+<li><strong>保留真实的学习过程</strong>：练习与作答记录里是学习时的原话、对错和点评。</li>
+<li><strong>术语不设门槛</strong>：缩写第一次出现就给英文全称并逐词解释，全书缩写见 <a href="../lessons/appendix-glossary.html">缩写与术语表</a>。</li>
+<li><strong>每章都有代码对照</strong>：讲义里的数字用 Python（NumPy、SciPy）算一遍，配测试核对；只算讲过的例子，不提前给练习答案。</li>
+<li><strong>每章收尾有口诀</strong>：全部口诀汇总在本页末尾。</li>
+</ul>
+<h2 id="_4">示例动画</h2>
+<table>
+<thead>
+<tr>
+<th>动画</th>
+<th>章</th>
+<th>演什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="置信区间覆盖率" src="../animations/01-ci-coverage.gif" /></td>
+<td><a href="../lessons/01-success-rate-ci.html">第 1 章 一个成功率有多准</a> · <a href="../animations/01-ci-coverage.html">▶ 交互</a></td>
+<td>重复做"测 n 次"的实验，数区间盖住真值的比例：Wald 名义 95%、实际约 81%；Wilson 约 97%</td>
+</tr>
+<tr>
+<td><img alt="零假设下的差值" src="../animations/02-null-distribution.gif" /></td>
+<td><a href="../lessons/02-two-proportions.html">第 2 章 两个成功率比一比</a> · <a href="../animations/02-null-distribution.html">▶ 交互</a></td>
+<td>在"两者一样"的世界里重做 A/B 实验，红色尾巴的比例就是 p 值</td>
+</tr>
+<tr>
+<td><img alt="似然与后验" src="../animations/08-likelihood-posterior.gif" /></td>
+<td><a href="../lessons/08-probability-mle-map.html">第 8 章 概率补课</a> · <a href="../animations/08-likelihood-posterior.html">▶ 交互</a></td>
+<td>逐个加试验结果，看 MLE 和 MAP 怎么移动、先验什么时候被压过</td>
+</tr>
+<tr>
+<td><img alt="二维高斯与条件分布" src="../animations/09-gaussian-conditional.gif" /></td>
+<td><a href="../lessons/09-gaussian.html">第 9 章 高斯分布</a> · <a href="../animations/09-gaussian-conditional.html">▶ 交互</a></td>
+<td>协方差椭圆；已知 x₂ 后 x₁ 的分布变窄</td>
+</tr>
+<tr>
+<td><img alt="两连杆雅可比" src="../animations/13-jacobian-2link.gif" /></td>
+<td><a href="../lessons/13-calculus-autodiff.html">第 13 章 微积分与自动微分</a> · <a href="../animations/13-jacobian-2link.html">▶ 交互</a></td>
+<td>雅可比两列与速度椭圆，手臂伸直时压成一条线</td>
+</tr>
+<tr>
+<td><img alt="欧拉角与万向锁" src="../animations/18-euler-gimbal-lock.gif" /></td>
+<td><a href="../lessons/18-rotations-rigid-transforms.html">第 18 章 3D 旋转</a> · <a href="../animations/18-euler-gimbal-lock.html">▶ 交互</a></td>
+<td>pitch 到 90° 后 yaw、roll 同时转，方块不动</td>
+</tr>
+<tr>
+<td><img alt="REINFORCE 与基线" src="../animations/24-reinforce-baseline.gif" /></td>
+<td><a href="../lessons/24-policy-gradient.html">第 24 章 策略梯度推导</a> · <a href="../animations/24-reinforce-baseline.html">▶ 交互</a></td>
+<td>同一串随机数，减基线后梯度估计更集中、学得更稳</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">其他入口</h2>
+<ul>
+<li><a href="../review.html">复习卡片</a>（ST01 起）</li>
+<li><a href="../lessons/appendix-reading-paths.html">按目标读：学 VLA、学运动控制的章节索引</a>（每条一条最短路径 + 分阶段必读 / 选读，对到 VLA 和运控讲义的章）</li>
+<li>学习计划与里程碑</li>
+<li>Physical AI 数学需求地图（算法 → 数学 → 章节）</li>
+<li>材料清单</li>
+<li>代码对照</li>
+</ul>
+<h2 id="_6">全流程总览</h2>
+<pre><code>一个成功率（第 1 章）── 有多准：SE、Wilson 区间
+      │
+两个成功率（第 2 章）── 差多少、是不是运气：差值区间、p 值
+      │
+要测多少次（第 3 章）── 功效、MDE、样本量        ← 锚点题：21/30 vs 18/30
+      │
+怎么测更省（第 4 章）── 配对、同初始条件交替跑
+      │
+换个角度（第 5 章）──── bootstrap、Beta 后验、P(B &gt; A)
+      │
+怎么拍板（第 6 章）──── 先定规则、不偷看、多重比较校正、多任务汇总
+      │
+审别人的实验（第 7 章）── loss 曲线、消融表、种子方差
+      │
+概率与信息（8–10）──── 期望 / MLE / MAP → 高斯 → 熵 / 交叉熵 / KL
+      │
+线代与微积分（11–13）── 矩阵 / 秩 / 特征 → SVD / 最小二乘 → 梯度 / Jacobian / autodiff
+      │
+优化（14–15）────────── GD / Adam / 牛顿 → 拉格朗日 / KKT / QP
+      │
+采样与生成（16–17）──── 重要性采样 / CEM / MPPI → ELBO / score / flow matching
+      │
+几何、估计与动力系统（18–22）── 旋转 / SE(3) → 李群 → Kalman / 因子图 → ODE / LQR / Bellman → 数值稳定
+      │
+深入篇（23–34）──────── RL 推导 → LQR / MPC 推导 → 扩散 / flow 推导 → 测度论 / 泛函 / 流形 / 随机微积分 / 最优传输 / 信息几何
+      │
+架构篇（35–40）──────── 卷积 → CNN 训练 → 注意力 → 位置编码 → 归一化 → 张量
+      │
+LLM 篇（41–51）──────── scaling law → μP → 优化器 → 稳定性 → MoE → 分布式账 → 推理成本 → 高效注意力 → 量化 → 解码 → 后训练
+      │
+导航感知篇（52–60）──── 相机 → 多视几何 → 点云配准 → SLAM → VIO → 地图 → 规划 → NeRF / 3DGS → 检测评测
+      │
+多模态与 VLN 篇（61–66）── 融合 → 视觉-语言对齐 → 非图像模态 → 标定对齐 → VLN 评测 → VLN 决策
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>做什么</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>给单个成功率配区间</td>
+<td>30 次试验的误差约 ±16 个点，比常见的"提升"还大</td>
+</tr>
+<tr>
+<td>2–3</td>
+<td>比较两个成功率，算要多少次</td>
+<td>锚点题的两半：下不了结论 + 要测多少次</td>
+</tr>
+<tr>
+<td>4</td>
+<td>配对设计</td>
+<td>同样的结论，配对能少测很多次</td>
+</tr>
+<tr>
+<td>5</td>
+<td>bootstrap 与贝叶斯</td>
+<td>指标复杂时、或要回答"B 比 A 好的概率"</td>
+</tr>
+<tr>
+<td>6</td>
+<td>判定规则与多重比较</td>
+<td>测 20 个任务总有一个"显著"；偷看到显著就停会骗自己</td>
+</tr>
+<tr>
+<td>7</td>
+<td>读曲线和消融表</td>
+<td>负责人每周都在做的事</td>
+</tr>
+<tr>
+<td>8–10</td>
+<td>概率与信息</td>
+<td>行为克隆、动作头、PPO 的 KL、VAE 都是这几个量</td>
+</tr>
+<tr>
+<td>11–13</td>
+<td>线代与微积分</td>
+<td>矩阵乘法、LoRA、IK 的雅可比、反向传播</td>
+</tr>
+<tr>
+<td>14–15</td>
+<td>优化</td>
+<td>训练器、SLAM 的高斯-牛顿、MPC 和全身控制的 QP</td>
+</tr>
+<tr>
+<td>16–17</td>
+<td>采样与生成</td>
+<td>PPO / off-policy 的比率、MPPI、扩散与 flow 动作头</td>
+</tr>
+<tr>
+<td>18–22</td>
+<td>几何、估计与动力系统</td>
+<td>动作的旋转表示、状态估计、LQR / Bellman、扩散采样步与混合精度</td>
+</tr>
+<tr>
+<td>23–34</td>
+<td>深入篇</td>
+<td>把常用算法的推导补完整，读论文附录时不卡在数学上</td>
+</tr>
+<tr>
+<td>35–40</td>
+<td>架构篇</td>
+<td>CNN、Transformer、PyTorch 每个设计背后的那一行数学</td>
+</tr>
+<tr>
+<td>41–51</td>
+<td>LLM 篇</td>
+<td>训练预算、调参、优化器、稳定性、部署成本和后训练，都能算账</td>
+</tr>
+<tr>
+<td>52–60</td>
+<td>导航感知篇</td>
+<td>从相机到地图到规划的几何与优化</td>
+</tr>
+<tr>
+<td>61–66</td>
+<td>多模态与 VLN 篇</td>
+<td>多传感器怎么融合、语言怎么对上视觉和路径、VLN 怎么评</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">目录</h2>
+<table>
+<thead>
+<tr>
+<th>章</th>
+<th>主题</th>
+<th>一句话精要</th>
+<th>动画</th>
+<th>卡片</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="../lessons/01-success-rate-ci.html">一个成功率有多准</a></td>
+<td>p̂ 是估计；SE = √(p̂(1−p̂)/n)；小样本靠边用 Wilson；半宽 ∝ 1/√n；95% 是方法的覆盖率</td>
+<td><a href="../animations/01-ci-coverage.gif">覆盖率</a></td>
+<td>ST01–ST05</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="../lessons/02-two-proportions.html">两个成功率比一比</a></td>
+<td>差值 SE 是两份方差相加；p 值 = 零假设下这么极端的概率；小样本用 Fisher；区间重叠 ≠ 不显著</td>
+<td><a href="../animations/02-null-distribution.gif">零假设下的差值</a></td>
+<td>ST06–ST10</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="../lessons/03-power-sample-size.html">要测多少次</a></td>
+<td>一类 / 二类错误、功效 80%、MDE；样本量公式；"10 个点要几百次"</td>
+<td><a href="../animations/03-power-sample-size.gif">GIF</a></td>
+<td>ST31–ST33</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="../lessons/04-paired-comparison.html">配对比较</a></td>
+<td>同一初始条件 A/B 交替跑；McNemar 只看不一致的对；配对降方差</td>
+<td><a href="../animations/04-paired-comparison.gif">GIF</a></td>
+<td>ST34–ST35</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="../lessons/05-bootstrap-bayes.html">Bootstrap 与 Beta 后验</a></td>
+<td>重抽样估区间；Beta(1+k, 1+n−k)；P(B &gt; A)</td>
+<td><a href="../animations/05-bootstrap-bayes.gif">GIF</a></td>
+<td>ST36–ST38</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="../lessons/06-ab-rules-multiple-comparisons.html">A/B 判定规则与多重比较</a></td>
+<td>先写判定规则再测；偷看提前停；Bonferroni / Holm；多任务多种子用 IQM + 分层 bootstrap</td>
+<td><a href="../animations/06-ab-rules-multiple-comparisons.gif">GIF</a></td>
+<td>ST39–ST42</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="../lessons/07-read-curves-and-ablations.html">批判地读 loss 曲线和消融表</a></td>
+<td>种子方差、平滑、过拟合、评测漂移；审稿追问清单</td>
+<td><a href="../animations/07-read-curves-and-ablations.gif">GIF</a></td>
+<td>ST43–ST45</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="../lessons/08-probability-mle-map.html">概率补课：期望方差、贝叶斯、MLE 与 MAP</a></td>
+<td>平均的方差除以 n；先验低时检测器误报多；伯努利 MLE = k/n；MAP 往中间拉；行为克隆 = NLL</td>
+<td><a href="../animations/08-likelihood-posterior.gif">似然与后验</a></td>
+<td>ST11–ST14</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="../lessons/09-gaussian.html">高斯分布</a></td>
+<td>协方差 = 椭圆（特征分解）；线性变换还是高斯；条件方差只减不增；高斯头 log 概率；单峰平均撞墙</td>
+<td><a href="../animations/09-gaussian-conditional.gif">二维高斯与条件分布</a></td>
+<td>ST15–ST18</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="../lessons/10-information-kl.html">信息论：熵、交叉熵、KL</a></td>
+<td>交叉熵 = 负对数似然；KL ≥ 0 且不对称，正向 / 反向 KL 各偏向什么；互信息</td>
+<td><a href="../animations/10-information-kl.gif">GIF</a></td>
+<td>ST46–ST48</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="../lessons/11-linear-algebra-basics.html">线代一：矩阵乘法、秩、特征分解</a></td>
+<td>矩阵乘法三种看法；秩；特征分解；正定与二次型（LQR 代价、Hessian）</td>
+<td><a href="../animations/11-linear-algebra-basics.gif">GIF</a></td>
+<td>ST49–ST51</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="../lessons/12-svd-least-squares.html">线代二：SVD、低秩、最小二乘</a></td>
+<td>SVD 与最优低秩近似、LoRA 参数量；最小二乘 = 正交投影；伪逆、条件数</td>
+<td><a href="../animations/12-svd-least-squares.gif">GIF</a></td>
+<td>ST52–ST55</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>13</td>
+<td><a href="../lessons/13-calculus-autodiff.html">多元微积分与自动微分</a></td>
+<td>梯度、雅可比（det J = sin θ₂）；链式法则 = 雅可比相乘；反向模式算 VJP；中心差分核对</td>
+<td><a href="../animations/13-jacobian-2link.gif">两连杆雅可比</a></td>
+<td>ST19–ST22</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>14</td>
+<td><a href="../lessons/14-unconstrained-optimization.html">无约束优化</a></td>
+<td>步长与收敛、动量、Adam / AdamW、warmup + cosine、梯度裁剪；牛顿、高斯-牛顿、LM</td>
+<td><a href="../animations/14-unconstrained-optimization.gif">GIF</a></td>
+<td>ST56–ST59</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>15</td>
+<td><a href="../lessons/15-constrained-convex-qp.html">约束与凸优化</a></td>
+<td>拉格朗日、KKT、凸性判断、QP 标准形；MPC、全身控制、带限位 IK 写成 QP</td>
+<td><a href="../animations/15-constrained-convex-qp.gif">GIF</a></td>
+<td>ST60–ST62</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>16</td>
+<td><a href="../lessons/16-monte-carlo-sampling.html">蒙特卡洛与采样</a></td>
+<td>MC 误差 ∝ 1/√N；重要性采样（PPO 比率、off-policy）；基线降方差；CEM、MPPI 加权</td>
+<td><a href="../animations/16-monte-carlo-sampling.gif">GIF</a></td>
+<td>ST63–ST65</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>17</td>
+<td><a href="../lessons/17-generative-math.html">生成模型的数学</a></td>
+<td>潜变量与 ELBO、重参数化、score、SDE / ODE 视角、连续性方程、flow matching 目标</td>
+<td><a href="../animations/17-generative-math.gif">GIF</a></td>
+<td>ST66–ST68</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>18</td>
+<td><a href="../lessons/18-rotations-rigid-transforms.html">3D 旋转与刚体变换</a></td>
+<td>旋转矩阵四性质；万向锁；Rodrigues；四元数半角与双覆盖；网络输出用 6D；SE(3) 求逆</td>
+<td><a href="../animations/18-euler-gimbal-lock.gif">欧拉角与万向锁</a></td>
+<td>ST23–ST26</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>19</td>
+<td>李群入门</td>
+<td>SO(3) / SE(3) 的 exp / log、切空间扰动、左右雅可比、SLERP 与旋转平均</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>20</td>
+<td>状态估计</td>
+<td>预测 + 更新两步；Kalman 增益；EKF / ESKF；UKF 与粒子滤波各适合什么；因子图 = 非线性最小二乘</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>21</td>
+<td>动力系统与控制的数学</td>
+<td>状态空间、线性化、ZOH 离散化、特征值判稳定、Riccati 与 LQR、Bellman 是不动点方程</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>22</td>
+<td>数值计算</td>
+<td>Euler / Heun / RK4 与扩散采样步数；logsumexp；float16 / bfloat16；病态问题</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>23</td>
+<td>MDP 与 Bellman 的完整推导</td>
+<td>值函数、Bellman 期望 / 最优方程、压缩映射与值迭代收敛</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>24</td>
+<td><a href="../lessons/24-policy-gradient.html">策略梯度推导</a></td>
+<td>似然比搬梯度；环境项消失；基线不偏降方差；PPO 只截得利侧；GRPO 组内归一化</td>
+<td><a href="../animations/24-reinforce-baseline.gif">REINFORCE 与基线</a></td>
+<td>ST27–ST30</td>
+<td>✅ 讲解（练习待作答）</td>
+</tr>
+<tr>
+<td>25</td>
+<td>LQR 与 Riccati</td>
+<td>动态规划推 Riccati、有限 / 无限时域、可控性</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>26</td>
+<td>轨迹优化与 MPC</td>
+<td>线性化后写成 QP（稠密 / 稀疏形式）、iLQR 的二阶展开与回传、MPPI 的路径积分推导</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>27</td>
+<td>扩散模型推导</td>
+<td>前向闭式、后验 <span class="arithmatex">\(q(x_{t-1}\mid x_t,x_0)\)</span>、ELBO 到噪声预测损失、DDIM、Tweedie 公式与 score</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Flow matching 推导</td>
+<td>概率路径、条件与边际目标等价、rectified flow、π0 动作头的训练与采样</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>29</td>
+<td>测度论概率入门</td>
+<td>σ-代数、测度、Lebesgue 积分与期望、密度 = Radon-Nikodym 导数、条件期望、收敛方式与大数定律 / CLT 的严格陈述</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>30</td>
+<td>泛函分析入门</td>
+<td>赋范空间、Banach / Hilbert 空间、算子与谱、Banach 不动点定理（Bellman 收敛）、再生核 Hilbert 空间（RKHS）与核方法</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>31</td>
+<td>微分几何与流形优化</td>
+<td>流形、切空间、黎曼度量、测地线、黎曼梯度与收缩映射（retraction）、和第 19 章李群接上</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>32</td>
+<td>随机微积分</td>
+<td>布朗运动、Itô 积分与 Itô 引理、SDE 的数值解、Fokker-Planck 方程、反向时间 SDE、概率流 ODE</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>33</td>
+<td>最优传输</td>
+<td>Monge / Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输与 flow matching 的联系</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>34</td>
+<td>信息几何</td>
+<td>Fisher 信息、自然梯度、KL 的局部二阶近似、TRPO / PPO 的信任域视角</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>35</td>
+<td>卷积的数学</td>
+<td>卷积 = 稀疏共享权重的线性映射（Toeplitz）、互相关与卷积、尺寸公式（填充 / 步长 / 空洞）、感受野、卷积定理与 FFT、im2col = 矩阵乘法</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>36</td>
+<td>CNN 训练的数学</td>
+<td>卷积的反向传播与转置卷积、Xavier / He 初始化的方差推导、BatchNorm 的统计与梯度、残差的梯度流</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>37</td>
+<td>注意力的数学</td>
+<td>缩放点积与 <span class="arithmatex">\(\sqrt{d}\)</span> 的方差推导、softmax 温度与饱和、注意力 = 核平滑 / 软检索、多头的低秩视角、因果 mask</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>38</td>
+<td>位置编码的数学</td>
+<td>正弦编码、RoPE = 复数旋转与相对位置、长度外推（位置插值、NTK、YaRN）、ALiBi</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>39</td>
+<td>归一化与信号传播</td>
+<td>LayerNorm / RMSNorm 的几何、Pre-LN vs Post-LN 的梯度、深层网络的方差传播</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>40</td>
+<td>张量的数学（PyTorch）</td>
+<td>stride 与索引映射、广播规则、einsum 记号、视图与连续性、计算图上的 VJP 组合</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>41</td>
+<td>Scaling law</td>
+<td>幂律与 log-log 拟合、Kaplan vs Chinchilla、计算最优 N / D、6ND 计算账、外推误差</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>42</td>
+<td>参数化与初始化</td>
+<td>标准参数化 vs μP、超参从小模型迁移、宽度缩放下的学习率</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>43</td>
+<td>现代优化器</td>
+<td>Adam 的预条件视角、Shampoo / SOAP（Kronecker 预条件）、Muon（Newton-Schulz 正交化）、Lion（符号更新）、WSD 调度、梯度噪声尺度与临界批量</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>44</td>
+<td>训练稳定性</td>
+<td>loss spike、logit 增长与 z-loss、QK-norm、梯度裁剪、bf16 / fp8 的数值范围与缩放因子</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>45</td>
+<td>MoE 的数学</td>
+<td>门控与 top-k、负载均衡辅助损失、无辅助损失的偏置调节、容量因子、专家并行的通信量</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>46</td>
+<td>分布式训练账本</td>
+<td>显存四项（参数 / 梯度 / 优化器状态 / 激活）、ZeRO 分片、DP / TP / PP 通信量公式、流水线气泡、all-reduce 成本模型</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>47</td>
+<td>推理成本模型</td>
+<td>roofline 与算术强度、prefill vs decode、KV cache 大小公式、批处理与延迟的权衡</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>48</td>
+<td>高效注意力与序列模型</td>
+<td>online softmax 与 FlashAttention 分块、MQA / GQA、MLA 低秩 KV、稀疏注意力（NSA）、线性注意力与 SSM 的并行扫描（Mamba）</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>49</td>
+<td>量化的数学</td>
+<td>均匀量化的 scale / zero-point、舍入误差方差、per-channel / group、离群值、GPTQ 的二阶误差补偿、AWQ、SmoothQuant 的等价变换、FP8 / FP4 格式</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>50</td>
+<td>解码与采样</td>
+<td>温度、top-k / top-p、beam search、投机解码（拒绝采样为什么不改分布）、Medusa / EAGLE、约束解码</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>51</td>
+<td>后训练的数学</td>
+<td>SFT = MLE；Bradley-Terry 奖励模型；KL 正则目标与闭式最优策略；DPO 推导；GRPO / 推理 RL 的优势归一化</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>52</td>
+<td>相机几何</td>
+<td>针孔模型、内参 / 外参、畸变模型、反投影、逆透视变换与 BEV（Lift-Splat-Shoot）</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>53</td>
+<td>多视几何</td>
+<td>对极约束、本质 / 基础矩阵、单应、三角化、PnP、RANSAC 迭代次数公式；DUSt3R 怎么绕开这条流水线</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>54</td>
+<td>点云与配准</td>
+<td>最近邻与 KD 树、Procrustes / Kabsch（SVD 求最优旋转）、ICP（点到点 / 点到面）、法向量 = 局部协方差的最小特征向量</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>55</td>
+<td>SLAM 的优化</td>
+<td>重投影误差与 BA、稀疏 Hessian 与 Schur 补、位姿图、鲁棒核（Huber / Cauchy）、边缘化</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>56</td>
+<td>VIO</td>
+<td>IMU 运动学与噪声 / 偏置模型、流形上的预积分、紧耦合滑窗、可观测性</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>57</td>
+<td>地图表示</td>
+<td>占用栅格的 log-odds 贝叶斯更新、TSDF / ESDF、体素与八叉树、语义地图</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>58</td>
+<td>路径规划</td>
+<td>图搜索（Dijkstra、A* 与可采纳启发）、构型空间、采样规划（PRM、RRT、RRT* 渐近最优）、代价地图与势场</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>59</td>
+<td>神经场景表示</td>
+<td>体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的协方差投影雅可比与球谐颜色</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>60</td>
+<td>感知的学习与评测</td>
+<td>IoU、NMS、PR 曲线与 mAP、匈牙利匹配（DETR）、度量学习与地点识别（三元组损失、NetVLAD、InfoNCE）</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>61</td>
+<td>多模态融合的数学</td>
+<td>逆方差加权（Kalman 的特例）、早 / 中 / 晚融合、交叉注意力与 Perceiver 潜变量、模态缺失与模态 dropout</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>62</td>
+<td>视觉-语言对齐</td>
+<td>CLIP 对比损失与温度、SigLIP 的 sigmoid 损失、InfoNCE 与互信息下界、零样本分类 = 余弦相似度、视觉 token 化（patch、Q-Former、投影器）与 token 数账、ImageBind</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>63</td>
+<td>非图像模态的表示</td>
+<td>点云的置换不变（PointNet 对称函数）、体素化与稀疏卷积、音频的 STFT / Mel 频谱、力 / 触觉阵列、本体感受的归一化</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>64</td>
+<td>多传感器标定与对齐</td>
+<td>外参标定（手眼 AX = XB）、时间同步与插值（含 SO(3) 上的插值）、相机-激光雷达投影、BEVFusion</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>65</td>
+<td>VLN 的几何与评测</td>
+<td>指令-轨迹对齐（DTW、nDTW、SDTW）、SPL、拓扑图与图搜索、前沿探索、语言特征投到俯视地图（VLMaps）</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>66</td>
+<td>VLN 的序列决策</td>
+<td>POMDP 与信念状态、行为克隆误差 O(T²) 累积与 DAgger 的 O(T)、语言条件策略、探索的信息增益</td>
+<td>—</td>
+<td>—</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_8">后续大纲</h2>
+<p>第 2–66 章各自对应的材料和里程碑见 学习计划 · 逐章计划。讲到时再微调。</p>
+<h2 id="_9">口诀汇总</h2>
+<p><strong>第 1 章 一个成功率有多准</strong></p>
+<blockquote>
+<p>一勺汤不是一锅汤，七成背后正负十五；<br />
+靠零靠一 Wald 塌，Wilson 往中拉一拉；<br />
+想窄一半测四倍，九五说的是方法。</p>
+</blockquote>
+<p><strong>第 2 章 两个成功率比一比</strong></p>
+<blockquote>
+<p>两秤称重误差叠，差值区间跨零别下结论；<br />
+无罪推定先当一样，p 值问的是有多罕见；<br />
+小样本用 Fisher 算，区间重叠不算数；<br />
+差值、区间、p 值，三样一起报。</p>
+</blockquote>
+<p><strong>第 3 章 要测多少次</strong></p>
+<blockquote>
+<p>误报 α 漏报 β，没检出不等于没差别；<br />
+功效查表：差值除 SE 再减一点九六；<br />
+次数等于 z 和平方乘方差，再除差值平方；<br />
+开测先算 MDE，期望比它小，测了也白测。</p>
+</blockquote>
+<p><strong>第 4 章 配对比较</strong></p>
+<blockquote>
+<p>同一张卷子比高低，初始条件对齐还要交替盲测；<br />
+当成独立来检验，难易波动白算进误差；<br />
+McNemar 只看一对一错，H₀ 下一半对一半；<br />
+方差减掉两倍协方差，相关 ρ 越大省得越多。</p>
+</blockquote>
+<p><strong>第 5 章 Bootstrap 与 Beta 后验</strong></p>
+<blockquote>
+<p>有放回重抽几万次，分位数就是区间，什么统计量都能套；<br />
+均匀先验加 k 次成功，后验是贝塔 1 加 k、1 加 n 减 k；<br />
+两个后验各抽一个比大小，胜率就是 B 更好的概率；<br />
+多任务多种子分层抽，任务不动只抽种子。</p>
+</blockquote>
+<p><strong>第 6 章 A/B 判定规则与多重比较</strong></p>
+<blockquote>
+<p>先写规则再开测，偷看一次多一分误报；<br />
+比得越多越容易撞上，一减零九五的 k 次方；<br />
+Bonferroni 除以 m，Holm 从小到大逐个放宽；<br />
+多任务报 IQM 加区间，题目成组用聚类标准误。</p>
+</blockquote>
+<p><strong>第 7 章 批判地读 loss 曲线和消融表</strong></p>
+<blockquote>
+<p>先问换种子差多少，差值小于标准差就别下结论；<br />
+均值差不如赢的概率，几十个种子才分得清一个点；<br />
+平滑像看后视镜，β 越大拖得越久；<br />
+训练降了看验证，五个问题逐个问。</p>
+</blockquote>
+<p><strong>第 8 章 概率补课</strong></p>
+<blockquote>
+<p>期望是长期账本，方差量散有多宽；<br />
+n 次平均除以 n，标准误按根号缩；<br />
+先验低时阳性假，后验似然乘先验；<br />
+似然最大挑参数，克隆就是 NLL。</p>
+</blockquote>
+<p><strong>第 9 章 高斯分布</strong></p>
+<blockquote>
+<p>小误差叠成一口钟，±2σ 九成五；<br />
+协方差是个椭圆，特征向量定方向；<br />
+线性变换还是高斯，采样加噪一条线；<br />
+知道一个缩另一个，单峰平均会撞墙。</p>
+</blockquote>
+<p><strong>第 10 章 信息论</strong></p>
+<blockquote>
+<p>熵是平均意外，越平越大越尖越小；<br />
+交叉熵用错的地图走路，就是负对数似然；<br />
+KL 是多走的冤枉路，不对称不是距离；<br />
+正向盖全、反向挑峰；互信息是重叠的那一块。</p>
+</blockquote>
+<p><strong>第 11 章 线代一</strong></p>
+<blockquote>
+<p>乘法三种看：点积表、列的组合、外积相加；<br />
+列是基向量的去处，行列式是面积的倍数；<br />
+秩是独立方向数，秩不满就有零空间；<br />
+对称矩阵转拉转，特征值全正才是朝上的碗。</p>
+</blockquote>
+<p><strong>第 12 章 线代二</strong></p>
+<blockquote>
+<p>任何矩阵转拉转，奇异值平方是 AᵀA 的特征值；<br />
+留前 k 个最省事，误差就是丢掉的那几个；<br />
+LoRA 两根瘦矩阵，参数 r 乘 d 加 k；<br />
+最小二乘是垂直投影，条件数大就加阻尼。</p>
+</blockquote>
+<p><strong>第 13 章 多元微积分与自动微分</strong></p>
+<blockquote>
+<p>偏导拼成梯度，指向最陡上坡；<br />
+雅可比是导数表，行列为零就奇异；<br />
+链式法则矩阵乘，关节速度乘出末端；<br />
+一个 loss 反向推，求导记得差分核。</p>
+</blockquote>
+<p><strong>第 14 章 无约束优化</strong></p>
+<blockquote>
+<p>步长小于二除 L，最陡方向说了算；<br />
+动量像滚球，来回抵消、一路加速；<br />
+Adam 按二阶矩归一，每步约走 lr；AdamW 衰减拿出来单做；<br />
+先 warmup 后余弦，裁剪按范数；拟合用高斯-牛顿，怕跳过头就加阻尼成 LM。</p>
+</blockquote>
+<p><strong>第 15 章 约束与凸优化</strong></p>
+<blockquote>
+<p>山路最低点，坡度垂直于路，梯度和法向平行；<br />
+λ 是影子价格，约束放松一点赚多少；<br />
+墙边球：可行、μ 非负、驻点、互补松弛；<br />
+凸则局部即全局，限位 IK、MPC、全身控制都是 QP。</p>
+</blockquote>
+<p><strong>第 16 章 蒙特卡洛与采样</strong></p>
+<blockquote>
+<p>扔石子估湖面，误差根号 n 分之一，和维度无关；<br />
+去山顶抽人再换算，权重 p 比 q，提议分布要盖住关键处；<br />
+PPO 的比率是权重，截断防止爆方差；<br />
+CEM 留精英，MPPI 按 e 的负代价除温度加权。</p>
+</blockquote>
+<p><strong>第 17 章 生成模型的数学</strong></p>
+<blockquote>
+<p>log p 等于 ELBO 加 KL，推高 ELBO 一举两得；<br />
+重参数化把随机挪出去，score function 只看概率，方差大要基线；<br />
+墨水跟着水流走，浓度变化等于净流入；<br />
+每辆车猜自己的方向，学到的就是路口的平均。</p>
+</blockquote>
+<p><strong>第 18 章 3D 旋转与刚体变换</strong></p>
+<blockquote>
+<p>三列就是三根轴，转置求逆不交换；<br />
+中间转到九十度，偏航横滚锁一起；<br />
+四元半角无万向，q 和负 q 同一转；<br />
+网络输出用 6D，位姿四乘四串起。</p>
+</blockquote>
+<p><strong>第 24 章 策略梯度推导</strong></p>
+<blockquote>
+<p>参数藏在概率里，似然比把梯度搬；<br />
+对数一拆环境掉，回报加权克隆样；<br />
+基线期望恒为零，减掉平均方差降；<br />
+PPO 只截得利侧，GRPO 组内比短长。</p>
+</blockquote>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

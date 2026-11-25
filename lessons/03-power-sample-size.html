@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 3 章 · 要测多少次：功效、最小可检测效应和样本量 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html" class="cur"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="3">第 3 章 · 要测多少次：功效、最小可检测效应和样本量</h1><div class="run"><a class="btn" href="../animations/03-power-sample-size.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch03_power_sample_size.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch03_power_sample_size.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch03_power_sample_size.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：测 30 次没看出差别，是两个策略真的一样，还是测得太少？想检出"提升 15 个点"，每边要测多少次？已经只能测 100 次，那能检出多小的提升？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/02-two-proportions.html">第 2 章 两个成功率比一比</a> · 下一章：<a href="../lessons/04-paired-comparison.html">第 4 章 配对比较</a><br />
+对应原文：NIST e-Handbook §7.2.4.2 <code>materials/text/web/nist/prc242.txt</code> L19–L111（比例检验的样本量公式）；Miller《Adding Error Bars to Evals》§5 <code>materials/text/papers/adding-error-bars-to-evals-2411.00640.txt</code> L410–L470（式 (9) 样本量、式 (10) MDE、969 题的例子）<br />
+本章缩写：α（alpha）= 一类错误率（误报）；β（beta）= 二类错误率（漏报）；1 − β = 功效（power）；MDE = Minimum Detectable Effect（最小 / 可检测 / 效应）；<span class="arithmatex">\(z_p\)</span> = 标准正态的上 p 分位数（比它大的概率是 p）；δ（delta）= 想检出的差值；Φ（Phi）= 标准正态的累积分布函数。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：两类错误：误报和漏报（2026-11-25）</h3>
+<p><strong>类比：机场安检。</strong> 把没带违禁品的人拦下来是误报，放过带了违禁品的人是漏报。门调得越严，误报越多、漏报越少；想两样都少，只能检查得更仔细（多测几次）。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>真相：两个策略一样</th>
+<th>真相：B 确实更好</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>判"B 更好"</td>
+<td><strong>一类错误</strong>（误报），概率 α</td>
+<td>判对，概率 1 − β = <strong>功效</strong></td>
+</tr>
+<tr>
+<td>判"说不出差别"</td>
+<td>判对</td>
+<td><strong>二类错误</strong>（漏报），概率 β</td>
+</tr>
+</tbody>
+</table>
+<p>第 2 章的"p &lt; 0.05"控制的只是 α。一个测得太少的实验，α 照样是 5%，但 β 可能高达 70%：大多数真实的提升都会被判成"没差别"。</p>
+<p>惯例：α = 0.05（双侧），功效 80%（β = 0.2）。对应的分位数（代码算的）：<span class="arithmatex">\(z_{0.025} = 1.960\)</span>，<span class="arithmatex">\(z_{0.20} = 0.842\)</span>，<span class="arithmatex">\(z_{0.10} = 1.282\)</span>。</p>
+<p><strong>一句话</strong>：α 管误报、β 管漏报；"没检出差别"只有在功效够高时才说明"差别不大"。</p>
+<h3 id="2026-11-25_1">第二步：功效：给定次数，真有差别时能看出来的概率（2026-11-25）</h3>
+<p><strong>类比：拿小网捞鱼。</strong> 鱼确实在（真有差别），网眼太大（次数太少）就捞不上来。功效就是"鱼在时捞得上来的概率"。</p>
+<p><strong>公式</strong>（正态近似、每组 n 次、双侧 α）：</p>
+<div class="arithmatex">\[\text{功效} \approx \Phi\!\Big(\frac{|p_A - p_B|}{SE} - z_{\alpha/2}\Big),\qquad SE = \sqrt{\frac{p_A(1-p_A) + p_B(1-p_B)}{n}}\]</div>
+<p>读法："差值除以标准误，减去 1.96，再查正态表"。差值是标准误的几倍，决定了能不能越过 1.96 那道门槛。</p>
+<p><strong>例子</strong>（编的）：真成功率 A = 0.70、B = 0.85，每组 30 次：</p>
+<table>
+<thead>
+<tr>
+<th>算什么</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SE = √((0.21 + 0.1275)/30)</td>
+<td>0.106</td>
+</tr>
+<tr>
+<td>差值 / SE = 0.15 / 0.106</td>
+<td>1.414</td>
+</tr>
+<tr>
+<td>功效 = Φ(1.414 − 1.960)</td>
+<td><strong>0.293</strong></td>
+</tr>
+<tr>
+<td>模拟 2 万次实验，z 检验显著的比例</td>
+<td>0.280</td>
+</tr>
+</tbody>
+</table>
+<p>真有 15 个点的提升，每组测 30 次，<strong>七成的概率看不出来</strong>。</p>
+<p><img alt="功效随每组次数 n 的变化" src="../figures/03-power-sample-size-power-vs-n.png" />
+<em>图 3-1 · 真成功率 0.70 vs 0.85：n = 30 时功效 0.29，到 n = 118 才达到 80%</em></p>
+<p><strong>一句话</strong>：功效 = Φ(差值 / SE − 1.96)；0.70 vs 0.85 每组 30 次，功效只有 29%。</p>
+<h3 id="80-2026-11-25">第三步：样本量公式：想要 80% 功效，每组要多少次（2026-11-25）</h3>
+<p><strong>类比：要看清多小的字，决定了望远镜要多大。</strong> 把第二步的公式反过来解 n：</p>
+<div class="arithmatex">\[n = \frac{(z_{\alpha/2} + z_\beta)^2\,\big[p_A(1-p_A) + p_B(1-p_B)\big]}{\delta^2}\]</div>
+<p>NIST §7.2.4.2 给的是单样本版本（和固定的 <span class="arithmatex">\(p_0\)</span> 比，L95–L99）；Miller 式 (9)（L440–L445）是两组版本，<span class="arithmatex">\(\omega^2\)</span> 那一项在不配对时就是两组方差之和。</p>
+<p><strong>例子</strong>（代码，向上取整）：</p>
+<table>
+<thead>
+<tr>
+<th>想检出</th>
+<th>功效</th>
+<th>每组次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.70 → 0.85（15 个点）</td>
+<td>80%</td>
+<td><strong>118</strong></td>
+</tr>
+<tr>
+<td>0.70 → 0.85</td>
+<td>90%</td>
+<td>158</td>
+</tr>
+<tr>
+<td>0.70 → 0.75（5 个点）</td>
+<td>80%</td>
+<td><strong>1248</strong></td>
+</tr>
+</tbody>
+</table>
+<p>n ∝ 1/δ²：想检出的差缩小 3 倍，次数要多约 10 倍（差值的方差项也略有变化）。</p>
+<p><strong>Miller 的例子</strong>（§5 L448–L455）：ω² = 1/9、想检出 δ = 0.03、α = 0.05、功效 80%：<span class="arithmatex">\(n = (1.96 + 0.84)^2 \cdot (1/9) / 0.03^2 \approx 969\)</span> 道独立题。论文据此建议新的评测集至少要 1000 题。</p>
+<p><strong>一句话</strong>：样本量 n = (z_α/2 + z_β)²·(两组方差之和)/δ²；差值减半，次数翻 4 倍。</p>
+<h3 id="mde2026-11-25">第四步：次数定了，能检出多小的差：MDE（2026-11-25）</h3>
+<p><strong>类比：体重秤的最小刻度。</strong> 秤只能读到 0.5 公斤，就别想用它称出 0.1 公斤的变化。</p>
+<p>把样本量公式反过来解 δ（Miller 式 (10)，L462–L464）。两组成功率都在 p 附近时：</p>
+<div class="arithmatex">\[\text{MDE} = (z_{\alpha/2} + z_\beta)\sqrt{\frac{2p(1-p)}{n}}\]</div>
+<p><strong>例子</strong>（成功率约 0.7，α = 0.05，功效 80%）：</p>
+<table>
+<thead>
+<tr>
+<th>每组次数</th>
+<th>MDE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30</td>
+<td><strong>0.331</strong>（33 个点）</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.182</td>
+</tr>
+<tr>
+<td>300</td>
+<td>0.105</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="MDE 随每组次数 n 的变化" src="../figures/03-power-sample-size-mde.png" />
+<em>图 3-2 · 每组 30 次时只能可靠检出 33 个点以上的差别；要检出 10 个点得 300 多次</em></p>
+<p><strong>怎么用</strong>：开测之前先算 MDE。如果团队期望的提升是 10 个点，而预算只够每组 30 次（MDE = 33 个点），这个实验大概率"看不出差别"，结论早就可以预料，不值得跑；要么加预算，要么换配对设计（第 4 章）降方差。</p>
+<p><strong>场景代码</strong>：用 statsmodels 算样本量（真实库的写法；本书环境没装 statsmodels，没跑过）：</p>
+<pre><code class="language-python">from statsmodels.stats.power import NormalIndPower
+from statsmodels.stats.proportion import proportion_effectsize
+h = proportion_effectsize(0.85, 0.70)                   # Cohen's h：比例差的标准化效应量
+n = NormalIndPower().solve_power(effect_size=h, alpha=0.05, power=0.8, ratio=1.0)   # 每组次数
+</code></pre>
+<p>它用的是反正弦变换的效应量，结果和本章的公式差一两次，量级一致。</p>
+<p><strong>一句话</strong>：MDE = (z_α/2 + z_β)·√(2p(1−p)/n)；开测前先算它，期望的提升比 MDE 小就别指望看出来。</p>
+<h3 id="_2">动画演示：拖动次数，看两个分布什么时候分得开</h3>
+<p><img alt="功效与样本量" src="../animations/03-power-sample-size.gif" /></p>
+<p>可交互版：<a href="../animations/03-power-sample-size.html">animations/03-power-sample-size.html</a>（滑块调每组次数 n 和 B 的真成功率）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>两座山是"真没差别"和"真有差别"时，观测差值的分布；竖线是判显著的门槛（第一步）；</li>
+<li>红色面积是 α（误报），蓝色面积是功效（第二步）；</li>
+<li>把 n 从 30 拖到 120：两座山变窄，蓝色面积超过 80%（第三步）；</li>
+<li>把 B 的真成功率拉近 A：右边那座山往左挪，要更大的 n 才分得开（第四步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步 功效）：真成功率 A = 0.5、B = 0.7，每组 40 次。用正态近似算功效（保留 2 位）。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步 样本量）：想检出 0.80 → 0.90，α = 0.05、功效 90%，每组要多少次？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第一步、第四步）：同事测了每组 20 次，p = 0.4，汇报"两个策略没区别"。你怎么回应？他应该补充报告什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>误报 α 漏报 β，没检出不等于没差别；<br />
+功效查表：差值除 SE 再减一点九六；<br />
+次数等于 z 和平方乘方差，再除差值平方；<br />
+开测先算 MDE，期望比它小，测了也白测。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST31（两类错误与功效的定义）、ST32（两组样本量公式、n ∝ 1/δ²）、ST33（MDE 的公式与用法）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Miller《Adding Error Bars to Evals》</td>
+<td>§5 L410–L470；附录 B</td>
+<td>式 (9) 样本量、式 (10) MDE、969 题的例子和推导</td>
+</tr>
+<tr>
+<td>★ NIST e-Handbook §7.2.4.2</td>
+<td><code>prc242.txt</code> L19–L111</td>
+<td>比例检验样本量的推导，单侧 / 双侧两种写法</td>
+</tr>
+<tr>
+<td>NIST e-Handbook §7.2.4.1</td>
+<td><code>prc241.txt</code></td>
+<td>第 1 章的 Wilson 区间，和样本量公式同一套正态近似</td>
+</tr>
+<tr>
+<td>Kress-Gazit 等《Robot Learning as an Empirical Science》</td>
+<td>§6</td>
+<td>真机评测里"测多少次"受什么约束</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>功效公式的来历</strong>：H₁ 下观测差值 <span class="arithmatex">\(\hat\delta \sim \mathcal N(\delta, SE^2)\)</span>，判显著的条件是 <span class="arithmatex">\(\hat\delta/SE &gt; z_{\alpha/2}\)</span>（只看对的那一侧），概率 <span class="arithmatex">\(P(\hat\delta &gt; z_{\alpha/2}SE) = \Phi(\delta/SE - z_{\alpha/2})\)</span>。</li>
+<li><strong>样本量公式</strong>：令功效 = 1 − β，即 <span class="arithmatex">\(\delta/SE - z_{\alpha/2} = z_\beta\)</span>，再把 <span class="arithmatex">\(SE = \sqrt{V/n}\)</span> 代入解 n。</li>
+<li><strong>为什么是 1/δ²</strong>：SE ∝ 1/√n，要让 δ/SE 保持不变，δ 减半 √n 就要翻倍，n 翻 4 倍。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>功效 <span class="arithmatex">\(\approx \Phi(\delta/SE - z_{\alpha/2})\)</span></td>
+<td>给定 n 的功效</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(n = (z_{\alpha/2} + z_\beta)^2[p_A(1-p_A) + p_B(1-p_B)]/\delta^2\)</span></td>
+<td>每组样本量</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{MDE} = (z_{\alpha/2} + z_\beta)\sqrt{2p(1-p)/n}\)</span></td>
+<td>最小可检测效应</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(n = (z_{\alpha/2} + z_\beta)^2\,\omega^2/\delta^2\)</span></td>
+<td>Miller 式 (9)（σ² 项为 0）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch03_power_sample_size.py</code>，配套测试 <code>tests/test_ch03.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch03_power_sample_size.py  
+uv run pytest tests/test_ch03.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 分位数</td>
+<td><span class="arithmatex">\(z_p\)</span></td>
+<td><code>z_of(0.025)</code>、<code>z_of(0.20)</code></td>
+<td>1.960、0.842</td>
+</tr>
+<tr>
+<td>第二步 功效</td>
+<td>Φ(δ/SE − z)</td>
+<td><code>power_at(0.70, 0.85, 30)</code></td>
+<td>0.293（模拟 0.280）</td>
+</tr>
+<tr>
+<td>第三步 样本量</td>
+<td>两组公式</td>
+<td><code>n_per_group(0.70, 0.85)</code></td>
+<td>118；功效 90% 时 158</td>
+</tr>
+<tr>
+<td>第四步 MDE</td>
+<td>(z+z)√(2p(1−p)/n)</td>
+<td><code>mde(0.7, 30)</code></td>
+<td>0.331</td>
+</tr>
+<tr>
+<td>第三步 Miller</td>
+<td>式 (9)</td>
+<td><code>miller_n(1/9, 0.03)</code></td>
+<td>969</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def n_per_group(p1, p2, alpha=0.05, power=0.8):
+    delta = abs(p1 - p2)
+    var = p1 * (1 - p1) + p2 * (1 - p2)                                      # 两组方差之和
+    return math.ceil((z_of(alpha / 2) + z_of(1 - power)) ** 2 * var / delta**2)   # 向上取整
+
+z = (k2 / n - k1 / n) / se                                                   # 模拟：每轮实验做一次 z 检验
+return float(np.mean(np.abs(z) &gt; z_of(0.025)))                               # 显著的比例 = 功效
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong><code>z_of(1 - power)</code> 是 z_β</strong>：功效 0.8 时 β = 0.2，要的是上 0.2 分位数 0.842；写成 <code>z_of(power)</code> 会得到 −0.842，样本量就算小了。</li>
+<li><strong>公式只看"对的那一侧"</strong>：双侧检验在"反方向显著"上也有一点点概率，真实功效比公式略高；差值不太小时可以忽略。</li>
+<li><strong>模拟和公式差 1 个多点</strong>：n = 30 时正态近似本身有误差（第 1 章说过 Wald 在小样本下不准），模拟值 0.280 比公式 0.293 略低。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>power_at</code> 的 n 从 30 改成 60，看功效是不是正好翻倍（不是，为什么？）。</li>
+<li>用 <code>mde(0.5, 100)</code> 和 <code>mde(0.9, 100)</code> 比一比：成功率接近 50% 时为什么最难检出差别？</li>
+</ol><nav class="pager"><a href="02-two-proportions.html">← 第 2 章 · 两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="04-paired-comparison.html">第 4 章 · 配对比较：同一批初始条件交替跑，省下一半样本 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

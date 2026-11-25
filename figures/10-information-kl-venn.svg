@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="290" viewBox="0 0 760 290">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">熵、条件熵与互信息</text>
+<text x="16.0" y="280.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">编的联合表：H(X) = H(Y) = 0.693 nat，H(X, Y) = 1.194，I(X; Y) = 0.193 nat（重叠部分）。</text>
+<circle cx="300" cy="145" r="95" fill="#e0ecff" stroke="#2563eb" stroke-width="2" opacity="0.7"/>
+<circle cx="440" cy="145" r="95" fill="#ffedd5" stroke="#ea580c" stroke-width="2" opacity="0.7"/>
+<text x="250.0" y="150.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1f2937" text-anchor="middle" font-weight="normal">H(X | Y)</text>
+<text x="490.0" y="150.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1f2937" text-anchor="middle" font-weight="normal">H(Y | X)</text>
+<text x="370.0" y="150.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#7c3aed" text-anchor="middle" font-weight="bold">I(X; Y)</text>
+<text x="300.0" y="40.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#2563eb" text-anchor="middle" font-weight="bold">H(X)</text>
+<text x="440.0" y="40.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#ea580c" text-anchor="middle" font-weight="bold">H(Y)</text>
+</svg>

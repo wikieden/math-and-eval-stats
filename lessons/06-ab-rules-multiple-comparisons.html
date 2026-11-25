@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 6 章 · A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html" class="cur"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="6-ab">第 6 章 · A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</h1><div class="run"><a class="btn" href="../animations/06-ab-rules-multiple-comparisons.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch06_ab_rules_multiple_comparisons.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch06_ab_rules_multiple_comparisons.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch06_ab_rules_multiple_comparisons.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：边测边看、一显著就停，为什么不行？20 个任务里有 1 个"显著"算不算数？多任务的结果该用均值、中位数还是别的？题目成组出现时，标准误为什么会被低估？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/05-bootstrap-bayes.html">第 5 章 Bootstrap 与 Beta 后验</a> · 下一章：<a href="../lessons/07-read-curves-and-ablations.html">第 7 章 批判地读 loss 曲线和消融表</a><br />
+对应原文：NIST e-Handbook §7.4.7 <code>materials/text/web/nist/prc47.txt</code> L100–L112（多重比较方法）、§7.4.7.3 <code>prc473.txt</code> L15–L75（Bonferroni）；Agarwal 2021 <code>materials/text/papers/rl-statistical-precipice-2108.13264.txt</code> L30–L34、L127–L133、L161（IQM）；Miller 2024 §2.2 <code>materials/text/papers/adding-error-bars-to-evals-2411.00640.txt</code> L174–L200（聚类标准误，式 (4)）<br />
+本章缩写：FWER = Family-Wise Error Rate（整族 / 错误率：一组检验里至少错一个的概率）；Bonferroni = 以数学家 Carlo Bonferroni 命名的校正；Holm = 以统计学家 Sture Holm 命名的逐步校正；IQM = Interquartile Mean（四分位 / 间 / 均值）；SE = Standard Error（标准误）；CLT = Central Limit Theorem（中心极限定理）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="5-192026-11-25">第一步：先定规则再测：偷看会把 5% 的误报变成 19%（2026-11-25）</h3>
+<p><strong>类比：掷骰子说"出 6 我就赢"，然后一直掷到出 6 为止。</strong> 每一次单看都只有 1/6 的机会，但"一直掷到满意为止"，迟早会赢。</p>
+<p>偷看（peeking）= 每测一小批就做一次检验，一显著就停下来宣布结果。每次检验单看都是 5% 的误报，但看了 10 次，"至少有一次误报"的概率会累积。</p>
+<p><strong>例子</strong>（代码模拟：A、B 其实一样，成功率都是 0.7；最多测 100 次）：</p>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>误报率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每测 10 次看一眼，显著就停</td>
+<td><strong>0.188</strong></td>
+</tr>
+<tr>
+<td>只在第 100 次看一次</td>
+<td>0.049</td>
+</tr>
+</tbody>
+</table>
+<p><strong>开测前要写下来的规则</strong>：</p>
+<ol>
+<li>主要指标（成功率？完成时间？）和比较的方向；</li>
+<li>每组测多少次（按第 3 章的样本量公式定）；</li>
+<li>α、用什么检验、要不要校正；</li>
+<li>什么情况下提前停（如果要，用专门的序贯检验方法，阈值要更严）。</li>
+</ol>
+<p><strong>一句话</strong>：边测边看、一显著就停，误报率会从 5% 涨到 19%；样本量和判定规则要在开测前写死。</p>
+<h3 id="2026-11-25">第二步：比得越多，越容易碰到"显著"（2026-11-25）</h3>
+<p><strong>类比：20 个人每人掷一次硬币连出 5 个正面的概率很小，但"20 个人里有人做到"的概率不小。</strong></p>
+<p>做 k 个独立检验、每个都在 α = 0.05 上判：</p>
+<div class="arithmatex">\[\text{FWER} = P(\text{至少一个误报}) = 1 - (1 - \alpha)^k\]</div>
+<table>
+<thead>
+<tr>
+<th>检验个数 k</th>
+<th>至少误报一个</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.050</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.226</td>
+</tr>
+<tr>
+<td>10</td>
+<td>0.401</td>
+</tr>
+<tr>
+<td>20</td>
+<td>0.642</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>（模拟：10 个任务，两个模型其实一样，每任务各测 50 次）：平均每轮有 0.52 个任务被判成"显著"。只挑那个"显著"的任务写进报告，就是在报噪声。</p>
+<p><img alt="检验个数越多，至少误报一个的概率越高" src="../figures/06-ab-rules-multiple-comparisons-fwer.png" />
+<em>图 6-1 · 不校正时 FWER 随 k 迅速上升；Bonferroni 校正后压在 5% 以下</em></p>
+<p><strong>一句话</strong>：k 个检验至少误报一个的概率是 1 − 0.95^k；20 个任务不校正，有 64% 的概率碰到至少一个假的"显著"。</p>
+<h3 id="bonferroni-holm2026-11-25">第三步：Bonferroni 和 Holm：把门槛调严（2026-11-25）</h3>
+<p><strong>类比：要求每个嫌疑人都证据确凿，整体冤案率才压得住。</strong></p>
+<ul>
+<li><strong>Bonferroni</strong>（NIST §7.4.7.3 L15–L75）：m 个检验，每个用 α/m 当门槛。简单、对任何依赖结构都成立，但偏保守。</li>
+<li><strong>Holm</strong>（逐步收紧的 Bonferroni）：p 值从小到大排，第 i 个（从 0 数）和 α/(m − i) 比；一旦有一个不过，后面全部不过。FWER 同样 ≤ α，但比 Bonferroni 检出得多。</li>
+</ul>
+<p><strong>例子</strong>（编的 6 个 p 值，α = 0.05）：</p>
+<table>
+<thead>
+<tr>
+<th>p 值</th>
+<th>0.004</th>
+<th>0.009</th>
+<th>0.012</th>
+<th>0.040</th>
+<th>0.130</th>
+<th>0.470</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>不校正（&lt; 0.05）</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Bonferroni（&lt; 0.05/6 = 0.0083）</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Holm 门槛</td>
+<td>0.0083</td>
+<td>0.0100</td>
+<td>0.0125</td>
+<td>0.0167</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Holm</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗（停）</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Holm 在这组数据上多检出 2 个，FWER 仍然控制在 5%。</p>
+<p><strong>场景代码</strong>：statsmodels 一行做多重比较校正（真实库的写法；本书环境没装 statsmodels，没跑过）：</p>
+<pre><code class="language-python">from statsmodels.stats.multitest import multipletests
+reject, p_adj, _, _ = multipletests([0.004, 0.009, 0.012, 0.040, 0.130, 0.470], alpha=0.05, method=&quot;holm&quot;)
+</code></pre>
+<p><strong>一句话</strong>：Bonferroni 每个用 α/m；Holm 从小到大逐个用 α/(m − i)，同样控制整体误报，检出更多。</p>
+<h3 id="iqm-2026-11-25">第四步：多任务汇总：IQM 比均值稳，比中位数省样本（2026-11-25）</h3>
+<p><strong>类比：评委打分去掉最高分和最低分再平均。</strong></p>
+<p>多任务结果汇总成一个数时：</p>
+<ul>
+<li><strong>均值</strong>：被少数极端任务带偏（一个任务 0.98，一个任务 0.02，就能拉动整体）；</li>
+<li><strong>中位数</strong>：稳，但只用了中间一两个数，方差大，需要更多运行；</li>
+<li><strong>IQM</strong>（Agarwal 2021 L130–L134、L161）：排序后去掉最低 25% 和最高 25%，剩下的取平均。既不被极端值左右，又用了一半的数据。</li>
+</ul>
+<p><strong>例子</strong>（编的 10 个任务分数：0.02, 0.10, 0.35, 0.41, 0.48, 0.52, 0.55, 0.61, 0.70, 0.98）：</p>
+<table>
+<thead>
+<tr>
+<th>汇总方式</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>均值</td>
+<td>0.472</td>
+</tr>
+<tr>
+<td>中位数</td>
+<td>0.500</td>
+</tr>
+<tr>
+<td>IQM（中间 6 个的平均）</td>
+<td>0.487</td>
+</tr>
+</tbody>
+</table>
+<p>Agarwal 建议同时报 IQM 和它的分层 bootstrap 区间（第 5 章），再加一张"表现分布图"（performance profile），而不是只报一个均值。</p>
+<p><img alt="均值、中位数和 IQM 用到哪些数" src="../figures/06-ab-rules-multiple-comparisons-iqm.png" />
+<em>图 6-2 · 10 个任务排成一排：均值用全部、中位数只用中间两个、IQM 用中间 6 个</em></p>
+<p><strong>一句话</strong>：IQM = 去掉两头各 25% 再平均；多任务汇总时比均值稳、比中位数省样本，还要配区间。</p>
+<h3 id="2026-11-25_1">第五步：题目成组出现：聚类标准误（2026-11-25）</h3>
+<p><strong>类比：问同一个人 4 道题，比问 4 个不同的人各 1 道题，得到的独立信息少得多。</strong></p>
+<p>很多评测的题目是成组的：同一篇文章的几道阅读题、同一个场景的几个子任务、同一个初始条件的几次重复。组内结果相关，CLT（"n 个独立样本"）的假设被打破，普通标准误会被<strong>低估</strong>（Miller §2.2 L174–L182）。</p>
+<p><strong>公式</strong>（Miller 式 (4)，L186–L190）：</p>
+<div class="arithmatex">\[SE_{\text{clustered}} = \Big(SE_{\text{CLT}}^2 + \frac{1}{n^2}\sum_c\sum_i\sum_{j\ne i}(s_{i,c} - \bar s)(s_{j,c} - \bar s)\Big)^{1/2}\]</div>
+<p>三重求和是"同组两两的协方差"；组内完全相关时，一组相当于一个样本；完全不相关时退回普通 SE（L192–L196）。</p>
+<p><strong>例子</strong>（编的：5 篇文章、每篇 4 道题）：</p>
+<table>
+<thead>
+<tr>
+<th>文章</th>
+<th>4 道题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1 1 1 1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0 0 0 0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1 1 1 0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0 0 1 0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1 1 1 1</td>
+</tr>
+</tbody>
+</table>
+<p>普通 SE 0.1095，聚类 SE <strong>0.1817</strong>，大了 1.66 倍。Miller 在真实评测上看到最多 3 倍（L198）。</p>
+<p><strong>一句话</strong>：题目成组时组内相关，普通 SE 会低估；用式 (4) 把同组协方差加回去，或者按组 bootstrap。</p>
+<h3 id="_2">动画演示：偷看的误报是怎么累积起来的</h3>
+<p><img alt="偷看与多重比较" src="../animations/06-ab-rules-multiple-comparisons.gif" /></p>
+<p>可交互版：<a href="../animations/06-ab-rules-multiple-comparisons.html">animations/06-ab-rules-multiple-comparisons.html</a>（滑块调"每测几次看一眼"和检验个数 k）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上半：40 条随机游走的 z 值曲线（两策略其实一样），水平线是 ±1.96；某条曲线一碰线就被标红"宣布显著"（第一步）；</li>
+<li>看得越勤，碰线的曲线越多，右上角的误报率跟着涨；</li>
+<li>下半：k 个任务的 p 值柱子，红线分别是 0.05、Bonferroni、Holm 的门槛（第二、三步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步 FWER）：一份消融表比了 8 个变体和基线，每个都在 0.05 上判。8 个变体其实都没用时，至少有一个"显著"的概率是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步 Holm）：4 个 p 值：0.010、0.013、0.020、0.060。分别用 Bonferroni 和 Holm（α = 0.05）判，各检出几个？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第一、五步）：同事每天早上看一次 A/B 的结果，第 6 天显著了就宣布上线；而且每个初始条件重复跑了 5 次，他把 5 次当成 5 个独立样本。指出这两个问题各会让结论偏向哪边。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>先写规则再开测，偷看一次多一分误报；<br />
+比得越多越容易撞上，一减零九五的 k 次方；<br />
+Bonferroni 除以 m，Holm 从小到大逐个放宽；<br />
+多任务报 IQM 加区间，题目成组用聚类标准误。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST39（偷看为什么不行、开测前要定哪些规则）、ST40（FWER 公式与 Bonferroni / Holm）、ST41（IQM 的定义与为什么用它）、ST42（聚类标准误为什么更大）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Agarwal 等《Deep RL at the Edge of the Statistical Precipice》</td>
+<td>§3–4；表 1 L140–L170</td>
+<td>少量运行下的不可靠做法和替代方案：分层 bootstrap、IQM、表现分布、改进概率</td>
+</tr>
+<tr>
+<td>★ Miller《Adding Error Bars to Evals》</td>
+<td>§2.2 L174–L200；附录 A</td>
+<td>聚类标准误的公式与推导</td>
+</tr>
+<tr>
+<td>NIST e-Handbook §7.4.7</td>
+<td><code>prc47.txt</code>–<code>prc474.txt</code></td>
+<td>Tukey、Scheffé、Bonferroni 各适合什么比较</td>
+</tr>
+<tr>
+<td>Kress-Gazit 等</td>
+<td>L170–L185</td>
+<td>评测流程本身怎么设计才不引入偏差</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>Bonferroni 不等式</strong>：<span class="arithmatex">\(P(\cup_i A_i) \le \sum_i P(A_i)\)</span>。每个检验误报率 α/m，至少一个误报的概率 ≤ m · α/m = α，不需要检验之间独立。</li>
+<li><strong>Holm 为什么也控制 FWER</strong>：假设有 m₀ 个真的零假设，它们中最小的那个 p 值要过的门槛最多是 α/m₀；由 Bonferroni 不等式，任何一个被错误拒绝的概率 ≤ α。</li>
+<li><strong>偷看的数学</strong>：多次检验的 z 值是同一条随机游走在不同时刻的值，相互相关但不完全相关；跨过门槛的累计概率随检查次数增加而上升（极限情况下必然跨过）。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\text{FWER} = 1 - (1 - \alpha)^k\)</span></td>
+<td>k 个独立检验至少误报一个</td>
+</tr>
+<tr>
+<td>Bonferroni：<span class="arithmatex">\(p_i &lt; \alpha/m\)</span></td>
+<td>每个检验的门槛</td>
+</tr>
+<tr>
+<td>Holm：<span class="arithmatex">\(p_{(i)} &lt; \alpha/(m - i)\)</span>，<span class="arithmatex">\(i = 0, 1, \ldots\)</span></td>
+<td>从小到大逐步收紧</td>
+</tr>
+<tr>
+<td>IQM = 中间 50% 的均值</td>
+<td>四分位间均值</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(SE_{\text{clustered}} = (SE_{\text{CLT}}^2 + \frac1{n^2}\sum_c\sum_{i\ne j}\ldots)^{1/2}\)</span></td>
+<td>Miller 式 (4)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch06_ab_rules.py</code>，配套测试 <code>tests/test_ch06.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch06_ab_rules.py  
+uv run pytest tests/test_ch06.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 偷看</td>
+<td>模拟</td>
+<td><code>peeking_false_positive()</code></td>
+<td>0.188 / 0.049</td>
+</tr>
+<tr>
+<td>第二步 FWER</td>
+<td>1 − 0.95^k</td>
+<td><code>family_error(20)</code></td>
+<td>0.642</td>
+</tr>
+<tr>
+<td>第二步 模拟</td>
+<td>10 个任务</td>
+<td><code>null_tasks_significant()</code></td>
+<td>平均 0.52 个</td>
+</tr>
+<tr>
+<td>第三步 校正</td>
+<td>Bonferroni / Holm</td>
+<td><code>bonferroni(P_VALUES)</code>、<code>holm(P_VALUES)</code></td>
+<td>检出 1 / 3 个</td>
+</tr>
+<tr>
+<td>第四步 IQM</td>
+<td>中间 50%</td>
+<td><code>iqm(TASK_SCORES)</code></td>
+<td>0.487</td>
+</tr>
+<tr>
+<td>第五步 聚类</td>
+<td>式 (4)</td>
+<td><code>clustered_se(clusters)</code></td>
+<td>0.1095 → 0.1817</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">order = np.argsort(pvals)
+for i, j in enumerate(order):                 # Holm：从最小的 p 值开始
+    if pvals[j] &lt; alpha / (m - i): reject[j] = True
+    else: break                               # 一旦不过，后面全部不过
+for c in scores_by_cluster:                   # 聚类 SE：每组内两两交叉项之和
+    d = np.asarray(c) - sbar
+    cross += d.sum() ** 2 - (d**2).sum()      # (Σd)² − Σd² = Σ_{i≠j} d_i d_j
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>交叉项的小技巧</strong>：<span class="arithmatex">\(\sum_{i\ne j}d_id_j = (\sum d)^2 - \sum d^2\)</span>，不用写双重循环。</li>
+<li><strong>IQM 在样本数不能被 4 整除时的取法</strong>：10 个数去掉"最低 25%"是 2.5 个，代码取 <code>floor</code> 和 <code>ceil</code>，实际去掉两头各 2 个、用中间 6 个；rliable 用的是按比例截尾平均，结果略有差别。</li>
+<li><strong>偷看模拟是向量化的</strong>：一次生成 2 万轮 × 100 次的结果矩阵，每 10 列做一次检验，<code>hit_any |= sig</code> 记录"有没有哪次显著过"。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>peeking_false_positive</code> 的 <code>every</code> 从 10 改成 1（每测一次就看），误报率涨到多少？</li>
+<li>把 <code>clusters</code> 里每篇文章的 4 道题都改成一半对一半错，聚类 SE 和普通 SE 还差多少？</li>
+</ol><nav class="pager"><a href="05-bootstrap-bayes.html">← 第 5 章 · Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="07-read-curves-and-ablations.html">第 7 章 · 批判地读 loss 曲线和消融表：一张图先问五个问题 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

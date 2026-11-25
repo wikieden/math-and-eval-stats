@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 14 章 · 无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html" class="cur"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="14-adam-adamw-lm">第 14 章 · 无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</h1><div class="run"><a class="btn" href="../animations/14-unconstrained-optimization.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch14_unconstrained_optimization.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch14_unconstrained_optimization.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch14_unconstrained_optimization.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：学习率为什么不能随便调大？动量在帮什么忙？Adam 为什么对每个参数"自动调步长"，AdamW 又改了什么？warmup + cosine 怎么写？拟合问题里高斯-牛顿为什么快、LM 为什么稳？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/13-calculus-autodiff.html">第 13 章 多元微积分与自动微分</a> · 下一章：<a href="../lessons/15-constrained-convex-qp.html">第 15 章 约束与凸优化</a><br />
+对应原文：MML <code>materials/text/books/mml-book.txt</code> §7.1 L12726 起（§7.1.2 动量 L12884）；Boyd <code>materials/text/books/boyd-convex-optimization.txt</code> §9.2–9.3（目录 L158–L159，正文约 L23544 起）、§9.5 牛顿法（目录 L161，正文约 L24554 起）；Adam <code>materials/text/papers/adam-1412.6980.txt</code> Algorithm 1 L75 起；AdamW <code>materials/text/papers/adamw-decoupled-weight-decay-1711.05101.txt</code> 摘要 L30–L35、Algorithm 2 L155 起<br />
+本章缩写：GD = Gradient Descent（梯度 / 下降）；lr = learning rate（学习率）；L = 最大曲率（Lipschitz 常数：梯度变化最快的程度）；κ = 条件数；Adam = Adaptive moment estimation（自适应 / 矩 / 估计）；AdamW = Adam with decoupled Weight decay（解耦权重衰减的 Adam）；wd = weight decay（权重衰减）；LM = Levenberg–Marquardt（两位数学家的姓：带阻尼的高斯-牛顿）；J = Jacobian（雅可比）；SSE = Sum of Squared Errors（残差平方和）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2l2026-11-25">第一步：梯度下降的步长：不能超过 2/L（2026-11-25）</h3>
+<p><strong>类比：在山谷里蒙眼下山，每一步迈多大。</strong> 步子太小走得慢；步子太大会跨过谷底，到对面更高的地方，越跨越高。</p>
+<div class="arithmatex">\[x \leftarrow x - \eta\,\nabla f(x)\]</div>
+<p>二次函数 <span class="arithmatex">\(f(x) = \frac12x^\top Hx\)</span> 上，每个特征方向（曲率 λ）每步乘上 <span class="arithmatex">\(1 - \eta\lambda\)</span>。要所有方向都收敛，需要 <span class="arithmatex">\(|1 - \eta\lambda| &lt; 1\)</span>，即 <span class="arithmatex">\(\eta &lt; 2/L\)</span>（L = 最大曲率）。</p>
+<p><strong>例子</strong>：<span class="arithmatex">\(f = \frac12(x_1^2 + 10x_2^2)\)</span>，L = 10，2/L = 0.2，从 [1, 1] 出发，走到 ‖x‖ &lt; 10⁻³：</p>
+<table>
+<thead>
+<tr>
+<th>学习率</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.05</td>
+<td>135 步</td>
+</tr>
+<tr>
+<td>0.18</td>
+<td>36 步</td>
+</tr>
+<tr>
+<td>0.21</td>
+<td><strong>发散</strong></td>
+</tr>
+</tbody>
+</table>
+<p>学习率最大只能到 0.2，由"最陡"的那个方向决定；可在平的方向（曲率 1）上，每步只缩 1 − 0.18 = 0.82。条件数 κ = 10 越大，"陡的不让快、平的走不动"越严重。</p>
+<p><img alt="不同学习率下的路径" src="../figures/14-unconstrained-optimization-gd.png" />
+<em>图 14-1 · 等高线是 ½(x₁² + 10x₂²)；lr = 0.05 慢慢走，lr = 0.18 沿陡的方向来回跳但收敛，lr = 0.21 越跳越远</em></p>
+<p><strong>一句话</strong>：学习率要小于 2/L（最陡方向决定）；条件数大时，平的方向收敛很慢。</p>
+<h3 id="2026-11-25">第二步：动量：在窄谷里少走之字（2026-11-25）</h3>
+<p><strong>类比：滚下山的球带着惯性。</strong> 来回跳的方向上，前后两步方向相反，惯性互相抵消；一直往下的方向上，惯性越积越大。</p>
+<div class="arithmatex">\[v \leftarrow \beta v + \nabla f(x),\qquad x \leftarrow x - \eta v\]</div>
+<p>（MML §7.1.2，L12884）</p>
+<p><strong>例子</strong>（同一个函数，lr = 0.05）：</p>
+<table>
+<thead>
+<tr>
+<th>动量 β</th>
+<th>收敛步数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>135</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>59</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>56</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：动量把过去的梯度累积起来，平的方向加速、来回跳的方向抵消。</p>
+<h3 id="adam-adamw2026-11-25">第三步：Adam 与 AdamW：每个参数自己调步长，权重衰减要解耦（2026-11-25）</h3>
+<p><strong>类比：给每个人发一双合脚的鞋。</strong> 梯度大的参数步子缩小，梯度小的参数步子放大。</p>
+<p><strong>Adam</strong>（Algorithm 1，L75 起）：</p>
+<div class="arithmatex">\[m \leftarrow \beta_1m + (1-\beta_1)g,\quad v \leftarrow \beta_2v + (1-\beta_2)g^2,\quad x \leftarrow x - \eta\frac{\hat m}{\sqrt{\hat v} + \epsilon}\]</div>
+<p><span class="arithmatex">\(\hat m = m/(1-\beta_1^t)\)</span>、<span class="arithmatex">\(\hat v = v/(1-\beta_2^t)\)</span> 是偏差修正（开头 m、v 从 0 起步，偏小）。</p>
+<p><strong>例子</strong>（第一步，lr = 10⁻³）：梯度 [0.1, 10] → 更新量 [0.001, 0.001]。第一步时 <span class="arithmatex">\(\hat m/\sqrt{\hat v} = g/|g| = \pm1\)</span>：<strong>每个坐标都走 lr，和梯度大小无关</strong>。</p>
+<p><strong>AdamW</strong>（摘要 L30–L35、Algorithm 2 L155）：在 Adam 里加 L2 正则（把 wd·x 加进梯度），这一项也会被 <span class="arithmatex">\(\sqrt{\hat v}\)</span> 除掉，大梯度的参数几乎得不到衰减；AdamW 把衰减<strong>拿到外面</strong>，直接 <span class="arithmatex">\(x \leftarrow x - \eta\cdot wd\cdot x\)</span>。</p>
+<table>
+<thead>
+<tr>
+<th>wd = 0.1，起点 [1, 1]，梯度 [0.1, 10]</th>
+<th>第一步后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AdamW（解耦）</td>
+<td>[0.9989, 0.9989]</td>
+</tr>
+<tr>
+<td>Adam + L2</td>
+<td>[0.999, 0.999]（衰减被归一化"吃掉"了）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：Adam 按梯度的二阶矩归一化，每个参数步长约 lr；AdamW 把权重衰减从梯度里拿出来单独做。</p>
+<h3 id="2026-11-25_1">第四步：学习率表与梯度裁剪（2026-11-25）</h3>
+<p><strong>warmup + cosine</strong>：开头几百步从很小线性涨到峰值（让 Adam 的 v 先估准、让早期的大梯度别把参数甩飞），然后按余弦降到一个下限：</p>
+<div class="arithmatex">\[\eta_t = \eta_{\min} + \tfrac12(\eta_{\max} - \eta_{\min})\Big(1 + \cos\frac{\pi(t - t_w)}{T - t_w}\Big)\]</div>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>0</th>
+<th>50</th>
+<th>99</th>
+<th>100</th>
+<th>550</th>
+<th>999</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>学习率（峰值 3e-4、warmup 100、共 1000 步）</td>
+<td>3.0e-6</td>
+<td>1.53e-4</td>
+<td>3.0e-4</td>
+<td>3.0e-4</td>
+<td>1.65e-4</td>
+<td>3.0e-5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>梯度裁剪</strong>：梯度范数超过门槛就按比例缩小，方向不变。[3, 4]（范数 5）裁到 1 → [0.6, 0.8]。防止一次异常大的梯度（loss spike）把参数甩出去（第 44 章）。</p>
+<p><img alt="warmup + cosine 学习率表" src="../figures/14-unconstrained-optimization-schedule.png" />
+<em>图 14-2 · 前 100 步线性上升到 3e-4，之后余弦下降到 3e-5</em></p>
+<p><strong>场景代码</strong>：PyTorch 里的真实写法（本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">opt = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: warmup_cosine(s) / 3e-4)   # 返回相对峰值的倍数
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)                     # 每步 backward 之后、step 之前
+</code></pre>
+<p><strong>一句话</strong>：warmup 先慢后快，cosine 平滑降到下限；梯度裁剪按范数缩放，防止一步甩飞。</p>
+<h3 id="-lm2026-11-25">第五步：高斯-牛顿与 LM：拟合问题的二阶方法（2026-11-25）</h3>
+<p><strong>类比：牛顿法是"照着地形的弯曲程度一步跳到底"，高斯-牛顿是"把非线性函数在当前点拉直，解一个最小二乘"。</strong></p>
+<p>拟合 <span class="arithmatex">\(\min\sum_i r_i(\theta)^2\)</span> 时，把残差在当前点线性化 <span class="arithmatex">\(r(\theta + \Delta) \approx r + J\Delta\)</span>，解线性最小二乘（第 12 章）：</p>
+<div class="arithmatex">\[J^\top J\,\Delta = -J^\top r\quad\text{（高斯-牛顿）};\qquad (J^\top J + \lambda I)\,\Delta = -J^\top r\quad\text{（LM）}\]</div>
+<p><span class="arithmatex">\(J^\top J\)</span> 是 Hessian 的近似（省掉了二阶导那一项），不用算二阶导。LM 加阻尼 λ：这一步让残差变小就接受并减小 λ（更像高斯-牛顿），变大就拒绝并加大 λ（更像小步的梯度下降）。</p>
+<p><strong>例子</strong>（编的 5 个点，拟合 y = a·e^{bx}，从 a = 1、b = 0.5 出发）：</p>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>高斯-牛顿 SSE</th>
+<th>LM SSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>212.48</td>
+<td>212.48</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>30635.95</strong>（跳过头）</td>
+<td>12.71</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2006.93</td>
+<td>1.76</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1.43</td>
+<td>0.545</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0.0023</td>
+<td>0.0269</td>
+</tr>
+</tbody>
+</table>
+<p>高斯-牛顿第一步离初值太远时线性近似失效，跳到很差的地方，但收敛后极快；LM 每步都变好，稳妥。SLAM 的光束法平差（第 55 章）、相机标定、机械臂 IK 都用 LM。</p>
+<p><strong>一句话</strong>：高斯-牛顿用 JᵀJ 近似 Hessian，快但可能跳过头；LM 加阻尼、变差就拒绝，每步都下降。</p>
+<h3 id="_2">动画演示：同一个山谷，四种走法</h3>
+<p><img alt="无约束优化" src="../animations/14-unconstrained-optimization.gif" /></p>
+<p>可交互版：<a href="../animations/14-unconstrained-optimization.html">animations/14-unconstrained-optimization.html</a>（滑块调学习率和动量 β；下拉选 GD / 动量 / Adam）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>椭圆等高线是 ½(x₁² + 10x₂²)，从 [1, 1] 出发的路径一步步画出来（第一步）；</li>
+<li>学习率拖过 0.2：路径沿 x₂ 方向越跳越远（第一步）；</li>
+<li>加动量：之字变少、更快到中心（第二步）；</li>
+<li>Adam：前几步每个坐标都走差不多同样大的步子，路径接近 45° 斜线（第三步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：<span class="arithmatex">\(f = \frac12(4x_1^2 + x_2^2)\)</span>。梯度下降最大能用多大的学习率？用 lr = 0.25 时，x₁ 和 x₂ 每步各乘多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：Adam 第一步时梯度是 [0.001, −50]，lr = 0.01。两个坐标各走多少（忽略 ε）？这说明 Adam 第一步的步长和什么无关？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四、五步）：warmup 1000 步、峰值 1e-3、总共 10000 步、下限 1e-4，第 500 步和第 5500 步的学习率各是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>步长小于二除 L，最陡方向说了算；<br />
+动量像滚球，来回抵消、一路加速；<br />
+Adam 按二阶矩归一，每步约走 lr；AdamW 衰减拿出来单做；<br />
+先 warmup 后余弦，裁剪按范数；拟合用高斯-牛顿，怕跳过头就加阻尼成 LM。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST56（学习率上限 2/L 与条件数）、ST57（Adam 更新式与 AdamW 的区别）、ST58（warmup + cosine、梯度裁剪）、ST59（高斯-牛顿与 LM 的公式和区别）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Adam（Kingma &amp; Ba 2014）</td>
+<td>Algorithm 1 L75 起；§2–3</td>
+<td>一阶矩、二阶矩、偏差修正</td>
+</tr>
+<tr>
+<td>★ AdamW（Loshchilov &amp; Hutter 2017）</td>
+<td>摘要 L30–L35；Algorithm 2 L155 起</td>
+<td>L2 正则和解耦权重衰减在 Adam 里为什么不等价</td>
+</tr>
+<tr>
+<td>★ MML</td>
+<td>§7.1 L12726–L13039</td>
+<td>梯度下降、步长、动量</td>
+</tr>
+<tr>
+<td>Boyd</td>
+<td>§9.2–9.3、§9.5（目录 L158–L161）</td>
+<td>下降方法的收敛分析、牛顿法</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/pytorch-inside-out/lessons/index.html">《PyTorch 从里到外》优化器章节</a></td>
+<td>优化器、学习率调度</td>
+<td>框架里怎么实现、参数组怎么分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>二次函数上 GD 的收敛</strong>：沿特征方向 i，误差每步乘 <span class="arithmatex">\(1 - \eta\lambda_i\)</span>；最优固定步长 <span class="arithmatex">\(\eta = 2/(\lambda_{\min} + \lambda_{\max})\)</span>，收敛率 <span class="arithmatex">\((\kappa - 1)/(\kappa + 1)\)</span>。</li>
+<li><strong>Adam 第一步</strong>：t = 1 时 <span class="arithmatex">\(\hat m = g\)</span>、<span class="arithmatex">\(\hat v = g^2\)</span>，更新量 <span class="arithmatex">\(\eta g/|g|\)</span>，就是 signSGD。</li>
+<li><strong>高斯-牛顿的 Hessian 近似</strong>：<span class="arithmatex">\(\nabla^2\frac12\|r\|^2 = J^\top J + \sum_i r_i\nabla^2r_i\)</span>；残差小或 r 接近线性时第二项可忽略。</li>
+<li><strong>LM 的两个极端</strong>：λ → 0 是高斯-牛顿；λ → ∞ 时 <span class="arithmatex">\(\Delta \approx -J^\top r/\lambda\)</span>，是步长 1/λ 的梯度下降。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\eta &lt; 2/L\)</span></td>
+<td>GD 收敛的步长上限</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(v \leftarrow \beta v + g\)</span>，<span class="arithmatex">\(x \leftarrow x - \eta v\)</span></td>
+<td>动量</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(x \leftarrow x - \eta\hat m/(\sqrt{\hat v} + \epsilon)\)</span>；AdamW 再减 <span class="arithmatex">\(\eta\,wd\,x\)</span></td>
+<td>Adam / AdamW</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\eta_t = \eta_{\min} + \frac12(\eta_{\max} - \eta_{\min})(1 + \cos\pi p)\)</span></td>
+<td>cosine 学习率</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((J^\top J + \lambda I)\Delta = -J^\top r\)</span></td>
+<td>LM（λ = 0 为高斯-牛顿）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch14_optimization.py</code>，配套测试 <code>tests/test_ch14.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch14_optimization.py  
+uv run pytest tests/test_ch14.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 GD</td>
+<td>x − ηHx</td>
+<td><code>gd(0.18, 500)</code></td>
+<td>36 步；lr = 0.21 发散</td>
+</tr>
+<tr>
+<td>第二步 动量</td>
+<td>v = βv + g</td>
+<td><code>gd(0.05, 2000, 0.5)</code></td>
+<td>59 步</td>
+</tr>
+<tr>
+<td>第三步 Adam</td>
+<td>Algorithm 1</td>
+<td><code>adam_step(...)</code></td>
+<td>更新 [0.001, 0.001]</td>
+</tr>
+<tr>
+<td>第三步 AdamW</td>
+<td>解耦衰减</td>
+<td><code>adam_step(..., wd=0.1, decoupled=True/False)</code></td>
+<td>0.9989 / 0.999</td>
+</tr>
+<tr>
+<td>第四步 学习率表</td>
+<td>warmup + cosine</td>
+<td><code>warmup_cosine(550)</code></td>
+<td>1.65e-4</td>
+</tr>
+<tr>
+<td>第五步 GN / LM</td>
+<td>(JᵀJ + λI)Δ = −Jᵀr</td>
+<td><code>gauss_newton()</code>、<code>levenberg_marquardt()</code></td>
+<td>第 1 步 30636 / 12.7</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">m = b1 * m + (1 - b1) * g;  v = b2 * v + (1 - b2) * g * g
+x = x - lr * (m / (1 - b1**t)) / (np.sqrt(v / (1 - b2**t)) + eps)   # Adam
+x = x - lr * wd * x                                                  # AdamW：衰减在归一化之外
+da, db = np.linalg.solve(j.T @ j + lam * np.eye(2), -j.T @ r)         # LM 一步
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>偏差修正只在开头重要</strong>：t = 1 时 m 只有 0.1g（小 10 倍）、v 只有 0.001g²（<span class="arithmatex">\(\sqrt v\)</span> 小约 32 倍），不修正的话第一步会走约 3.2 倍的 lr；几千步后修正项接近 1。</li>
+<li><strong>LM 的拒绝循环</strong>：<code>while True</code> 里不断加大 λ 直到这一步真的变好；所以 LM 的"一步"可能解了好几次线性方程。</li>
+<li><strong><code>gd</code> 里的发散判断</strong>：‖x‖ &gt; 10⁶ 或出现 inf / nan 就提前返回，否则 0.21 的学习率会跑出浮点范围。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>H</code> 改成 diag(1, 100)（条件数 100），lr 最大能用多少？lr = 0.019 要多少步？</li>
+<li>高斯-牛顿从 a = 1.5、b = 1.0 出发（离答案更近），还会跳过头吗？</li>
+</ol><nav class="pager"><a href="13-calculus-autodiff.html">← 第 13 章 · 多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="15-constrained-convex-qp.html">第 15 章 · 约束与凸优化：拉格朗日乘子、KKT、凸性与 QP →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

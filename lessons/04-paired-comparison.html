@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 4 章 · 配对比较：同一批初始条件交替跑，省下一半样本 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html" class="cur"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="4">第 4 章 · 配对比较：同一批初始条件交替跑，省下一半样本</h1><div class="run"><a class="btn" href="../animations/04-paired-comparison.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch04_paired_comparison.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch04_paired_comparison.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch04_paired_comparison.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：两个策略在同一批初始条件上各跑一次，和各自随便找 30 个初始条件跑，统计上有什么不同？为什么同样的数据，配对检验能显著、不配对检验却不能？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/03-power-sample-size.html">第 3 章 要测多少次</a> · 下一章：<a href="../lessons/05-bootstrap-bayes.html">第 5 章 Bootstrap 与 Beta 后验</a><br />
+对应原文：Miller《Adding Error Bars to Evals》§4.2 <code>materials/text/papers/adding-error-bars-to-evals-2411.00640.txt</code> L325–L384（式 (7) 配对标准误、方差减少）；NIST e-Handbook §7.3.1.1 <code>materials/text/web/nist/prc311.txt</code> L14–L82（配对观测）；Kress-Gazit 等 <code>materials/text/papers/robot-eval-best-practices-2409.09491.txt</code> L174–L181（对齐初始条件、交替盲测）<br />
+本章缩写：IC = Initial Condition（初始 / 条件：物体摆放、光照等开局状态）；Cov = covariance（协方差）；ρ（rho）= 相关系数；McNemar 检验 = 以统计学家 Quinn McNemar 命名的配对比例检验；b、c = 四格表里不一致的两格。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：配对 = 两个策略面对同一道题（2026-11-25）</h3>
+<p><strong>类比：两个学生考同一张卷子 vs 各考各的卷子。</strong> 各考各的，分数差里混着"卷子难易"的差别；考同一张卷子，卷子难度对两人一样，分数差就只反映水平。</p>
+<p>机器人评测里，"卷子"就是初始条件：杯子放在哪、光线怎样、桌上有没有干扰物。Kress-Gazit 等建议（L174–L181）：</p>
+<ul>
+<li>用图像叠加或桌面标记，让两个策略的初始条件尽量一样；</li>
+<li>同一个时段<strong>交替</strong>跑 A、B，评测人不知道当前是哪个策略（盲测），避免光照漂移和评测人偏见。</li>
+</ul>
+<p>做到了这两点，数据就是<strong>配对</strong>的：第 i 个初始条件上有一对结果 (A_i, B_i)（NIST §7.3.1.1 的定义，L31–L35）。</p>
+<p><strong>例子</strong>（编的，30 个初始条件）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>B 成功</th>
+<th>B 失败</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A 成功</strong></td>
+<td>14（都成功）</td>
+<td><strong>8</strong>（只有 A 成）</td>
+</tr>
+<tr>
+<td><strong>A 失败</strong></td>
+<td><strong>1</strong>（只有 B 成）</td>
+<td>7（都失败）</td>
+</tr>
+</tbody>
+</table>
+<p>A 成功 22/30，B 成功 15/30。</p>
+<p><strong>一句话</strong>：配对 = 两个策略在同一个初始条件上比；它把"这道题难不难"从比较里扣掉了。</p>
+<h3 id="2026-11-25_1">第二步：当成不配对，信息被浪费了（2026-11-25）</h3>
+<p><strong>类比：只看两人的总分，不看每道题谁对谁错。</strong></p>
+<p>把上面的数据当成两组独立样本，做第 2 章的双比例 z 检验：</p>
+<table>
+<thead>
+<tr>
+<th>算什么</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>差值</td>
+<td>22/30 − 15/30 = 0.233</td>
+</tr>
+<tr>
+<td>z</td>
+<td>1.859</td>
+</tr>
+<tr>
+<td>p</td>
+<td><strong>0.063</strong>（不显著）</td>
+</tr>
+</tbody>
+</table>
+<p>这个检验的标准误里，包含了"30 个初始条件有难有易"带来的波动。可这部分波动对 A、B 是一样的，本不该算进差值的不确定性里。</p>
+<p><strong>一句话</strong>：配对数据当成独立数据检验，初始条件难易的波动被算进了误差，结论过于保守。</p>
+<h3 id="mcnemar-2026-11-25">第三步：McNemar 检验：只看不一致的那几对（2026-11-25）</h3>
+<p><strong>类比：两个学生考同一张卷子，都对或都错的题说明不了谁强，只有"一个对一个错"的题有信息。</strong></p>
+<p>在 H₀（两个策略一样好）下，不一致的 b + c = 9 对里，"A 赢"和"B 赢"应该各占一半：</p>
+<div class="arithmatex">\[b \sim \text{Binomial}(b + c,\ 0.5)\]</div>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>统计量</th>
+<th>p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>精确检验：9 对里 A 赢 8 对</td>
+<td>—</td>
+<td><strong>0.039</strong></td>
+</tr>
+<tr>
+<td>卡方（连续性校正）<span class="arithmatex">\((\lvert b - c\rvert - 1)^2/(b + c)\)</span></td>
+<td><span class="arithmatex">\((7 - 1)^2/9 = 4.00\)</span></td>
+<td>0.046</td>
+</tr>
+</tbody>
+</table>
+<p>同一组数据，配对检验在 5% 水平上显著，不配对检验不显著。原因不是换了个公式，而是配对检验用上了"同一个初始条件"这条信息。</p>
+<p><img alt="四格表：只有对角线外的两格参与 McNemar" src="../figures/04-paired-comparison-table.png" />
+<em>图 4-1 · 灰色的"都成功 / 都失败"不提供 A、B 谁好的信息；蓝、橙两格（8 对 1）才是证据</em></p>
+<p><strong>一句话</strong>：McNemar 只看不一致的对，H₀ 下"A 赢"的对数服从 Binomial(b + c, 0.5)。</p>
+<h3 id="2cov2026-11-25">第四步：配对为什么省：方差里减掉了 2Cov（2026-11-25）</h3>
+<p><strong>类比：两个人走同一条颠簸的路，比谁走得快，路的颠簸对两人一样，可以抵消。</strong></p>
+<p>差值的方差：</p>
+<div class="arithmatex">\[\mathrm{Var}(A - B) = \mathrm{Var}(A) + \mathrm{Var}(B) - 2\,\mathrm{Cov}(A, B)\]</div>
+<p>不配对时 A、B 来自不同的初始条件，Cov = 0；配对时同一个初始条件对两者都难或都易，Cov &gt; 0，这一项就被减掉了（Miller §4.2 L340–L384）。两组方差相同、相关系数为 ρ 时：</p>
+<div class="arithmatex">\[\frac{\text{配对方差}}{\text{不配对方差}} = 1 - \rho\]</div>
+<table>
+<thead>
+<tr>
+<th>ρ</th>
+<th>配对方差 / 不配对方差</th>
+<th>同样功效要的样本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>100%</td>
+<td>一样多</td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>70%</td>
+<td>少 30%</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>50%</td>
+<td>少一半</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>（代码）：</p>
+<ul>
+<li>第一步的数据：配对标准误（Miller 式 (7)：差值 <span class="arithmatex">\(d_i = A_i - B_i\)</span> 的标准差 / √n）= 0.0920；不配对标准误 = 0.1219；</li>
+<li>模拟"初始条件有难有易"：每个 IC 一个难度 u，A 的成功率 0.95 − 0.9u，B 的 0.85 − 0.9u。A、B 结果的相关系数 0.270，配对方差是不配对的 73%。</li>
+</ul>
+<p><img alt="相关系数 ρ 越大，配对省得越多" src="../figures/04-paired-comparison-variance.png" />
+<em>图 4-2 · 横轴 ρ，纵轴配对 / 不配对的方差比（= 样本量比）；初始条件难度差异越大，ρ 越大</em></p>
+<p><strong>场景代码</strong>：statsmodels 里的 McNemar（真实库的写法；本书环境没装 statsmodels，没跑过）：</p>
+<pre><code class="language-python">from statsmodels.stats.contingency_tables import mcnemar
+table = [[14, 8],          # A 成功：B 成功 14，B 失败 8
+         [1, 7]]           # A 失败：B 成功 1，B 失败 7
+print(mcnemar(table, exact=True).pvalue)   # 只用 8 和 1 两格
+</code></pre>
+<p><strong>一句话</strong>：Var(A − B) = Var(A) + Var(B) − 2Cov；配对让 Cov &gt; 0，方差按 1 − ρ 缩小，同样的功效少测很多次。</p>
+<h3 id="_2">动画演示：配对和不配对的差值分布</h3>
+<p><img alt="配对比较" src="../animations/04-paired-comparison.gif" /></p>
+<p>可交互版：<a href="../animations/04-paired-comparison.html">animations/04-paired-comparison.html</a>（滑块调初始条件难度差异；勾选"配对"）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>左边一排方块是 30 个初始条件，颜色深浅是难度；每个方块上下两点是 A、B 的结果（第一步）；</li>
+<li>不勾配对：A、B 各自用不同的初始条件，差值的直方图很宽（第二步）；</li>
+<li>勾上配对：同一个方块上比，直方图变窄（第四步）；</li>
+<li>把难度差异调大：配对的好处越来越明显，右上角显示 ρ 和方差比。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第三步 McNemar）：40 个初始条件上，A 成 B 败 10 次，A 败 B 成 3 次。用精确检验的思路写出 p 值的算式（不必算到小数），说说"都成功"和"都失败"的次数为什么不出现在算式里。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第四步 方差）：两个策略在同一批初始条件上的结果相关系数 ρ = 0.4。和不配对相比，同样功效下配对能省多少样本？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第一步 设计）：你有两台机器人、一个下午、两个策略要比。给出一个让数据成为"配对"的评测流程（谁摆放、谁评分、按什么顺序跑）。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>同一张卷子比高低，初始条件对齐还要交替盲测；<br />
+当成独立来检验，难易波动白算进误差；<br />
+McNemar 只看一对一错，H₀ 下一半对一半；<br />
+方差减掉两倍协方差，相关 ρ 越大省得越多。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST34（配对数据的定义和为什么省：Var(A − B) 公式）、ST35（McNemar 检验只看不一致的对，H₀ 下的分布）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Miller《Adding Error Bars to Evals》</td>
+<td>§4.2 L325–L384</td>
+<td>式 (7) 配对标准误；配对方差减少量的推导</td>
+</tr>
+<tr>
+<td>★ Kress-Gazit 等《Robot Learning as an Empirical Science》</td>
+<td>L174–L185；§6.4</td>
+<td>对齐初始条件、交替盲测、评测人和示范人分开</td>
+</tr>
+<tr>
+<td>NIST e-Handbook §7.3.1.1</td>
+<td><code>prc311.txt</code> L14–L82</td>
+<td>配对观测的定义和配对 t 检验</td>
+</tr>
+<tr>
+<td>Miller 2024</td>
+<td>§5 式 (9) 的 ω² 项</td>
+<td>第 3 章样本量公式里怎么体现配对：ω² = Var(A) + Var(B) − 2Cov</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>方差的展开</strong>：<span class="arithmatex">\(\mathrm{Var}(X - Y) = \mathbb E[(X - Y - \mathbb E[X - Y])^2] = \mathrm{Var}(X) + \mathrm{Var}(Y) - 2\mathrm{Cov}(X, Y)\)</span>。独立时 Cov = 0（第 8 章）。</li>
+<li><strong>McNemar 为什么只看 b、c</strong>：差值 <span class="arithmatex">\(d_i\)</span> 只在不一致的对上非零；在 H₀（<span class="arithmatex">\(P(A成B败) = P(A败B成)\)</span>）下，给定不一致对的总数，b 服从参数 0.5 的二项分布。</li>
+<li><strong>相关系数</strong>：<span class="arithmatex">\(\rho = \mathrm{Cov}(A, B)/\sqrt{\mathrm{Var}(A)\mathrm{Var}(B)}\)</span>；方差相等时 <span class="arithmatex">\(\mathrm{Var}(A - B) = 2\sigma^2(1 - \rho)\)</span>，不配对是 <span class="arithmatex">\(2\sigma^2\)</span>。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\mathrm{Var}(A - B) = \mathrm{Var}(A) + \mathrm{Var}(B) - 2\mathrm{Cov}(A, B)\)</span></td>
+<td>差值的方差</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(SE_{\text{paired}} = \sqrt{\mathrm{Var}(d)/n}\)</span></td>
+<td>Miller 式 (7)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(b \sim \text{Binomial}(b + c, 0.5)\)</span></td>
+<td>McNemar 精确检验</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((\lvert b - c\rvert - 1)^2/(b + c) \sim \chi^2_1\)</span></td>
+<td>McNemar 卡方（连续性校正）</td>
+</tr>
+<tr>
+<td>配对 / 不配对方差 <span class="arithmatex">\(= 1 - \rho\)</span></td>
+<td>等方差时省下的比例</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch04_paired.py</code>，配套测试 <code>tests/test_ch04.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch04_paired.py  
+uv run pytest tests/test_ch04.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第二步 不配对</td>
+<td>双比例 z</td>
+<td><code>unpaired_z(22, 30, 15, 30)</code></td>
+<td>z = 1.859，p = 0.063</td>
+</tr>
+<tr>
+<td>第三步 精确</td>
+<td>Binomial(9, 0.5)</td>
+<td><code>mcnemar_exact(8, 1)</code></td>
+<td>0.039</td>
+</tr>
+<tr>
+<td>第三步 卡方</td>
+<td>连续性校正</td>
+<td><code>mcnemar_chi2(8, 1)</code></td>
+<td>4.00，p = 0.046</td>
+</tr>
+<tr>
+<td>第四步 配对 SE</td>
+<td>式 (7)</td>
+<td><code>paired_se(table_to_diffs(TABLE))</code></td>
+<td>0.0920</td>
+</tr>
+<tr>
+<td>第四步 模拟</td>
+<td>难度 u</td>
+<td><code>simulate_difficulty()</code></td>
+<td>ρ = 0.270，方差比 0.730</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">p = binomtest(b, b + c, 0.5).pvalue                  # McNemar 精确：不一致的对里 A 赢几次
+stat = (abs(b - c) - 1) ** 2 / (b + c)                # 卡方版
+d = np.array([0]*both + [1]*a_only + [-1]*b_only + [0]*neither)   # 每个 IC 的差值
+se = np.sqrt(d.var(ddof=1) / len(d))                  # 配对标准误
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>配对 SE 用差值算</strong>：不是分别算 A、B 的方差再相加，而是先每个初始条件做差，再算这 30 个差值的标准差。协方差自动被扣掉了。</li>
+<li><strong><code>ddof=1</code></strong>：样本方差除以 n − 1（Miller 式 (7) 也是 n − 1），n 小时和除以 n 差别不小。</li>
+<li><strong>模拟里的 ρ 只有 0.27</strong>：结果是 0 / 1，即使成功概率高度相关，单次结果的相关也会被抛硬币的随机性冲淡。真机上难度差异越大（有的 IC 几乎必败），ρ 越高。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>simulate_difficulty</code> 里的 0.9u 改成 0.3u（初始条件难度差不多），看 ρ 和方差比怎么变。</li>
+<li>把 <code>TABLE</code> 里的"都成功"从 14 改成 20、"都失败"从 7 改成 1，McNemar 的 p 值变不变？不配对的 p 值呢？</li>
+</ol><nav class="pager"><a href="03-power-sample-size.html">← 第 3 章 · 要测多少次：功效、最小可检测效应和样本量</a><a href="05-bootstrap-bayes.html">第 5 章 · Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

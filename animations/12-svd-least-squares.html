@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SVD 与最小二乘</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 12 章 · SVD 拉伸、最小二乘投影与条件数</h1>
+<p class="sub">配套讲义：<a href="../lessons/12-svd-least-squares.html">第 12 章 · 线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a>。SVD：单位圆依次经过 Vᵀ（转）、Σ（拉）、U（转），矩阵取 [[3, 2], [2, 3]]。最小二乘：拖第 5 个点的 y 值，拟合直线和残差跟着变。条件数：两条几乎平行的直线 x + y = 2、x + (1 + ε)y = 2 + δ。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">SVD 三段</option><option value="1">最小二乘</option><option value="2">条件数</option></select><label for="p">参数（阶段 / 第 5 点 y / δ）</label><input type="range" id="p" min="0" max="10" step="0.1" value="0"><span id="pv">0</span></div>
+<p class="note">看点：① SVD：阶段 0→1→2→3 依次是原圆、转、拉、再转；② 最小二乘：右上角的 Xᵀr 始终是 0（残差垂直于列空间）；③ 条件数：δ 从 0 拖到 10（单位 0.0001），交点从 (1, 1) 一路飞到很远。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','p'],F=[[0,0],[0,1],[0,2],[0,3],[1,8.8],[1,4],[2,0],[2,1],[2,2]];
+const XS=[0,1,2,3,4],YS=[1.1,2.9,5.2,7.1,8.8];
+function render(md,p){if(md==0){const st=Math.min(Math.round(p),3);const c=Math.SQRT1_2,V=[[c,-c],[c,c]];const S=[5,1];
+ const tf=([x,y])=>{let v=[x,y];if(st>=1)v=[V[0][0]*v[0]+V[1][0]*v[1],V[0][1]*v[0]+V[1][1]*v[1]];if(st>=2)v=[S[0]*v[0],S[1]*v[1]];if(st>=3)v=[V[0][0]*v[0]+V[0][1]*v[1],V[1][0]*v[0]+V[1][1]*v[1]];return v};
+ cap(['原始单位圆','① Vᵀ：先转到奇异向量方向','② Σ：沿坐标轴拉伸 σ₁ = 5、σ₂ = 1','③ U：再转回来，得到 [[3,2],[2,3]] 的像'][st]);frame(140,40,400,300);const m=PM(140,40,400,300,[-5,5],[-3.75,3.75]);
+ const pts=[];for(let i=0;i<=120;i++){const t=2*Math.PI*i/120;pts.push(m(...tf([Math.cos(t),Math.sin(t)])))}P(pts,'var(--accent)',2.2);const o=m(0,0);AR(o[0],o[1],...m(...tf([1,0])),'var(--bad)',2);AR(o[0],o[1],...m(...tf([0,1])),'var(--good)',2)}
+ else if(md==1){const ys=YS.slice();ys[4]=p;const n=5,sx=XS.reduce((a,b)=>a+b),sy=ys.reduce((a,b)=>a+b),sxx=XS.reduce((a,b)=>a+b*b,0),sxy=XS.reduce((a,x,i)=>a+x*ys[i],0);
+ const k=(n*sxy-sx*sy)/(n*sxx-sx*sx),b0=(sy-k*sx)/n;const r=ys.map((y,i)=>y-(k*XS[i]+b0));const xr=[r.reduce((a,v,i)=>a+v*XS[i],0),r.reduce((a,v)=>a+v,0)];
+ cap(`y = ${k.toFixed(2)}x + ${b0.toFixed(2)}；Xᵀr = [${xr.map(v=>Math.abs(v)<1e-9?'0':v.toFixed(3)).join(', ')}]`);frame(40,40,600,300);const m=PM(40,40,600,300,[-0.5,4.5],[0,11]);
+ P([m(-0.5,k*-0.5+b0),m(4.5,k*4.5+b0)],'var(--accent)',2);XS.forEach((x,i)=>{L(...m(x,ys[i]),...m(x,k*x+b0),'var(--bad)',2);const q=m(x,ys[i]);C(q[0],q[1],6,i==4?'var(--purple)':'var(--warm)',1)})}
+ else{const e=1e-4,d=p*1e-4;const y=d/e,x=2-y;cap(`δ = ${d.toFixed(4)}：交点 (${x.toFixed(2)}, ${y.toFixed(2)})，条件数约 40,000`);frame(40,40,600,300);const m=PM(40,40,600,300,[-10,4],[-2,12]);
+ P([m(-10,12),m(4,-2)],'var(--accent)',2);P([m(-10,(2+d+10)/(1+e)),m(4,(2+d-4)/(1+e))],'var(--warm)',2);const q=m(x,y);C(q[0],q[1],6,'var(--bad)',1)}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

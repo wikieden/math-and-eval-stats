@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 8 章 · 概率补课：期望方差、贝叶斯、最大似然与最大后验 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html" class="cur"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="8">第 8 章 · 概率补课：期望方差、贝叶斯、最大似然与最大后验</h1><div class="run"><a class="btn" href="../animations/08-likelihood-posterior.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch08_probability_mle_map.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch08_probability_mle_map.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch08_probability_mle_map.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：期望和方差到底在算什么？成功检测器说"成功了"，真成功的概率有多大？为什么行为克隆的损失就是"最大似然"？21/30 估成 0.70 是哪来的，加一点先验又会变成多少？<br />
+讲解日期：2026-11-23 · 上一章：<a href="../lessons/07-read-curves-and-ablations.html">第 7 章 批判地读 loss 曲线和消融表</a> · 下一章：<a href="../lessons/09-gaussian.html">第 9 章 高斯分布</a><br />
+对应原文：MML（Mathematics for Machine Learning）§6.3 Bayes' theorem <code>materials/text/books/mml-book.txt</code> L10422–L10431（式 6.23）；§6.4.1 期望 L10513–L10530、§6.4.3 方差三种写法 L10816 起、§6.4.4 和与变换 L10879 起；§8.3.1 最大似然 L14659–L14745；§8.3.2 最大后验 L14845–L14880<br />
+本章缩写：MLE = Maximum Likelihood Estimation（最大 / 似然 / 估计）；MAP = Maximum A Posteriori（最大 / 后验，估计）；BC = Behavior Cloning（行为 / 克隆）；NLL = Negative Log-Likelihood（负 / 对数 / 似然）；E[·] 读作"期望"（Expectation）；Var = Variance（方差）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-23">第一步：随机变量与期望（2026-11-23）</h3>
+<p><strong>类比：赌场的长期账本。</strong> 一次下注输赢不定，但下一万次，平均每次赚多少几乎是固定的。这个"长期平均"就是期望。</p>
+<p>随机变量 <span class="arithmatex">\(X\)</span> 是"结果 → 数"的映射。离散时，期望是每个可能值乘它的概率再相加：</p>
+<div class="arithmatex">\[\mathbb{E}[X] = \sum_x x \cdot P(X = x)\]</div>
+<ul>
+<li><span class="arithmatex">\(\mathbb{E}\)</span>：读作"期望"，花体 E。</li>
+<li><span class="arithmatex">\(P(X = x)\)</span>：<span class="arithmatex">\(X\)</span> 取值 <span class="arithmatex">\(x\)</span> 的概率，所有 <span class="arithmatex">\(x\)</span> 的概率加起来是 1。</li>
+</ul>
+<p><strong>例子（编的）</strong>：一次抓取的奖励：成功 +1（概率 0.7）、掉落 −1（0.1）、没抓到 0（0.2）。</p>
+<div class="arithmatex">\[\mathbb{E}[R] = 1 \times 0.7 + (-1)\times 0.1 + 0 \times 0.2 = 0.60\]</div>
+<p>期望是线性的：<span class="arithmatex">\(\mathbb{E}[aX + bY] = a\,\mathbb{E}[X] + b\,\mathbb{E}[Y]\)</span>，不管 X、Y 是否独立。强化学习里的回报、PPO 的目标函数都是期望（<a href="https://wikieden.github.io/rl-from-scratch/lessons/04-expectation.html">《从零学强化学习》第 4 章</a>）。</p>
+<p><strong>一句话</strong>：期望 = 按概率加权的平均，是"长期每次平均拿多少"。</p>
+<h3 id="2026-11-23_1">第二步：方差：结果晃得多厉害（2026-11-23）</h3>
+<p><strong>类比：两个射手平均都打中靶心，一个弹孔紧凑，一个散得满靶都是。</strong> 平均一样，"散"不一样。方差量的就是散。</p>
+<div class="arithmatex">\[\mathrm{Var}(X) = \mathbb{E}\big[(X - \mathbb{E}[X])^2\big] = \mathbb{E}[X^2] - \mathbb{E}[X]^2\]</div>
+<ul>
+<li>先减去平均，再平方（正负偏差都算），再取期望。</li>
+<li>标准差 <span class="arithmatex">\(\sigma = \sqrt{\mathrm{Var}}\)</span>，和 <span class="arithmatex">\(X\)</span> 同单位。</li>
+</ul>
+<p><strong>例子</strong>：上面的奖励，<span class="arithmatex">\(\mathrm{Var}(R) = 0.7\times(1-0.6)^2 + 0.1\times(-1-0.6)^2 + 0.2\times(0-0.6)^2 = 0.112 + 0.256 + 0.072 = 0.44\)</span>，标准差 0.663。</p>
+<p>两条最常用的性质：</p>
+<table>
+<thead>
+<tr>
+<th>性质</th>
+<th>公式</th>
+<th>用在哪</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>缩放</td>
+<td><span class="arithmatex">\(\mathrm{Var}(aX + b) = a^2\,\mathrm{Var}(X)\)</span></td>
+<td>归一化、学习率缩放</td>
+</tr>
+<tr>
+<td>独立相加</td>
+<td><span class="arithmatex">\(\mathrm{Var}(X + Y) = \mathrm{Var}(X) + \mathrm{Var}(Y)\)</span></td>
+<td>第 2 章差值的 SE</td>
+</tr>
+<tr>
+<td>平均 n 个独立同分布</td>
+<td><span class="arithmatex">\(\mathrm{Var}(\bar X) = \mathrm{Var}(X)/n\)</span></td>
+<td>第 1 章：<span class="arithmatex">\(SE = \sqrt{p(1-p)/n}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>成功 / 失败（伯努利）时 <span class="arithmatex">\(\mathrm{Var} = p(1-p)\)</span>；p = 0.7 时是 0.21，30 次平均的方差是 0.21/30 = 0.007，开根号就是第 1 章的 SE = 0.084。</p>
+<p><img alt="期望相同、方差不同的两种奖励" src="../figures/08-probability-mle-map-reward-pmf.png" /></p>
+<p><em>图 8-1 · 两种奖励的期望都是 0.60（黑竖线），B 的结果更分散，标准差从 0.663 变成 0.800（红箭头是 ±1σ）。</em></p>
+<p><strong>一句话</strong>：方差量"散"；n 次平均把方差除以 n，标准误按 <span class="arithmatex">\(1/\sqrt n\)</span> 缩。</p>
+<h3 id="2026-11-23_2">第三步：条件概率与贝叶斯：检测器说成功，就真成功了吗（2026-11-23）</h3>
+<p><strong>类比：体检报阳性。</strong> 检测再准，如果这种病本来就少见，阳性里也有一大半是误报。先验（本来多常见）很重要。</p>
+<div class="arithmatex">\[P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)}, \qquad P(B) = P(B\mid A)P(A) + P(B\mid \neg A)P(\neg A)\]</div>
+<ul>
+<li><span class="arithmatex">\(P(A\mid B)\)</span>：读作"B 发生的条件下 A 的概率"，后验（posterior）。</li>
+<li><span class="arithmatex">\(P(A)\)</span>：先验（prior）；<span class="arithmatex">\(P(B\mid A)\)</span>：似然（likelihood）；<span class="arithmatex">\(P(B)\)</span>：证据（evidence）。MML 式 6.23（L10429）就是这个式子。</li>
+<li><span class="arithmatex">\(\neg A\)</span>：读作"非 A"。</li>
+</ul>
+<p><strong>例子（编的）</strong>：自动成功检测器（VLM 看视频判成败）的灵敏度 0.95（真成功时 95% 说成功）、特异度 0.90（真失败时 90% 说失败）。</p>
+<table>
+<thead>
+<tr>
+<th>任务的真成功率（先验）</th>
+<th>P(检测器说成功)</th>
+<th>P(真成功 ∣ 说成功)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.70</td>
+<td>0.95×0.7 + 0.10×0.3 = 0.695</td>
+<td>0.665 / 0.695 = <strong>0.957</strong></td>
+</tr>
+<tr>
+<td>0.20</td>
+<td>0.95×0.2 + 0.10×0.8 = 0.270</td>
+<td>0.190 / 0.270 = <strong>0.704</strong></td>
+</tr>
+</tbody>
+</table>
+<p>同一个检测器，在难任务（真成功率 20%）上，它报的"成功"有 30% 是假的。用自动检测器做评测或做 RL 奖励时，难任务上的数字会被系统性抬高。</p>
+<p><img alt="100 回合里检测器说成功的有多少是真的" src="../figures/08-probability-mle-map-bayes-grid.png" /></p>
+<p><em>图 8-2 · 把概率换成 100 个回合来数。先验高时误报（橙）只有 3 个；先验低时真成功只剩 19 个，误报 8 个就占了近三成。</em></p>
+<p><strong>一句话</strong>：后验 = 似然 × 先验 ÷ 证据；先验低的时候，"准确率 90%"的检测器也会大量误报。</p>
+<h3 id="2026-11-23_3">第四步：最大似然：哪个参数最能解释看到的数据（2026-11-23）</h3>
+<p><strong>类比：侦探挑嫌疑人。</strong> 看到的线索固定，挨个问"如果是你，留下这些线索的可能性多大"，选可能性最大的那个。</p>
+<p>似然函数把数据固定、把参数当变量。21/30 的伯努利似然：</p>
+<div class="arithmatex">\[L(p) = p^{k}(1-p)^{n-k}, \qquad \log L(p) = k\log p + (n-k)\log(1-p)\]</div>
+<p>对 <span class="arithmatex">\(p\)</span> 求导令其为 0：</p>
+<div class="arithmatex">\[\frac{k}{p} - \frac{n-k}{1-p} = 0 \;\Rightarrow\; \hat p_{MLE} = \frac{k}{n}\]</div>
+<ul>
+<li>取对数：乘积变求和，数值稳定，最大值位置不变。</li>
+<li>MML §8.3.1 把它写成最小化负对数似然（L14665–L14675），机器学习里的"loss"大多就是它。</li>
+</ul>
+<p><strong>例子</strong>：21/30 的对数似然</p>
+<table>
+<thead>
+<tr>
+<th>p</th>
+<th>0.5</th>
+<th>0.6</th>
+<th>0.7</th>
+<th>0.8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>log L(p)</td>
+<td>−20.794</td>
+<td>−18.974</td>
+<td><strong>−18.326</strong></td>
+<td>−19.171</td>
+</tr>
+</tbody>
+</table>
+<p>最大值在 0.7。第 1 章的 <span class="arithmatex">\(\hat p = k/n\)</span> 不是拍脑袋，是最大似然估计。</p>
+<p><strong>一句话</strong>：MLE = 让观测数据最可能出现的参数；伯努利的 MLE 就是成功次数除以总次数。</p>
+<h3 id="2026-11-23_4">第五步：最大后验：数据少的时候，加一点先验（2026-11-23）</h3>
+<p><strong>类比：新餐馆只有 3 条评价全是五星。</strong> 你不会真信它是"满分餐馆"，心里默认"大多数餐馆在 3–4 星"，把估计往中间拉。</p>
+<p>MAP 最大化后验 <span class="arithmatex">\(p(\theta\mid D) \propto p(D\mid\theta)\,p(\theta)\)</span>，等于在负对数似然上加一项 <span class="arithmatex">\(-\log p(\theta)\)</span>（MML §8.3.2，L14871 起）。成功率用 Beta(a, b) 先验时有闭式解：</p>
+<div class="arithmatex">\[\hat p_{MAP} = \frac{k + a - 1}{n + a + b - 2}\]</div>
+<ul>
+<li>Beta(a, b)：0 到 1 之间的分布，像"事先看过 a−1 次成功、b−1 次失败"。Beta(1, 1) 是均匀分布，MAP 退回 MLE。</li>
+<li>先验在神经网络里就是正则项：高斯先验 ↔ L2 权重衰减。</li>
+</ul>
+<p><strong>例子（Beta(2, 2) 先验，相当于事先多看了 1 成 1 败）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>MLE</th>
+<th>MAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21/30</td>
+<td>0.700</td>
+<td>(21+1)/(30+2) = 0.6875</td>
+</tr>
+<tr>
+<td>3/3</td>
+<td>1.00</td>
+<td>(3+1)/(3+2) = 0.80</td>
+</tr>
+</tbody>
+</table>
+<p>数据多时 MAP ≈ MLE；数据少、结果极端时，先验把估计拉回中间。第 1 章 Wilson 区间"往 0.5 拉"也是同一个直觉。</p>
+<p><img alt="对数似然曲线与先验把估计拉回" src="../figures/08-probability-mle-map-loglik-map.png" /></p>
+<p><em>图 8-3 · 左边对应第四步，21/30 的对数似然在 0.7 最高，表里四个点都在曲线上。右边对应第五步，3/3 的似然一路涨到 p = 1；乘上 Beta(2, 2) 先验后，后验的最高点落在 0.8。</em></p>
+<p><strong>一句话</strong>：MAP = 似然 × 先验后取最大；数据少时防止 3/3 就说 100%。</p>
+<h3 id="2026-11-23_5">第六步：行为克隆就是最大似然（2026-11-23）</h3>
+<p>把示范数据 <span class="arithmatex">\(D = \{(s_i, a_i)\}\)</span> 看成从专家策略采样来的，策略 <span class="arithmatex">\(\pi_\theta(a\mid s)\)</span> 是我们的模型。最大似然：</p>
+<div class="arithmatex">\[\max_\theta \sum_i \log \pi_\theta(a_i \mid s_i) \quad\Longleftrightarrow\quad \min_\theta \underbrace{-\frac{1}{N}\sum_i \log \pi_\theta(a_i\mid s_i)}_{\text{NLL：负对数似然}}\]</div>
+<ul>
+<li>离散动作（动作 token）时，NLL 就是交叉熵损失（第 10 章）。</li>
+<li>连续动作用高斯头时，NLL 就是加权的均方误差（第 9 章）。</li>
+</ul>
+<p><strong>例子（编的）</strong>：三条示范的动作在当前策略下的概率是 0.9、0.6、0.3。</p>
+<div class="arithmatex">\[\text{NLL} = -\tfrac{1}{3}(\log 0.9 + \log 0.6 + \log 0.3) = 0.607\]</div>
+<p>概率 0.3 的那条贡献最大（−log 0.3 = 1.20）：训练会优先把"模型认为不太可能、专家却做了"的动作概率往上推。</p>
+<p><strong>场景代码</strong>：VLA 里离散动作 token 的行为克隆损失，就是 PyTorch 的交叉熵，也就是平均 NLL：</p>
+<pre><code class="language-python">import torch
+import torch.nn.functional as F
+
+logits = policy(images, instruction)                 # [batch, num_action_bins]：每个动作 bin 的打分
+loss = F.cross_entropy(logits, expert_action_bins)   # = -mean(log softmax(logits)[expert])：第六步的 NLL
+loss.backward()                                      # 最小化 NLL = 最大化示范动作的似然（第四步）
+
+# 核对：手写的 NLL 和 cross_entropy 一样
+nll = -F.log_softmax(logits, dim=-1).gather(-1, expert_action_bins[:, None]).mean()
+assert torch.allclose(loss, nll)
+</code></pre>
+<p><strong>补基础</strong>：<a href="https://wikieden.github.io/vla-from-scratch/lessons/02-behavior-cloning.html">《VLA 从零到 π0》第 2 章 行为克隆</a>讲了 BC 的训练流程和误差累积；<a href="https://wikieden.github.io/beyond-transformer/lessons/01-cross-entropy.html">《超越 Transformer》第 1 章</a>讲了交叉熵的数值细节。</p>
+<p><img alt="负对数似然曲线" src="../figures/08-probability-mle-map-nll.png" /></p>
+<p><em>图 8-4 · −log π 在 π 接近 0 时陡增。三条示范里 π = 0.3 那条贡献最大，它也是曲线最陡、梯度最大的位置。</em></p>
+<p><strong>一句话</strong>：行为克隆 = 让专家动作在策略下的概率最大 = 最小化负对数似然。</p>
+<h3 id="mle-map">动画演示：拖动数据和先验，看 MLE 和 MAP 怎么移动</h3>
+<p><img alt="似然、先验与后验" src="../animations/08-likelihood-posterior.gif" /></p>
+<p>可交互版：<a href="../animations/08-likelihood-posterior.html">animations/08-likelihood-posterior.html</a>（滑块：先验强度 a = b、生成数据用的真成功率）</p>
+<p><strong>怎么看</strong>：
+1. 蓝色曲线是似然 <span class="arithmatex">\(p^k(1-p)^{n-k}\)</span>（第四步），峰顶在 k/n。
+2. 灰色曲线是 Beta(a, a) 先验，橙色是后验（第五步），橙色峰顶就是 MAP。
+3. 动画一次加一个试验结果（录制版开头 3 次都是成功）：数据少时，先验把 MAP 拉向 0.5；数据多了，似然变尖，MAP 和 MLE 重合。
+4. 把先验强度拖大，看要多少数据才能"压过"先验。</p>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一、二步）：一个策略每回合奖励 +1 的概率 0.6、0 的概率 0.4。（a）期望和方差各是多少；（b）跑 100 回合求平均，这个平均的标准差是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：同一个成功检测器（灵敏度 0.95、特异度 0.90），任务真成功率 0.5 时，它说"成功"的回合里有多大比例是真成功？如果想在难任务上少些误报，该提高灵敏度还是特异度？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四、五步）：一个新任务只测了 5 次，成功 5 次。（a）MLE 是多少；（b）用 Beta(2, 2) 先验，MAP 是多少；（c）你会向老板报哪个数，为什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>期望是长期账本，方差量散有多宽；<br />
+n 次平均除以 n，标准误按根号缩；<br />
+先验低时阳性假，后验似然乘先验；<br />
+似然最大挑参数，克隆就是 NLL。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST11–ST14（必须记住的公式和概念）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ MML 第 6 章</td>
+<td>§6.3 L10345 起、§6.4 L10499–L11085</td>
+<td>求和 / 乘积规则、贝叶斯、期望方差、独立性的正式定义</td>
+</tr>
+<tr>
+<td>★ MML 第 8 章</td>
+<td>§8.3 L14649–L14957</td>
+<td>MLE、MAP、过拟合与正则的关系</td>
+</tr>
+<tr>
+<td>Durrett《Probability: Theory and Examples》</td>
+<td>第 1 章</td>
+<td>想看期望的严格定义（第 29 章深入篇会用）</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/rl-from-scratch/lessons/04-expectation.html">《从零学强化学习》第 4 章 期望</a></td>
+<td>全章</td>
+<td>期望在回报、值函数里的用法</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/02-behavior-cloning.html">《VLA 从零到 π0》第 2 章</a></td>
+<td>全章</td>
+<td>行为克隆的工程细节和误差累积</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>期望的线性性</strong>：<span class="arithmatex">\(\mathbb{E}[aX+bY] = a\mathbb{E}[X] + b\mathbb{E}[Y]\)</span>，不需要独立。</li>
+<li><strong>方差的另一种写法</strong>：<span class="arithmatex">\(\mathrm{Var}(X) = \mathbb{E}[X^2] - \mathbb{E}[X]^2\)</span>，MML §6.4.3 给了三种等价写法。</li>
+<li><strong>对数单调</strong>：<span class="arithmatex">\(\log\)</span> 单调递增，最大化 <span class="arithmatex">\(L\)</span> 和最大化 <span class="arithmatex">\(\log L\)</span> 的位置相同。</li>
+<li><strong>共轭先验</strong>：Beta 先验 + 伯努利似然 → Beta 后验 Beta(a + k, b + n − k)；第 5 章用它算"B 比 A 好的概率"。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\mathbb{E}[X] = \sum_x x\,P(x)\)</span></td>
+<td>期望</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathrm{Var}(X) = \mathbb{E}[(X-\mathbb{E}X)^2]\)</span></td>
+<td>方差</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathrm{Var}(\bar X) = \mathrm{Var}(X)/n\)</span></td>
+<td>平均的方差（独立同分布）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P(A\mid B) = P(B\mid A)P(A)/P(B)\)</span></td>
+<td>贝叶斯公式</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat p_{MLE} = k/n\)</span></td>
+<td>伯努利最大似然</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat p_{MAP} = (k+a-1)/(n+a+b-2)\)</span></td>
+<td>Beta(a, b) 先验下的最大后验</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathcal{L}_{BC} = -\frac{1}{N}\sum\log\pi_\theta(a_i\mid s_i)\)</span></td>
+<td>行为克隆损失 = NLL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>Python + NumPy。代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch08_probability_mle_map.py</code>，配套测试 <code>tests/test_ch08.py</code>。Mac 上直接能跑：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch08_probability_mle_map.py  
+uv run pytest tests/test_ch08.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步</td>
+<td><span class="arithmatex">\(\mathbb{E}[R]\)</span></td>
+<td><code>expectation([1,-1,0], [0.7,0.1,0.2])</code></td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td><span class="arithmatex">\(\mathrm{Var}(R)\)</span></td>
+<td><code>variance(...)</code></td>
+<td>0.44</td>
+</tr>
+<tr>
+<td>第三步</td>
+<td>贝叶斯后验</td>
+<td><code>bayes_posterior(0.7, 0.95, 0.90)</code>、<code>bayes_posterior(0.2, ...)</code></td>
+<td>0.957、0.704</td>
+</tr>
+<tr>
+<td>第四步</td>
+<td><span class="arithmatex">\(\log L(p)\)</span>、MLE</td>
+<td><code>bernoulli_log_likelihood(p, 21, 30)</code>、<code>mle_bernoulli(21, 30)</code></td>
+<td>−18.326（p = 0.7）、0.700</td>
+</tr>
+<tr>
+<td>第五步</td>
+<td>MAP</td>
+<td><code>map_bernoulli(21, 30, 2, 2)</code>、<code>map_bernoulli(3, 3, 2, 2)</code></td>
+<td>0.6875、0.80</td>
+</tr>
+<tr>
+<td>第六步</td>
+<td>NLL</td>
+<td><code>bc_nll([0.9, 0.6, 0.3])</code></td>
+<td>0.607</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">says_yes = sensitivity * prior + (1 - specificity) * (1 - prior)   # 证据 P(说成功)：真成功说对 + 真失败说错
+posterior = sensitivity * prior / says_yes                         # 贝叶斯：似然 × 先验 ÷ 证据
+log_l = k * math.log(p) + (n - k) * math.log(1 - p)               # 伯努利对数似然
+p_map = (k + a - 1) / (n + a + b - 2)                              # Beta(a, b) 先验下的 MAP
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><code>bernoulli_log_likelihood</code> 在 p = 0 或 1 时会算 <code>log(0)</code> 报错；真实训练代码里都用 <code>log_softmax</code> / <code>logsigmoid</code>，不会先算概率再取对数。</li>
+<li>对数似然是很大的负数（−18 量级），比较时只看差值；它随 n 线性变大，所以 loss 通常除以 N 取平均。</li>
+<li>MAP 公式在 a 或 b 小于 1 时可能落在区间外（峰在边界），代码只适用于 a, b ≥ 1。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把检测器特异度从 0.90 提到 0.99，看真成功率 0.20 时后验变成多少。</li>
+<li>用 Beta(10, 10) 先验算 21/30 的 MAP，体会"先验太强"的效果。</li>
+<li>对照 notebook，把 21/30 的对数似然在 0.01–0.99 上画成曲线。</li>
+</ol><nav class="pager"><a href="07-read-curves-and-ablations.html">← 第 7 章 · 批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="09-gaussian.html">第 9 章 · 高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>零假设下的差值</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 2 章 · p 值是什么：在"两个策略一样好"的世界里重做 A/B 实验</h1>
+<p class="sub">配套讲义：<a href="../lessons/02-two-proportions.html">第 2 章 · 两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a>。两个策略的真成功率都设成合并成功率（零假设）。每一帧重做一批 A/B 实验，把"A 的成功率 − B 的成功率"落进直方图。红线是实际观测到的差值，红色柱子占的比例就是模拟出来的 p 值。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">已重做实验</div><div class="v" id="sr">0</div></div>
+<div class="stat"><div class="l">|差值| ≥ 观测值</div><div class="v" id="sh">—</div></div>
+<div class="stat"><div class="l">模拟 p 值</div><div class="v" id="sp">—</div></div>
+<div class="stat"><div class="l">差值的标准误</div><div class="v" id="se">—</div></div>
+</div>
+<div class="row ctl"><label>每组次数 n <b id="nv">50</b></label><input id="n" type="range" min="10" max="300" step="10" value="50"></div>
+<div class="row ctl"><label>观测到的差值 <b id="dv">0.20</b></label><input id="d" type="range" min="0" max="0.4" step="0.01" value="0.2"></div>
+<div class="row ctl"><label>合并成功率 <b id="pv">0.70</b></label><input id="p" type="range" min="0.2" max="0.9" step="0.01" value="0.7"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：n = 50、差 0.20、合并 0.70 是讲义的 40/50 vs 30/50，p 约 0.03–0.04；把 n 拖到 20、差值拖到 0.05（讲义的 14/20 vs 13/20），差值落在直方图正中间，p 接近 0.9。n 越大直方图越窄，同样的差值越罕见。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const X0=40,W=600,Y0=300,H=250,R=0.6,BATCH=200,MAXR=6000;
+const X=v=>X0+(v+R)/(2*R)*W;
+let n,d,p,counts,total,hits,layer;
+el('line',{x1:X0,y1:Y0,x2:X0+W,y2:Y0,stroke:'var(--line)'},sv);
+[-0.6,-0.4,-0.2,0,0.2,0.4,0.6].forEach(v=>{el('line',{x1:X(v),y1:Y0-4,x2:X(v),y2:Y0+4,stroke:'var(--muted)'},sv);txt(v.toFixed(1),{x:X(v)-10,y:Y0+20,class:'m'},sv)});
+txt('A 的成功率 − B 的成功率（零假设：两者真成功率相同）',{x:X0,y:Y0+44,class:'m'},sv);
+function binom(n,p){let k=0;for(let i=0;i<n;i++)if(rnd()<p)k++;return k}
+function reset(s){seed(s);n=+$('n').value;d=+$('d').value;p=+$('p').value;counts=new Map();total=0;hits=0;draw()}
+function next(){if(total>=MAXR)return false;for(let i=0;i<BATCH;i++){const diff=(binom(n,p)-binom(n,p))/n;const key=Math.round(diff*n);counts.set(key,(counts.get(key)||0)+1);total++;if(Math.abs(diff)>=d-1e-9)hits++}draw();return total<MAXR}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const keys=[...counts.keys()];const mx=Math.max(1,...counts.values());const bw=Math.max(1.5,W/(2*R*n)*0.85);
+  keys.forEach(k=>{const v=k/n;if(Math.abs(v)>R)return;const h=counts.get(k)/mx*H;const tail=Math.abs(v)>=d-1e-9;
+    el('rect',{x:X(v)-bw/2,y:Y0-h,width:bw,height:h,fill:tail?'var(--bad)':'var(--accent)',opacity:tail?0.85:0.55},layer)});
+  [d,-d].forEach((v,i)=>{el('line',{x1:X(v),y1:30,x2:X(v),y2:Y0,stroke:'var(--bad)','stroke-width':2,'stroke-dasharray':i?'4 3':''},layer)});
+  txt('观测值 '+(d>=0?'+':'')+d.toFixed(2),{x:X(d)+4,y:44,fill:'var(--bad)'},layer);
+  const se=Math.sqrt(p*(1-p)*2/n);
+  $('sr').textContent=total;$('sh').textContent=hits;$('sp').textContent=total?(hits/total).toFixed(3):'—';$('se').textContent=se.toFixed(3)}
+['n','d','p'].forEach(id=>$(id).oninput=()=>{$(id[0]+'v').textContent=id==='n'?$(id).value:(+$(id).value).toFixed(2);ANIM.stop();reset(Date.now())});
+setupPlayer({captureSeed:5,reset,next},120);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

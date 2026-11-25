@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 13 章 · 多元微积分与自动微分：从机械臂雅可比到反向传播 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html" class="cur"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="13">第 13 章 · 多元微积分与自动微分：从机械臂雅可比到反向传播</h1><div class="run"><a class="btn" href="../animations/13-jacobian-2link.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch13_calculus_autodiff.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch13_calculus_autodiff.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch13_calculus_autodiff.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：梯度、雅可比到底是什么，和机械臂"关节转一点、末端动多少"有什么关系？链式法则为什么就是矩阵相乘？PyTorch 的 <code>backward()</code> 在一张计算图上做了什么，为什么训练用反向模式？怎么检查自己算的导数对不对？<br />
+讲解日期：2026-11-23 · 上一章：<a href="../lessons/12-svd-least-squares.html">第 12 章 线代二</a> · 下一章：<a href="../lessons/14-unconstrained-optimization.html">第 14 章 无约束优化</a><br />
+对应原文：MML 第 5 章 <code>materials/text/books/mml-book.txt</code>：§5.2 偏导与梯度 L8118 起（式 5.40 附近 L8145 "gradient … or the Jacobian"）、§5.2.2 链式法则 L8240、§5.3 向量值函数的梯度 L8326、§5.6 反向传播与自动微分 L8929；Baydin 等《Automatic Differentiation in Machine Learning: a Survey》§3.1 前向模式 <code>materials/text/papers/autodiff-survey-1502.05767.txt</code> L469、§3.2 反向模式 L616–L630<br />
+本章缩写：AD = Automatic Differentiation（自动 / 微分）；VJP = Vector-Jacobian Product（向量 / 乘 / 雅可比）；JVP = Jacobian-Vector Product（雅可比 / 乘 / 向量）；IK = Inverse Kinematics（逆 / 运动学）；∇ 读作"nabla"，梯度算子；∂ 读作"偏"，偏导数。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-23">第一步：偏导与梯度：往哪走上升最快（2026-11-23）</h3>
+<p><strong>类比：站在山坡上。</strong> 只往东走一步，高度变多少，是"对东的偏导"；只往北走一步，是"对北的偏导"。两个偏导拼成一个箭头，就是梯度，它指向最陡的上坡方向。</p>
+<div class="arithmatex">\[f(x, y) = x^2 + 3xy, \qquad \nabla f = \left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right) = (2x + 3y,\; 3x)\]</div>
+<ul>
+<li><span class="arithmatex">\(\partial f/\partial x\)</span>：读作"f 对 x 的偏导"，把 y 当常数求导。</li>
+<li>在 (1, 2)：<span class="arithmatex">\(\nabla f = (8, 3)\)</span>。沿 (8, 3) 方向走，f 上升最快；梯度下降就往反方向走（第 14 章）。</li>
+<li>MML 把梯度写成<strong>行向量</strong>（L8145），这是"雅可比的特例"。</li>
+</ul>
+<p><img alt="梯度场与等高线" src="../figures/13-calculus-autodiff-gradient-field.png" /></p>
+<p><em>图 13-1 · 灰箭头是各处梯度的方向（只画方向、长度统一），处处垂直于等高线、指向数值变大的一侧。橙箭头是 (1, 2) 处的梯度 (8, 3)。</em></p>
+<p><strong>一句话</strong>：梯度 = 所有偏导拼成的向量，指向上升最快的方向。</p>
+<h3 id="2026-11-23_1">第二步：雅可比：多个输入、多个输出的"导数表"（2026-11-23）</h3>
+<p><strong>类比：两连杆机械臂。</strong> 两个关节角 (θ₁, θ₂) 决定末端位置 (x, y)。雅可比是一张 2×2 的表：每个关节转一点，末端的 x、y 各动多少。</p>
+<p>正运动学（连杆长 <span class="arithmatex">\(l_1 = l_2 = 1\)</span>）：</p>
+<div class="arithmatex">\[x = l_1\cos\theta_1 + l_2\cos(\theta_1+\theta_2), \qquad y = l_1\sin\theta_1 + l_2\sin(\theta_1+\theta_2)\]</div>
+<div class="arithmatex">\[J = \frac{\partial(x,y)}{\partial(\theta_1,\theta_2)} = \begin{pmatrix} -l_1 s_1 - l_2 s_{12} &amp; -l_2 s_{12} \\ l_1 c_1 + l_2 c_{12} &amp; l_2 c_{12}\end{pmatrix}\]</div>
+<ul>
+<li><span class="arithmatex">\(s_1 = \sin\theta_1\)</span>，<span class="arithmatex">\(c_{12} = \cos(\theta_1+\theta_2)\)</span>。</li>
+<li>第 j 列：只转第 j 个关节时，末端速度的方向。</li>
+</ul>
+<p><strong>例子</strong>：θ = (30°, 60°)</p>
+<table>
+<thead>
+<tr>
+<th>量</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>末端位置</td>
+<td>(0.866, 1.5)</td>
+</tr>
+<tr>
+<td>J</td>
+<td><span class="arithmatex">\(\begin{pmatrix}-1.5 &amp; -1.0\\ 0.866 &amp; 0\end{pmatrix}\)</span></td>
+</tr>
+<tr>
+<td>det J</td>
+<td>0.866（= <span class="arithmatex">\(l_1 l_2\sin\theta_2\)</span>）</td>
+</tr>
+<tr>
+<td>θ₂ = 0（手臂伸直）时 det J</td>
+<td>0：奇异，末端沿手臂方向动不了</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="两连杆臂的雅可比" src="../figures/13-calculus-autodiff-2link-jacobian.png" /></p>
+<p><em>图 13-2 · θ = (30°, 60°) 时两列雅可比画成末端的速度箭头，以及单位关节速度能达到的末端速度椭圆（可操作度椭圆）。θ₂ 越接近 0，椭圆越扁，伸直时压成一条线。</em></p>
+<p><strong>一句话</strong>：雅可比 = 每个输入对每个输出的偏导排成的矩阵；行列式为 0 就是奇异位形。</p>
+<h3 id="2026-11-23_2">第三步：链式法则就是雅可比相乘（2026-11-23）</h3>
+<p><strong>类比：汇率换算。</strong> 人民币 → 美元 → 日元，总汇率是两个汇率相乘。函数套函数，导数也是一层层相乘。</p>
+<p><span class="arithmatex">\(h(\mathbf{x}) = g(f(\mathbf{x}))\)</span> 时：</p>
+<div class="arithmatex">\[J_h = J_g \cdot J_f\]</div>
+<p>（MML §5.2.2，L8240 起；§5.3 推广到向量值函数）</p>
+<p><strong>例子</strong>：关节速度 <span class="arithmatex">\(\dot\theta = (0.1, -0.2)\)</span> rad/s，末端速度 <span class="arithmatex">\(\mathbf{v} = J\dot\theta\)</span>：</p>
+<div class="arithmatex">\[\mathbf{v} = \begin{pmatrix}-1.5 &amp; -1.0\\ 0.866 &amp; 0\end{pmatrix}\begin{pmatrix}0.1\\ -0.2\end{pmatrix} = \begin{pmatrix}0.05\\ 0.0866\end{pmatrix}\]</div>
+<p>这是链式法则 <span class="arithmatex">\(\frac{d\mathbf{p}}{dt} = \frac{\partial\mathbf{p}}{\partial\theta}\frac{d\theta}{dt}\)</span>。反过来，想让末端走速度 <span class="arithmatex">\(\mathbf{v}\)</span>，就解 <span class="arithmatex">\(J\dot\theta = \mathbf{v}\)</span>：这是速度级逆运动学，J 奇异时解不出来（第 12 章伪逆、第 15 章 QP）。</p>
+<p>深网络也是一样：每层一个雅可比，整个网络的雅可比是它们的连乘。连乘太多会爆炸或消失（<a href="https://wikieden.github.io/robot-motion-rl/lessons/10-bptt-critic.html">《机器人运控与强化学习》第 10 章</a> 的 BPTT 就卡在这里）。</p>
+<p><strong>一句话</strong>：函数套函数，雅可比相乘；关节速度乘雅可比就是末端速度。</p>
+<h3 id="2026-11-23_3">第四步：自动微分：前向模式与反向模式（2026-11-23）</h3>
+<p><strong>类比：查快递路线。</strong> 前向模式像从发货点出发，沿每条路往前推"影响多大"；反向模式像从收件点出发，往回推"每个中转站对结果贡献多少"。只有一个收件点（一个 loss）时，往回推一次就得到所有发货点（所有参数）的导数。</p>
+<p>把计算拆成一张图，每个节点只做一个简单运算。例子 <span class="arithmatex">\(f = x\cdot y + \sin x\)</span>，在 x = 2、y = 3：</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>前向值</th>
+<th>局部导数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(v_1 = x\cdot y\)</span></td>
+<td>6</td>
+<td><span class="arithmatex">\(\partial v_1/\partial x = y = 3\)</span>，<span class="arithmatex">\(\partial v_1/\partial y = x = 2\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(v_2 = \sin x\)</span></td>
+<td>0.9093</td>
+<td><span class="arithmatex">\(\partial v_2/\partial x = \cos x = -0.4161\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(f = v_1 + v_2\)</span></td>
+<td>6.9093</td>
+<td>1、1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>反向模式</strong>（Baydin §3.2，L616–L630：给每个中间量配一个"伴随量" adjoint <span class="arithmatex">\(\bar v = \partial f/\partial v\)</span>）：</p>
+<ol>
+<li><span class="arithmatex">\(\bar f = 1\)</span>。</li>
+<li><span class="arithmatex">\(\bar v_1 = \bar f \cdot 1 = 1\)</span>，<span class="arithmatex">\(\bar v_2 = 1\)</span>。</li>
+<li><span class="arithmatex">\(\bar x = \bar v_1 \cdot y + \bar v_2\cdot\cos x = 3 - 0.4161 = 2.5839\)</span>；<span class="arithmatex">\(\bar y = \bar v_1 \cdot x = 2\)</span>。</li>
+</ol>
+<p>x 有两条路通到 f，两条路的贡献相加。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>前向模式（JVP）</th>
+<th>反向模式（VJP）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次能算</td>
+<td><span class="arithmatex">\(J\mathbf{v}\)</span>：一个输入方向的影响</td>
+<td><span class="arithmatex">\(\mathbf{u}^\top J\)</span>：一个输出对所有输入的梯度</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>输入少、输出多（如 2 个关节 → 末端 6 维）</td>
+<td>输出少、输入多（<strong>一个 loss、上亿参数</strong>）</td>
+</tr>
+<tr>
+<td>代价</td>
+<td>每个输入方向一遍</td>
+<td>每个输出一遍，但要存前向的中间值（显存）</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="计算图上的前向与反向" src="../figures/13-calculus-autodiff-graph.png" /></p>
+<p><em>图 13-3 · f = x·y + sin x 的计算图。蓝色是前向值，橙色是反向传回的伴随量；x 的伴随量是两条路之和。</em></p>
+<p><strong>一句话</strong>：自动微分把链式法则按计算图机械地执行；一个 loss 对很多参数求导用反向模式，代价约等于再跑一遍前向。</p>
+<h3 id="2026-11-23_4">第五步：怎么检查导数对不对（2026-11-23）</h3>
+<p>手推雅可比、手写反向传播都容易错。标准做法是和<strong>中心差分</strong>比：</p>
+<div class="arithmatex">\[\frac{\partial f}{\partial x_i} \approx \frac{f(\mathbf{x} + h\mathbf{e}_i) - f(\mathbf{x} - h\mathbf{e}_i)}{2h}\]</div>
+<ul>
+<li><span class="arithmatex">\(\mathbf{e}_i\)</span>：第 i 维是 1、其余为 0 的向量；h 取 1e-6 左右（float64）。</li>
+<li>误差是 <span class="arithmatex">\(O(h^2)\)</span>；h 太小会被浮点舍入误差淹没（第 22 章）。</li>
+</ul>
+<p><strong>例子</strong>：两连杆雅可比的解析式和中心差分，最大误差 8.2e-11。</p>
+<p><strong>场景代码</strong>：真实项目里，雅可比和梯度检查都让 PyTorch 来做：</p>
+<pre><code class="language-python">import torch
+from torch.autograd.functional import jacobian
+from torch.autograd import gradcheck
+
+def fk(theta):                                         # 两连杆正运动学（第二步）
+    t1, t2 = theta[0], theta[1]
+    return torch.stack([torch.cos(t1) + torch.cos(t1 + t2), torch.sin(t1) + torch.sin(t1 + t2)])
+
+theta = torch.deg2rad(torch.tensor([30.0, 60.0], dtype=torch.float64))
+J = jacobian(fk, theta)                                # 自动微分算出 2×2 雅可比 = [[-1.5, -1.0], [0.866, 0]]
+v = J @ torch.tensor([0.1, -0.2], dtype=torch.float64) # 第三步：末端速度
+
+theta.requires_grad_(True)
+assert gradcheck(fk, (theta,))                         # 第五步：和中心差分对比，必须用 float64
+</code></pre>
+<p><strong>补基础</strong>：<a href="https://wikieden.github.io/pytorch-inside-out/lessons/04-autograd.html">《PyTorch 从里到外》第 4 章 Autograd</a> 讲了反向图在 PyTorch 里怎么存、怎么执行；<a href="https://wikieden.github.io/robot-architecture/lessons/02-kinematics.html">《机器人软硬件架构》第 2 章 运动学</a> 讲了机械臂的正逆运动学。</p>
+<p><img alt="差分步长与误差" src="../figures/13-calculus-autodiff-finite-diff-error.png" /></p>
+<p><em>图 13-4 · 用差分算 sin x 在 x = 1 的导数。h 大时误差来自截断（前向差分 O(h)，中心差分 O(h²)）；h 太小时浮点舍入误差按 ε/h 变大。中心差分在 h ≈ 1e-6 附近最准，误差约 1e-11。</em></p>
+<p><strong>一句话</strong>：自己写的导数，一律用中心差分（<code>gradcheck</code>）在 float64 下对一遍。</p>
+<h3 id="_2">动画演示：拖关节角，看雅可比和奇异位形</h3>
+<p><img alt="两连杆雅可比" src="../animations/13-jacobian-2link.gif" /></p>
+<p>可交互版：<a href="../animations/13-jacobian-2link.html">animations/13-jacobian-2link.html</a>（滑块：θ₁、θ₂）</p>
+<p><strong>怎么看</strong>：
+1. 手臂按 θ₂ 从 150° 慢慢转到 0° 播放。末端画两支箭头：雅可比的两列（第二步）。
+2. 椭圆是"所有单位关节速度能达到的末端速度"（<span class="arithmatex">\(J\dot\theta\)</span>，<span class="arithmatex">\(\|\dot\theta\| = 1\)</span>，第三步）。
+3. 下方显示 det J。θ₂ → 0 时两支箭头趋于共线，椭圆压扁，det J → 0：手臂伸直，沿手臂方向动不了。
+4. 自己拖 θ₁：椭圆形状不变，只是整体转动；det J 只跟 θ₂ 有关。</p>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：<span class="arithmatex">\(f(x, y) = x^2 y + e^y\)</span>，求梯度，并算出在 (1, 0) 处的值。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二、三步）：两连杆臂 <span class="arithmatex">\(l_1 = l_2 = 1\)</span>，θ = (0°, 90°)。（a）末端位置；（b）雅可比；（c）关节速度 (0.1, 0.1) 时末端速度。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：对 <span class="arithmatex">\(f = (x + y)\cdot x\)</span> 画计算图，在 x = 1、y = 2 处用反向模式手算 ∂f/∂x 和 ∂f/∂y。一个有 7B 参数、1 个 loss 的模型，为什么用反向模式而不是前向模式？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>偏导拼成梯度，指向最陡上坡；<br />
+雅可比是导数表，行列为零就奇异；<br />
+链式法则矩阵乘，关节速度乘出末端；<br />
+一个 loss 反向推，求导记得差分核。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST19–ST22（必须记住的公式和概念）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ MML 第 5 章</td>
+<td>§5.2–5.3 L8118–L8720；§5.6 L8929–L9254</td>
+<td>梯度、雅可比、矩阵求导、反向传播的正式推导</td>
+</tr>
+<tr>
+<td>★ Baydin 等自动微分综述</td>
+<td>§3.1 L469 起、§3.2 L616 起</td>
+<td>前向 / 反向模式的执行过程和复杂度</td>
+</tr>
+<tr>
+<td>Modern Robotics（Lynch &amp; Park）第 5 章</td>
+<td><code>robot-system-architecture/materials/books/modern-robotics-lynch-park.pdf</code></td>
+<td>空间雅可比、物体雅可比、奇异性与可操作度</td>
+</tr>
+<tr>
+<td>Matrix Cookbook</td>
+<td>第 2 节 Derivatives</td>
+<td>查矩阵求导公式</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/pytorch-inside-out/lessons/04-autograd.html">《PyTorch 从里到外》第 4 章</a></td>
+<td>全章</td>
+<td>autograd 在框架里的实现</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>全微分</strong>：<span class="arithmatex">\(df = \nabla f \cdot d\mathbf{x}\)</span>，梯度是"一阶近似里的系数"；第 22 章的线性化用同一个式子。</li>
+<li><strong>可操作度（manipulability）</strong>：<span class="arithmatex">\(\sqrt{\det(JJ^\top)}\)</span>，椭圆面积的度量；为 0 即奇异。</li>
+<li><strong>反向模式的代价</strong>：一次反向约为前向的 2–3 倍计算量，但要存全部中间值；激活重计算（checkpointing）用计算换显存。</li>
+<li><strong>VJP 组合</strong>：<span class="arithmatex">\(\mathbf{u}^\top J_g J_f = (\mathbf{u}^\top J_g) J_f\)</span>，从左往右乘，每步都是向量乘矩阵，从不显式构造完整雅可比。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\nabla f = (\partial f/\partial x_1, \dots, \partial f/\partial x_n)\)</span></td>
+<td>梯度</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(J_{ij} = \partial f_i/\partial x_j\)</span></td>
+<td>雅可比</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(J_{g\circ f} = J_g J_f\)</span></td>
+<td>链式法则</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{v} = J\dot\theta\)</span></td>
+<td>关节速度 → 末端速度</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\det J = l_1 l_2\sin\theta_2\)</span></td>
+<td>两连杆的奇异条件</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\frac{f(x+h)-f(x-h)}{2h}\)</span></td>
+<td>中心差分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>Python + NumPy。代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch13_calculus_autodiff.py</code>，配套测试 <code>tests/test_ch13.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch13_calculus_autodiff.py  
+uv run pytest tests/test_ch13.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步</td>
+<td>梯度</td>
+<td><code>grad_f(1, 2)</code></td>
+<td>[8, 3]</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td>正运动学、雅可比</td>
+<td><code>fk_2link</code>、<code>jacobian_2link(30°, 60°)</code></td>
+<td>(0.866, 1.5)；[[−1.5, −1.0], [0.866, 0]]，det 0.866</td>
+</tr>
+<tr>
+<td>第三步</td>
+<td><span class="arithmatex">\(J\dot\theta\)</span></td>
+<td><code>J @ [0.1, -0.2]</code></td>
+<td>(0.05, 0.0866)</td>
+</tr>
+<tr>
+<td>第四步</td>
+<td>反向模式</td>
+<td><code>Var</code>、<code>backward()</code></td>
+<td>f = 6.9093，∂f/∂x = 2.5839，∂f/∂y = 2</td>
+</tr>
+<tr>
+<td>第五步</td>
+<td>中心差分</td>
+<td><code>numeric_jacobian(fk_2link, θ)</code></td>
+<td>最大误差 8.2e-11</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def __mul__(self, other):                                  # 乘法节点：记下两个父节点和各自的局部导数
+    return Var(self.value * other.value, ((self, other.value), (other, self.value)))
+
+for v in reversed(order):                                  # 按拓扑序倒着走（从 loss 往输入）
+    for p, local in v.parents:
+        p.grad += v.grad * local                           # 伴随量 = 上游伴随 × 局部导数；多条路径相加
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li>反向传播前必须<strong>拓扑排序</strong>：一个节点要等所有下游的伴随量收齐才能往上传；直接递归会在共享节点上重复计算。</li>
+<li><code>p.grad +=</code> 而不是 <code>=</code>：x 同时进了乘法和 sin，两条路的贡献相加。PyTorch 的梯度默认也累加，所以每步训练前要 <code>zero_grad()</code>。</li>
+<li>中心差分在 float32 下 h 取 1e-6 会被舍入误差淹没，<code>gradcheck</code> 要求 float64。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>给 <code>Var</code> 加一个 <code>exp</code> 方法（局部导数是它自己），用 f = x·exp(y) 测一下。</li>
+<li>把 θ₂ 从 60° 逐步减到 1°，打印 det J，看它怎么趋于 0。</li>
+<li>对照 notebook，把 <code>numeric_jacobian</code> 的 h 从 1e-2 扫到 1e-12，画出误差曲线（先降后升）。</li>
+</ol><nav class="pager"><a href="12-svd-least-squares.html">← 第 12 章 · 线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="14-unconstrained-optimization.html">第 14 章 · 无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

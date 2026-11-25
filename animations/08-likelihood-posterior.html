@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>似然与后验</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 8 章 · 最大似然与最大后验：数据越多，先验越不重要</h1>
+<p class="sub">配套讲义：<a href="../lessons/08-probability-mle-map.html">第 8 章 · 概率补课：期望方差、贝叶斯、最大似然与最大后验</a>。蓝线是似然 p^k(1−p)^(n−k)，灰线是 Beta(a, a) 先验，橙线是后验（似然 × 先验）。三条线都缩放到峰值为 1，只看形状和峰的位置。播放时按"真成功率 0.7"一次加一个试验结果。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 330"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">成功 / 总数</div><div class="v" id="skn">0 / 0</div></div>
+<div class="stat"><div class="l">MLE = k/n</div><div class="v" id="sm">—</div></div>
+<div class="stat"><div class="l">MAP</div><div class="v" id="sa">—</div></div>
+<div class="stat"><div class="l">先验</div><div class="v" id="sp">—</div></div>
+</div>
+<div class="row ctl"><label>先验强度 a = b <b id="av">3</b></label><input id="a" type="range" min="1" max="20" step="1" value="3"></div>
+<div class="row ctl"><label>真成功率（生成数据用）<b id="tv">0.70</b></label><input id="t" type="range" min="0.05" max="0.95" step="0.05" value="0.7"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：开头几次全成功时，MLE 直接是 1.00，MAP 被先验拉回中间；试验多了，蓝线变尖，橙线和蓝线几乎重合。先验强度拖到 20，要几十次试验才能把 MAP 拉到 MLE 附近。a = 1 是均匀先验，MAP 恒等于 MLE。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const X0=40,W=600,Y0=270,H=220,MAXN=60;const X=v=>X0+v*W;
+el('line',{x1:X0,y1:Y0,x2:X0+W,y2:Y0,stroke:'var(--line)'},sv);
+[0,0.2,0.4,0.6,0.8,1].forEach(v=>{el('line',{x1:X(v),y1:Y0-4,x2:X(v),y2:Y0+4,stroke:'var(--muted)'},sv);txt(v.toFixed(1),{x:X(v)-9,y:Y0+20,class:'m'},sv)});
+txt('成功率 p',{x:X0+W-60,y:Y0+40,class:'m'},sv);
+let a,t,k,n,layer,seq;
+function logcurve(f){const xs=[],ys=[];for(let i=1;i<200;i++){const p=i/200;xs.push(p);ys.push(f(p))}const m=Math.max(...ys);return xs.map((p,i)=>[p,Math.exp(ys[i]-m)])}
+function path(pts,c,w,dash){return el('polyline',{points:pts.map(([p,y])=>X(p)+','+(Y0-y*H)).join(' '),fill:'none',stroke:c,'stroke-width':w,'stroke-dasharray':dash||''},layer)}
+function reset(s){seed(s);a=+$('a').value;t=+$('t').value;k=0;n=0;seq=[];for(let i=0;i<MAXN;i++)seq.push(rnd()<t?1:0);
+  if(CAPTURE){seq[0]=1;seq[1]=1;seq[2]=1}draw()}
+function next(){if(n>=MAXN)return false;k+=seq[n];n++;draw();return n<MAXN}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const lp=p=>(a-1)*Math.log(p)+(a-1)*Math.log(1-p);
+  const ll=p=>k*Math.log(p)+(n-k)*Math.log(1-p);
+  path(logcurve(lp),'var(--muted)',2,'5 4');
+  if(n>0)path(logcurve(ll),'var(--accent)',2.5);
+  path(logcurve(p=>ll(p)+lp(p)),'var(--warm)',2.5);
+  const mle=n?k/n:null,map=(k+a-1)/(n+2*a-2||1);
+  if(mle!==null){el('line',{x1:X(mle),y1:Y0,x2:X(mle),y2:Y0-H-8,stroke:'var(--accent)','stroke-dasharray':'3 3'},layer);txt('MLE',{x:X(mle)-14,y:Y0-H-12,fill:'var(--accent)'},layer)}
+  if(n+2*a-2>0){el('line',{x1:X(map),y1:Y0,x2:X(map),y2:Y0-H+12,stroke:'var(--warm)','stroke-dasharray':'3 3'},layer);txt('MAP',{x:X(map)-14,y:Y0-H+8,fill:'var(--warm)'},layer)}
+  txt('蓝 = 似然　灰虚线 = 先验 Beta('+a+', '+a+')　橙 = 后验',{x:X0,y:22,class:'m'},layer);
+  $('skn').textContent=k+' / '+n;$('sm').textContent=mle===null?'—':mle.toFixed(3);$('sa').textContent=(n+2*a-2>0)?map.toFixed(3):'—';$('sp').textContent='Beta('+a+', '+a+')'}
+$('a').oninput=()=>{$('av').textContent=$('a').value;ANIM.stop();reset(Date.now())};
+$('t').oninput=()=>{$('tv').textContent=(+$('t').value).toFixed(2);ANIM.stop();reset(Date.now())};
+setupPlayer({captureSeed:2,reset,next},250);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

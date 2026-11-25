@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>种子方差与平滑滞后</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 7 章 · 种子方差和平滑滞后</h1>
+<p class="sub">配套讲义：<a href="../lessons/07-read-curves-and-ablations.html">第 7 章 · 批判地读 loss 曲线和消融表：一张图先问五个问题</a>。上半：配置 A 和 B 的种子分数（前 5 个是讲义里的数，之后按均值 71.9 / 72.7、标准差 1.3 随机补）；每个点是一个种子。下半：一条在第 200 步突降 0.5 的 loss 曲线和它的 EMA 平滑。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="ns">每边种子数</label><input type="range" id="ns" min="1" max="30" step="1" value="1"><span id="nsv">1</span><label for="bt">EMA 系数 β</label><input type="range" id="bt" min="0" max="0.99" step="0.01" value="0.9"><span id="btv">0.9</span></div>
+<p class="note">看点：① 只有 1 个种子时 B − A 的符号是随机的；种子多了才稳定；② 右上角是 Welch 近似的 p 值；③ 拖 β：平滑曲线的拐点往右挪，β = 0.99 时要 230 步才走完 90%。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const PHI=z=>0.5*(1+erf(z/Math.SQRT2));
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}
+const npdf=(x,m,s)=>Math.exp(-0.5*((x-m)/s)**2)/(s*2.5066283);
+const IDS=['ns','bt'],F=[[1,0.9],[3,0.9],[5,0.9],[15,0.9],[30,0.9],[30,0.99]];
+const SA=memo('a',()=>{seed(11);return [71.2,72.8,70.1,73.5,71.9].concat(Array.from({length:25},()=>71.9+1.3*gauss()))}),SB=memo('b',()=>{seed(97);return [72.4,71.0,73.9,72.2,74.1].concat(Array.from({length:25},()=>72.7+1.3*gauss()))});
+const LC=memo('lc',()=>{seed(4);return Array.from({length:600},(_,t)=>2*Math.exp(-t/300)+0.5-0.5*(t>=200)+0.15*gauss())});
+function render(ns,bt){const a=SA.slice(0,ns),b=SB.slice(0,ns),ma=a.reduce((x,y)=>x+y)/ns,mb=b.reduce((x,y)=>x+y)/ns;
+ const va=ns>1?a.reduce((x,y)=>x+(y-ma)**2,0)/(ns-1):1.69,vb=ns>1?b.reduce((x,y)=>x+(y-mb)**2,0)/(ns-1):1.69,t=(mb-ma)/Math.sqrt(va/ns+vb/ns),p=2*(1-PHI(Math.abs(t)));
+ cap(`每边 ${ns} 个种子：B − A = ${(mb-ma>=0?'+':'')}${(mb-ma).toFixed(2)}，p ≈ ${p.toFixed(3)}；β = ${(+bt).toFixed(2)} 走完 90% 要 ${bt>0?Math.ceil(Math.log(0.1)/Math.log(bt)):1} 步`);
+ frame(40,40,600,110);const m=PM(40,40,600,110,[68,77],[0,3]);a.forEach(v=>{const q=m(v,1);C(q[0],q[1],4,'var(--accent)',.8)});b.forEach(v=>{const q=m(v,2);C(q[0],q[1],4,'var(--warm)',.8)});
+ [[ma,1,'var(--accent)'],[mb,2,'var(--warm)']].forEach(([v,y,c])=>{const q=m(v,y);L(q[0],q[1]-14,q[0],q[1]+14,c,3)});T('A',30,m(0,1)[1]+4,'end','num');T('B',30,m(0,2)[1]+4,'end','num');
+ frame(40,170,600,170);const m2=PM(40,170,600,170,[0,600],[0,3]);P(LC.map((v,i)=>m2(i,Math.max(Math.min(v,3),0))).filter((_,i)=>i%2==0),'var(--line)',1);
+ let s=LC[0];const sm=LC.map(v=>(s=bt*s+(1-bt)*v));P(sm.map((v,i)=>m2(i,v)).filter((_,i)=>i%2==0),'var(--accent)',2.2);const d=m2(200,0);L(d[0],170,d[0],340,'var(--bad)',1.2,'4 3')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

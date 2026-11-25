@@ -1,0 +1,111 @@
+# 数学与实验统计
+
+**在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
+
+> 66 章大纲 · 已写 19 章 · 19 个动画（GIF + 可交互页面）· 47 张静态图 · 68 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
+
+## 这本书讲什么
+
+从"30 次试验成功 21 次"这一个数字讲起：它有多准、两个这样的数怎么比、要测多少次才分得出高下、配对和多任务时怎么算、怎么定 A/B 判定规则，最后落到批判地读 loss 曲线和消融表。后 15 章从 Physical AI 的算法倒推数学：VLA 和动作头要的概率、高斯、KL 与生成模型数学，训练要的线代、自动微分与优化，运控要的 QP 与 Riccati，感知要的旋转、李群与 Kalman，扩散采样要的 ODE 积分器。再往下两篇：深入篇（第 23–34 章）把 RL、LQR / MPC、扩散与 flow 的推导写完整，补测度论、泛函、流形、随机微积分、最优传输、信息几何；应用篇（第 35–66 章）讲 CNN、Transformer、PyTorch 张量背后的数学，现代 LLM 的 scaling law、μP、Muon / SOAP、MoE、分布式账本、KV cache、FlashAttention、量化、投机解码、DPO / GRPO，以及导航感知（多视几何、SLAM、VIO、规划、NeRF / 3DGS）、多模态融合和 VLN。哪个算法用到哪块数学，见 Physical AI 数学需求地图。
+
+- **适合谁**：要审实验、做评测、拍板"新模型能不能上"的人。只需要高中数学；缺的概率知识在第 1 章和第 8 章现场补。
+- **读完能做什么**：当场回答 算法总监路线 · 达标自测 第 1 题（21/30 对 18/30，为什么下不了结论、要测多少次）；给团队的成功率表配上正确的区间；审一张消融表；做 学习计划 的里程碑 ME-M1–M36；读 π0 的 flow 动作头、PPO 的重要性比率、ESKF 的四元数扰动、凸 MPC 的 QP 时，知道每一步数学在干什么。
+- **怎么读**：按章顺序读；只想学 VLA 或运动控制的，按 [章节索引](https://wikieden.github.io/math-and-eval-stats/lessons/appendix-reading-paths.html) 挑章读。每章先看讲解和动画，再自己做练习，最后用复习卡片隔几天考自己。
+
+## 讲解的特点
+
+- **一次一小步**：每个概念按"白话类比 → 公式（每个符号说清楚怎么读）→ 小数字亲手算一遍"讲。
+- **能用图讲的都用图讲**：数量不设上限。关键机制做成可交互页面（▶ 播放、→ 单步、↺ 重来，有参数的配滑块），讲义里嵌 GIF；数字之间的关系画成图表，结构和流程画成静态图。
+- **对照原文**：讲到原文的地方标本地文本行号（如 NIST §7.2.4.1 L22–L27），引用原句。
+- **保留真实的学习过程**：练习与作答记录里是学习时的原话、对错和点评。
+- **术语不设门槛**：缩写第一次出现就给英文全称并逐词解释，全书缩写见 [缩写与术语表](https://wikieden.github.io/math-and-eval-stats/lessons/appendix-glossary.html)。
+- **每章都有代码对照**：讲义里的数字用 Python（NumPy、SciPy）算一遍，配测试核对；只算讲过的例子，不提前给练习答案。
+- **每章收尾有口诀**：全部口诀汇总在本页末尾。
+
+## 示例动画
+
+| 动画 | 章 | 演什么 |
+|---|---|---|
+| ![置信区间覆盖率](https://wikieden.github.io/math-and-eval-stats/animations/01-ci-coverage.gif) | [第 1 章 一个成功率有多准](https://wikieden.github.io/math-and-eval-stats/lessons/01-success-rate-ci.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/01-ci-coverage.html) | 重复做"测 n 次"的实验，数区间盖住真值的比例：Wald 名义 95%、实际约 81%；Wilson 约 97% |
+| ![零假设下的差值](https://wikieden.github.io/math-and-eval-stats/animations/02-null-distribution.gif) | [第 2 章 两个成功率比一比](https://wikieden.github.io/math-and-eval-stats/lessons/02-two-proportions.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/02-null-distribution.html) | 在"两者一样"的世界里重做 A/B 实验，红色尾巴的比例就是 p 值 |
+| ![似然与后验](https://wikieden.github.io/math-and-eval-stats/animations/08-likelihood-posterior.gif) | [第 8 章 概率补课](https://wikieden.github.io/math-and-eval-stats/lessons/08-probability-mle-map.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/08-likelihood-posterior.html) | 逐个加试验结果，看 MLE 和 MAP 怎么移动、先验什么时候被压过 |
+| ![二维高斯与条件分布](https://wikieden.github.io/math-and-eval-stats/animations/09-gaussian-conditional.gif) | [第 9 章 高斯分布](https://wikieden.github.io/math-and-eval-stats/lessons/09-gaussian.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/09-gaussian-conditional.html) | 协方差椭圆；已知 x₂ 后 x₁ 的分布变窄 |
+| ![两连杆雅可比](https://wikieden.github.io/math-and-eval-stats/animations/13-jacobian-2link.gif) | [第 13 章 微积分与自动微分](https://wikieden.github.io/math-and-eval-stats/lessons/13-calculus-autodiff.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/13-jacobian-2link.html) | 雅可比两列与速度椭圆，手臂伸直时压成一条线 |
+| ![欧拉角与万向锁](https://wikieden.github.io/math-and-eval-stats/animations/18-euler-gimbal-lock.gif) | [第 18 章 3D 旋转](https://wikieden.github.io/math-and-eval-stats/lessons/18-rotations-rigid-transforms.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/18-euler-gimbal-lock.html) | pitch 到 90° 后 yaw、roll 同时转，方块不动 |
+| ![REINFORCE 与基线](https://wikieden.github.io/math-and-eval-stats/animations/24-reinforce-baseline.gif) | [第 24 章 策略梯度推导](https://wikieden.github.io/math-and-eval-stats/lessons/24-policy-gradient.html) · [▶ 交互](https://wikieden.github.io/math-and-eval-stats/animations/24-reinforce-baseline.html) | 同一串随机数，减基线后梯度估计更集中、学得更稳 |
+
+## 目录
+
+| 章 | 主题 | 一句话精要 | 动画 | 卡片 | 状态 |
+|---|---|---|---|---|---|
+| 1 | [一个成功率有多准](https://wikieden.github.io/math-and-eval-stats/lessons/01-success-rate-ci.html) | p̂ 是估计；SE = √(p̂(1−p̂)/n)；小样本靠边用 Wilson；半宽 ∝ 1/√n；95% 是方法的覆盖率 | [覆盖率](https://wikieden.github.io/math-and-eval-stats/animations/01-ci-coverage.gif) | ST01–ST05 | ✅ 讲解（练习待作答） |
+| 2 | [两个成功率比一比](https://wikieden.github.io/math-and-eval-stats/lessons/02-two-proportions.html) | 差值 SE 是两份方差相加；p 值 = 零假设下这么极端的概率；小样本用 Fisher；区间重叠 ≠ 不显著 | [零假设下的差值](https://wikieden.github.io/math-and-eval-stats/animations/02-null-distribution.gif) | ST06–ST10 | ✅ 讲解（练习待作答） |
+| 3 | [要测多少次](https://wikieden.github.io/math-and-eval-stats/lessons/03-power-sample-size.html) | 一类 / 二类错误、功效 80%、MDE；样本量公式；"10 个点要几百次" | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/03-power-sample-size.gif) | ST31–ST33 | ✅ 讲解（练习待作答） |
+| 4 | [配对比较](https://wikieden.github.io/math-and-eval-stats/lessons/04-paired-comparison.html) | 同一初始条件 A/B 交替跑；McNemar 只看不一致的对；配对降方差 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/04-paired-comparison.gif) | ST34–ST35 | ✅ 讲解（练习待作答） |
+| 5 | [Bootstrap 与 Beta 后验](https://wikieden.github.io/math-and-eval-stats/lessons/05-bootstrap-bayes.html) | 重抽样估区间；Beta(1+k, 1+n−k)；P(B > A) | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/05-bootstrap-bayes.gif) | ST36–ST38 | ✅ 讲解（练习待作答） |
+| 6 | [A/B 判定规则与多重比较](https://wikieden.github.io/math-and-eval-stats/lessons/06-ab-rules-multiple-comparisons.html) | 先写判定规则再测；偷看提前停；Bonferroni / Holm；多任务多种子用 IQM + 分层 bootstrap | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/06-ab-rules-multiple-comparisons.gif) | ST39–ST42 | ✅ 讲解（练习待作答） |
+| 7 | [批判地读 loss 曲线和消融表](https://wikieden.github.io/math-and-eval-stats/lessons/07-read-curves-and-ablations.html) | 种子方差、平滑、过拟合、评测漂移；审稿追问清单 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/07-read-curves-and-ablations.gif) | ST43–ST45 | ✅ 讲解（练习待作答） |
+| 8 | [概率补课：期望方差、贝叶斯、MLE 与 MAP](https://wikieden.github.io/math-and-eval-stats/lessons/08-probability-mle-map.html) | 平均的方差除以 n；先验低时检测器误报多；伯努利 MLE = k/n；MAP 往中间拉；行为克隆 = NLL | [似然与后验](https://wikieden.github.io/math-and-eval-stats/animations/08-likelihood-posterior.gif) | ST11–ST14 | ✅ 讲解（练习待作答） |
+| 9 | [高斯分布](https://wikieden.github.io/math-and-eval-stats/lessons/09-gaussian.html) | 协方差 = 椭圆（特征分解）；线性变换还是高斯；条件方差只减不增；高斯头 log 概率；单峰平均撞墙 | [二维高斯与条件分布](https://wikieden.github.io/math-and-eval-stats/animations/09-gaussian-conditional.gif) | ST15–ST18 | ✅ 讲解（练习待作答） |
+| 10 | [信息论：熵、交叉熵、KL](https://wikieden.github.io/math-and-eval-stats/lessons/10-information-kl.html) | 交叉熵 = 负对数似然；KL ≥ 0 且不对称，正向 / 反向 KL 各偏向什么；互信息 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/10-information-kl.gif) | ST46–ST48 | ✅ 讲解（练习待作答） |
+| 11 | [线代一：矩阵乘法、秩、特征分解](https://wikieden.github.io/math-and-eval-stats/lessons/11-linear-algebra-basics.html) | 矩阵乘法三种看法；秩；特征分解；正定与二次型（LQR 代价、Hessian） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/11-linear-algebra-basics.gif) | ST49–ST51 | ✅ 讲解（练习待作答） |
+| 12 | [线代二：SVD、低秩、最小二乘](https://wikieden.github.io/math-and-eval-stats/lessons/12-svd-least-squares.html) | SVD 与最优低秩近似、LoRA 参数量；最小二乘 = 正交投影；伪逆、条件数 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/12-svd-least-squares.gif) | ST52–ST55 | ✅ 讲解（练习待作答） |
+| 13 | [多元微积分与自动微分](https://wikieden.github.io/math-and-eval-stats/lessons/13-calculus-autodiff.html) | 梯度、雅可比（det J = sin θ₂）；链式法则 = 雅可比相乘；反向模式算 VJP；中心差分核对 | [两连杆雅可比](https://wikieden.github.io/math-and-eval-stats/animations/13-jacobian-2link.gif) | ST19–ST22 | ✅ 讲解（练习待作答） |
+| 14 | [无约束优化](https://wikieden.github.io/math-and-eval-stats/lessons/14-unconstrained-optimization.html) | 步长与收敛、动量、Adam / AdamW、warmup + cosine、梯度裁剪；牛顿、高斯-牛顿、LM | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/14-unconstrained-optimization.gif) | ST56–ST59 | ✅ 讲解（练习待作答） |
+| 15 | [约束与凸优化](https://wikieden.github.io/math-and-eval-stats/lessons/15-constrained-convex-qp.html) | 拉格朗日、KKT、凸性判断、QP 标准形；MPC、全身控制、带限位 IK 写成 QP | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/15-constrained-convex-qp.gif) | ST60–ST62 | ✅ 讲解（练习待作答） |
+| 16 | [蒙特卡洛与采样](https://wikieden.github.io/math-and-eval-stats/lessons/16-monte-carlo-sampling.html) | MC 误差 ∝ 1/√N；重要性采样（PPO 比率、off-policy）；基线降方差；CEM、MPPI 加权 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/16-monte-carlo-sampling.gif) | ST63–ST65 | ✅ 讲解（练习待作答） |
+| 17 | [生成模型的数学](https://wikieden.github.io/math-and-eval-stats/lessons/17-generative-math.html) | 潜变量与 ELBO、重参数化、score、SDE / ODE 视角、连续性方程、flow matching 目标 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/17-generative-math.gif) | ST66–ST68 | ✅ 讲解（练习待作答） |
+| 18 | [3D 旋转与刚体变换](https://wikieden.github.io/math-and-eval-stats/lessons/18-rotations-rigid-transforms.html) | 旋转矩阵四性质；万向锁；Rodrigues；四元数半角与双覆盖；网络输出用 6D；SE(3) 求逆 | [欧拉角与万向锁](https://wikieden.github.io/math-and-eval-stats/animations/18-euler-gimbal-lock.gif) | ST23–ST26 | ✅ 讲解（练习待作答） |
+| 19 | 李群入门 | SO(3) / SE(3) 的 exp / log、切空间扰动、左右雅可比、SLERP 与旋转平均 | — | — | ⬜ |
+| 20 | 状态估计 | 预测 + 更新两步；Kalman 增益；EKF / ESKF；UKF 与粒子滤波各适合什么；因子图 = 非线性最小二乘 | — | — | ⬜ |
+| 21 | 动力系统与控制的数学 | 状态空间、线性化、ZOH 离散化、特征值判稳定、Riccati 与 LQR、Bellman 是不动点方程 | — | — | ⬜ |
+| 22 | 数值计算 | Euler / Heun / RK4 与扩散采样步数；logsumexp；float16 / bfloat16；病态问题 | — | — | ⬜ |
+| 23 | MDP 与 Bellman 的完整推导 | 值函数、Bellman 期望 / 最优方程、压缩映射与值迭代收敛 | — | — | ⬜ |
+| 24 | [策略梯度推导](https://wikieden.github.io/math-and-eval-stats/lessons/24-policy-gradient.html) | 似然比搬梯度；环境项消失；基线不偏降方差；PPO 只截得利侧；GRPO 组内归一化 | [REINFORCE 与基线](https://wikieden.github.io/math-and-eval-stats/animations/24-reinforce-baseline.gif) | ST27–ST30 | ✅ 讲解（练习待作答） |
+| 25 | LQR 与 Riccati | 动态规划推 Riccati、有限 / 无限时域、可控性 | — | — | ⬜ |
+| 26 | 轨迹优化与 MPC | 线性化后写成 QP（稠密 / 稀疏形式）、iLQR 的二阶展开与回传、MPPI 的路径积分推导 | — | — | ⬜ |
+| 27 | 扩散模型推导 | 前向闭式、后验 $q(x_{t-1}\mid x_t,x_0)$、ELBO 到噪声预测损失、DDIM、Tweedie 公式与 score | — | — | ⬜ |
+| 28 | Flow matching 推导 | 概率路径、条件与边际目标等价、rectified flow、π0 动作头的训练与采样 | — | — | ⬜ |
+| 29 | 测度论概率入门 | σ-代数、测度、Lebesgue 积分与期望、密度 = Radon-Nikodym 导数、条件期望、收敛方式与大数定律 / CLT 的严格陈述 | — | — | ⬜ |
+| 30 | 泛函分析入门 | 赋范空间、Banach / Hilbert 空间、算子与谱、Banach 不动点定理（Bellman 收敛）、再生核 Hilbert 空间（RKHS）与核方法 | — | — | ⬜ |
+| 31 | 微分几何与流形优化 | 流形、切空间、黎曼度量、测地线、黎曼梯度与收缩映射（retraction）、和第 19 章李群接上 | — | — | ⬜ |
+| 32 | 随机微积分 | 布朗运动、Itô 积分与 Itô 引理、SDE 的数值解、Fokker-Planck 方程、反向时间 SDE、概率流 ODE | — | — | ⬜ |
+| 33 | 最优传输 | Monge / Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输与 flow matching 的联系 | — | — | ⬜ |
+| 34 | 信息几何 | Fisher 信息、自然梯度、KL 的局部二阶近似、TRPO / PPO 的信任域视角 | — | — | ⬜ |
+| 35 | 卷积的数学 | 卷积 = 稀疏共享权重的线性映射（Toeplitz）、互相关与卷积、尺寸公式（填充 / 步长 / 空洞）、感受野、卷积定理与 FFT、im2col = 矩阵乘法 | — | — | ⬜ |
+| 36 | CNN 训练的数学 | 卷积的反向传播与转置卷积、Xavier / He 初始化的方差推导、BatchNorm 的统计与梯度、残差的梯度流 | — | — | ⬜ |
+| 37 | 注意力的数学 | 缩放点积与 $\sqrt{d}$ 的方差推导、softmax 温度与饱和、注意力 = 核平滑 / 软检索、多头的低秩视角、因果 mask | — | — | ⬜ |
+| 38 | 位置编码的数学 | 正弦编码、RoPE = 复数旋转与相对位置、长度外推（位置插值、NTK、YaRN）、ALiBi | — | — | ⬜ |
+| 39 | 归一化与信号传播 | LayerNorm / RMSNorm 的几何、Pre-LN vs Post-LN 的梯度、深层网络的方差传播 | — | — | ⬜ |
+| 40 | 张量的数学（PyTorch） | stride 与索引映射、广播规则、einsum 记号、视图与连续性、计算图上的 VJP 组合 | — | — | ⬜ |
+| 41 | Scaling law | 幂律与 log-log 拟合、Kaplan vs Chinchilla、计算最优 N / D、6ND 计算账、外推误差 | — | — | ⬜ |
+| 42 | 参数化与初始化 | 标准参数化 vs μP、超参从小模型迁移、宽度缩放下的学习率 | — | — | ⬜ |
+| 43 | 现代优化器 | Adam 的预条件视角、Shampoo / SOAP（Kronecker 预条件）、Muon（Newton-Schulz 正交化）、Lion（符号更新）、WSD 调度、梯度噪声尺度与临界批量 | — | — | ⬜ |
+| 44 | 训练稳定性 | loss spike、logit 增长与 z-loss、QK-norm、梯度裁剪、bf16 / fp8 的数值范围与缩放因子 | — | — | ⬜ |
+| 45 | MoE 的数学 | 门控与 top-k、负载均衡辅助损失、无辅助损失的偏置调节、容量因子、专家并行的通信量 | — | — | ⬜ |
+| 46 | 分布式训练账本 | 显存四项（参数 / 梯度 / 优化器状态 / 激活）、ZeRO 分片、DP / TP / PP 通信量公式、流水线气泡、all-reduce 成本模型 | — | — | ⬜ |
+| 47 | 推理成本模型 | roofline 与算术强度、prefill vs decode、KV cache 大小公式、批处理与延迟的权衡 | — | — | ⬜ |
+| 48 | 高效注意力与序列模型 | online softmax 与 FlashAttention 分块、MQA / GQA、MLA 低秩 KV、稀疏注意力（NSA）、线性注意力与 SSM 的并行扫描（Mamba） | — | — | ⬜ |
+| 49 | 量化的数学 | 均匀量化的 scale / zero-point、舍入误差方差、per-channel / group、离群值、GPTQ 的二阶误差补偿、AWQ、SmoothQuant 的等价变换、FP8 / FP4 格式 | — | — | ⬜ |
+| 50 | 解码与采样 | 温度、top-k / top-p、beam search、投机解码（拒绝采样为什么不改分布）、Medusa / EAGLE、约束解码 | — | — | ⬜ |
+| 51 | 后训练的数学 | SFT = MLE；Bradley-Terry 奖励模型；KL 正则目标与闭式最优策略；DPO 推导；GRPO / 推理 RL 的优势归一化 | — | — | ⬜ |
+| 52 | 相机几何 | 针孔模型、内参 / 外参、畸变模型、反投影、逆透视变换与 BEV（Lift-Splat-Shoot） | — | — | ⬜ |
+| 53 | 多视几何 | 对极约束、本质 / 基础矩阵、单应、三角化、PnP、RANSAC 迭代次数公式；DUSt3R 怎么绕开这条流水线 | — | — | ⬜ |
+| 54 | 点云与配准 | 最近邻与 KD 树、Procrustes / Kabsch（SVD 求最优旋转）、ICP（点到点 / 点到面）、法向量 = 局部协方差的最小特征向量 | — | — | ⬜ |
+| 55 | SLAM 的优化 | 重投影误差与 BA、稀疏 Hessian 与 Schur 补、位姿图、鲁棒核（Huber / Cauchy）、边缘化 | — | — | ⬜ |
+| 56 | VIO | IMU 运动学与噪声 / 偏置模型、流形上的预积分、紧耦合滑窗、可观测性 | — | — | ⬜ |
+| 57 | 地图表示 | 占用栅格的 log-odds 贝叶斯更新、TSDF / ESDF、体素与八叉树、语义地图 | — | — | ⬜ |
+| 58 | 路径规划 | 图搜索（Dijkstra、A* 与可采纳启发）、构型空间、采样规划（PRM、RRT、RRT* 渐近最优）、代价地图与势场 | — | — | ⬜ |
+| 59 | 神经场景表示 | 体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的协方差投影雅可比与球谐颜色 | — | — | ⬜ |
+| 60 | 感知的学习与评测 | IoU、NMS、PR 曲线与 mAP、匈牙利匹配（DETR）、度量学习与地点识别（三元组损失、NetVLAD、InfoNCE） | — | — | ⬜ |
+| 61 | 多模态融合的数学 | 逆方差加权（Kalman 的特例）、早 / 中 / 晚融合、交叉注意力与 Perceiver 潜变量、模态缺失与模态 dropout | — | — | ⬜ |
+| 62 | 视觉-语言对齐 | CLIP 对比损失与温度、SigLIP 的 sigmoid 损失、InfoNCE 与互信息下界、零样本分类 = 余弦相似度、视觉 token 化（patch、Q-Former、投影器）与 token 数账、ImageBind | — | — | ⬜ |
+| 63 | 非图像模态的表示 | 点云的置换不变（PointNet 对称函数）、体素化与稀疏卷积、音频的 STFT / Mel 频谱、力 / 触觉阵列、本体感受的归一化 | — | — | ⬜ |
+| 64 | 多传感器标定与对齐 | 外参标定（手眼 AX = XB）、时间同步与插值（含 SO(3) 上的插值）、相机-激光雷达投影、BEVFusion | — | — | ⬜ |
+| 65 | VLN 的几何与评测 | 指令-轨迹对齐（DTW、nDTW、SDTW）、SPL、拓扑图与图搜索、前沿探索、语言特征投到俯视地图（VLMaps） | — | — | ⬜ |
+| 66 | VLN 的序列决策 | POMDP 与信念状态、行为克隆误差 O(T²) 累积与 DAgger 的 O(T)、语言条件策略、探索的信息增益 | — | — | ⬜ |
+
+---
+
+本仓库由私有学习仓库里的脚本 `tools/publish-transformer/build.py` 自动生成，内容摘自讲义目录，不要直接修改这里的文件。

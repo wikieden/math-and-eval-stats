@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>二维高斯与条件分布</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 9 章 · 协方差是个椭圆；知道 x₂，x₁ 的不确定性就变小</h1>
+<p class="sub">配套讲义：<a href="../lessons/09-gaussian.html">第 9 章 · 高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a>。点按 x = μ + L z 逐批采样（L 是协方差的 Cholesky 因子）。橙色实线 / 虚线是 1σ / 2σ 椭圆。绿色横线是"已知 x₂ = c"，右侧小图是 x₁ 在这条线上的条件分布（绿）和不看 x₂ 时的边缘分布（灰）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 380"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">相关系数 ρ</div><div class="v" id="sr">—</div></div>
+<div class="stat"><div class="l">条件均值 μ₁|₂</div><div class="v" id="sm">—</div></div>
+<div class="stat"><div class="l">条件方差 / 边缘方差</div><div class="v" id="sv2">—</div></div>
+<div class="stat"><div class="l">样本数</div><div class="v" id="sn">0</div></div>
+</div>
+<div class="row ctl"><label>σ₁ <b id="av">1.41</b></label><input id="a" type="range" min="0.3" max="2" step="0.001" value="1.414"></div>
+<div class="row ctl"><label>σ₂ <b id="bv">1.00</b></label><input id="b" type="range" min="0.3" max="2" step="0.01" value="1"></div>
+<div class="row ctl"><label>ρ <b id="rv">0.85</b></label><input id="r" type="range" min="-0.95" max="0.95" step="0.001" value="0.849"></div>
+<div class="row ctl"><label>已知 x₂ = <b id="cv">1.50</b></label><input id="c" type="range" min="-2.5" max="2.5" step="0.1" value="1.5"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：默认值就是讲义的 Σ = [[2, 1.2], [1.2, 1]]、x₂ = 1.5，条件分布是 N(1.80, 0.56)，方差从 2 降到 0.56。ρ 拖到 0，绿色和灰色一样宽：x₂ 对 x₁ 没有信息。ρ 拖向 ±0.95，椭圆压成斜线，绿色变得很窄。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const CX=230,CY=190,S=55,BATCH=60,MAXP=2400;
+const PX=x=>CX+x*S,PY=y=>CY-y*S;
+let s1,s2,r,c,pts,layer,dots;
+el('line',{x1:PX(-4),y1:CY,x2:PX(4),y2:CY,stroke:'var(--line)'},sv);el('line',{x1:CX,y1:PY(3.2),x2:CX,y2:PY(-3.2),stroke:'var(--line)'},sv);
+txt('x₁',{x:PX(4)-14,y:CY-6,class:'m'},sv);txt('x₂',{x:CX+6,y:PY(3.2)+12,class:'m'},sv);
+dots=el('g',{},sv);
+function reset(sd){seed(sd);s1=+$('a').value;s2=+$('b').value;r=+$('r').value;c=+$('c').value;pts=0;clear(dots);draw()}
+function next(){if(pts>=MAXP)return false;const L11=s1,L21=r*s2,L22=s2*Math.sqrt(1-r*r);
+  for(let i=0;i<BATCH;i++){const z1=gauss(),z2=gauss();const x=L11*z1,y=L21*z1+L22*z2;
+    el('circle',{cx:PX(x),cy:PY(y),r:1.6,fill:'var(--accent)',opacity:0.35},dots)}pts+=BATCH;draw();return pts<MAXP}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const S11=s1*s1,S22=s2*s2,S12=r*s1*s2;const tr=S11+S22,det=S11*S22-S12*S12;const l1=tr/2+Math.sqrt(tr*tr/4-det),l2=tr/2-Math.sqrt(tr*tr/4-det);
+  const ang=Math.abs(S12)<1e-9?(S11>=S22?0:Math.PI/2):Math.atan2(l1-S11,S12);
+  [1,2].forEach(k=>{const pts=[];for(let i=0;i<=100;i++){const t=i/100*2*Math.PI;const u=k*Math.sqrt(l1)*Math.cos(t),v=k*Math.sqrt(l2)*Math.sin(t);
+    pts.push(PX(u*Math.cos(ang)-v*Math.sin(ang))+','+PY(u*Math.sin(ang)+v*Math.cos(ang)))}
+    el('polyline',{points:pts.join(' '),fill:'none',stroke:'var(--warm)','stroke-width':2,'stroke-dasharray':k===2?'6 4':''},layer)});
+  el('line',{x1:PX(-4),y1:PY(c),x2:PX(4),y2:PY(c),stroke:'var(--good)','stroke-width':2},layer);
+  const m=S12/S22*c,v=S11-S12*S12/S22;
+  el('circle',{cx:PX(m),cy:PY(c),r:5,fill:'var(--good)'},layer);
+  // 右侧小图
+  const BX=480,BW=180,BY=300,BH=200,XR=4;const bx=x=>BX+(x+XR)/(2*XR)*BW;
+  el('line',{x1:BX,y1:BY,x2:BX+BW,y2:BY,stroke:'var(--line)'},layer);
+  const pdf=(x,mu,va)=>Math.exp(-(x-mu)*(x-mu)/(2*va))/Math.sqrt(2*Math.PI*va);const peak=1/Math.sqrt(2*Math.PI*Math.min(v,S11));
+  [[0,S11,'var(--muted)'],[m,v,'var(--good)']].forEach(([mu,va,col])=>{const p=[];for(let i=0;i<=120;i++){const x=-XR+i/120*2*XR;p.push(bx(x)+','+(BY-pdf(x,mu,va)/peak*BH*0.9))}
+    el('polyline',{points:p.join(' '),fill:'none',stroke:col,'stroke-width':2},layer)});
+  txt('x₁ 的分布',{x:BX,y:BY+18,class:'m'},layer);txt('灰 = 边缘　绿 = 已知 x₂ 后',{x:BX,y:BY+36,class:'m'},layer);
+  $('sr').textContent=r.toFixed(2);$('sm').textContent=m.toFixed(2);$('sv2').textContent=v.toFixed(2)+' / '+S11.toFixed(2);$('sn').textContent=pts}
+['a','b','r','c'].forEach(id=>$(id).oninput=()=>{$(id+'v').textContent=(+$(id).value).toFixed(2);ANIM.stop();reset(Date.now())});
+setupPlayer({captureSeed:4,reset,next},90);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

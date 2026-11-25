@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>math-and-eval-stats · 复习卡片 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<a class="brand" href="index.html">数学与实验统计</a>
+<a href="lessons/index.html">讲义目录</a>
+<a href="animations/index.html">动画</a>
+<a href="review.html">复习卡片</a>
+<a href="lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<main>
+<h1 id="math-and-eval-stats">math-and-eval-stats · 复习卡片</h1>
+<p>讲解中卡住、追问、答错的地方，以及必须记住的公式和符号，都会自动追加到这里。每张卡片的"来源"链接到 <a href="lessons/index.html">lessons/</a> 里对应的讲义章节，忘了就回去重读那一章。卡片编号 ST01 起（ST = statistics）。</p>
+<h2 id="_1">怎么用</h2>
+<ol>
+<li>先只看<strong>问题</strong>，自己说出或写出答案；</li>
+<li>再点开"答案"核对；</li>
+<li>答对了，在"复习记录"里补一个日期；答错了就当天再看一遍。</li>
+</ol>
+<p><strong>复习间隔</strong>（按答对的次数）：第 1 次 → 隔 1 天 → 隔 3 天 → 隔 7 天 → 隔 14 天 → 隔 30 天。连续答对 5 次的卡片移到文末"已掌握"。</p>
+<p>想复习时说一声"复习"，我会挑到期的卡片来考你。</p>
+<hr />
+<h2 id="_2">成功率与置信区间</h2>
+<h3 id="st01-n-k-se2130">ST01 · 测了 n 次、成功 k 次，成功率的标准误（SE）怎么算？21/30 时是多少？</h3>
+<p>来源：<a href="lessons/01-success-rate-ci.html">第 1 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(SE = \sqrt{\hat p(1-\hat p)/n}\)</span>，<span class="arithmatex">\(\hat p = k/n\)</span>。SE（Standard Error：标准 / 误差）是"同样的实验重做一遍，成功率大概晃多少"。</p>
+<p>21/30：<span class="arithmatex">\(\sqrt{0.7 \times 0.3 / 30} = \sqrt{0.007} \approx 0.084\)</span>，1.96 × SE ≈ 0.16，即 ±16 个点。</p>
+<p>口诀：一勺汤不是一锅汤，七成背后正负十五。</p>
+</details>
+<h3 id="st02-wald-p-196se">ST02 · Wald 区间（p̂ ± 1.96·SE）什么时候不能用？该换什么？</h3>
+<p>来源：<a href="lessons/01-success-rate-ci.html">第 1 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>n 小、成功率靠近 0 或 1 时（机器人评测最常见的情形）。它用 <span class="arithmatex">\(\hat p\)</span> 算误差，靠边时误差被算小：30/30 的 Wald 区间是 [1, 1]，宽度 0。模拟里真值 0.9、n = 30 时，名义 95% 的 Wald 实际只盖住约 81%。</p>
+<p>换 Wilson 区间：中心往 0.5 拉一点（像多做了约 4 次、一半成一半败），根号里多一项 <span class="arithmatex">\(z^2/4n^2\)</span>。30/30 的 Wilson 区间是 [0.886, 1.000]。代码：<code>binomtest(k, n).proportion_ci(method="wilson")</code>（scipy 默认是更宽的精确区间 Clopper-Pearson）。</p>
+<p>口诀：靠零靠一 Wald 塌，Wilson 往中拉一拉。</p>
+</details>
+<h3 id="st03-wilson-95-2130">ST03 · Wilson 95% 区间的公式是什么？21/30 时是多少？</h3>
+<p>来源：<a href="lessons/01-success-rate-ci.html">第 1 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<div class="arithmatex">\[\frac{\hat p + \dfrac{z^2}{2n} \pm z\sqrt{\dfrac{\hat p(1-\hat p)}{n} + \dfrac{z^2}{4n^2}}}{1+\dfrac{z^2}{n}}, \quad z = 1.96\]</div>
+<p>21/30：中心 0.677，半宽 0.156，区间 [0.521, 0.833]。报告写成"21/30 = 70%，95% Wilson CI [52%, 83%]"。</p>
+<p>口诀：分子加 z 方除二 n，分母加 z 方除 n。</p>
+</details>
+<h3 id="st04-n-70-5">ST04 · 区间宽度和试验次数 n 是什么关系？成功率约 70%，想要 ±5 个点，大约测多少次？</h3>
+<p>来源：<a href="lessons/01-success-rate-ci.html">第 1 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>半宽 ∝ <span class="arithmatex">\(1/\sqrt n\)</span>：n 翻 4 倍，区间才窄一半。反解：<span class="arithmatex">\(n \approx z^2 p(1-p)/h^2\)</span>。</p>
+<p><span class="arithmatex">\(1.96^2 \times 0.7 \times 0.3 / 0.05^2 \approx 3.84 \times 0.21 / 0.0025 \approx 323\)</span> 次。对照：n = 30 时约 ±15.6 个点，n = 100 约 ±8.8，n = 300 约 ±5.2。</p>
+<p>口诀：想窄一半测四倍。</p>
+</details>
+<h3 id="st05-95-95">ST05 · "95% 置信区间"里的 95% 指什么？哪种说法是常见误读？</h3>
+<p>来源：<a href="lessons/01-success-rate-ci.html">第 1 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>指<strong>方法</strong>的覆盖率：把"测 n 次、算一个区间"重复很多遍，约 95% 的区间会盖住真值。真值是固定的，随机的是区间。</p>
+<p>误读："真实成功率有 95% 的概率落在这个区间里"。想要这种说法得用贝叶斯后验的可信区间（第 5 章）。</p>
+<p>口诀：九五说的是方法，不是这一个区间。</p>
+</details>
+<h2 id="_3">两组比较与检验</h2>
+<h3 id="st06">ST06 · 两个独立的成功率相减，差值的标准误怎么算？为什么比单个的大？</h3>
+<p>来源：<a href="lessons/02-two-proportions.html">第 2 章</a> 第一步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(SE_{diff} = \sqrt{\hat p_1(1-\hat p_1)/n_1 + \hat p_2(1-\hat p_2)/n_2}\)</span>。两组独立，方差相加（不是标准误相加）。</p>
+<p>14/20 vs 13/20：<span class="arithmatex">\(\sqrt{0.0105 + 0.011375} = 0.148\)</span>，差值区间 [−0.24, +0.34]，跨 0，分不出谁好。</p>
+<p>口诀：两秤称重误差叠，差值区间跨零别下结论。</p>
+</details>
+<h3 id="st07-p">ST07 · p 值的定义是什么？列出两个最常见的误读。</h3>
+<p>来源：<a href="lessons/02-two-proportions.html">第 2 章</a> 第二、五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>p 值 = 假设零假设成立（两者一样），重做实验看到"至少这么极端"的结果的概率。</p>
+<p>误读：① "p = 0.03 → 新模型更好的概率 97%"（那是后验，要用贝叶斯）；② "p = 0.74 → 两者一样好"（不显著只说明这次实验分不出来）；③ "p 越小提升越大"（p 还取决于样本量）。</p>
+<p>口诀：无罪推定先当一样，p 值问的是有多罕见。</p>
+</details>
+<h3 id="st08-z">ST08 · 双比例 z 检验的公式是什么？为什么用合并的成功率？</h3>
+<p>来源：<a href="lessons/02-two-proportions.html">第 2 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\bar p = (k_1+k_2)/(n_1+n_2)\)</span>，<span class="arithmatex">\(z = (\hat p_1 - \hat p_2)/\sqrt{\bar p(1-\bar p)(1/n_1 + 1/n_2)}\)</span>，<span class="arithmatex">\(|z| &gt; 1.96\)</span> 对应双侧 p &lt; 0.05。</p>
+<p>零假设下两组成功率相同，所以把两组合起来估这个共同的成功率。</p>
+<p>40/50 vs 30/50：<span class="arithmatex">\(\bar p = 0.7\)</span>，z = 2.18，p = 0.029。</p>
+</details>
+<h3 id="st09-ab-p">ST09 · 每组几十次的机器人 A/B 评测，该报哪种检验的 p 值？为什么？</h3>
+<p>来源：<a href="lessons/02-two-proportions.html">第 2 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Fisher 精确检验。z 检验靠正态近似，n 小时偏乐观（p 偏小）。</p>
+<p>14/20 vs 13/20：z 检验 p = 0.736，Fisher p = 1.000；40/50 vs 30/50：z 检验 0.029，Fisher 0.049（压线）。代码：<code>scipy.stats.fisher_exact([[成, 败], [成, 败]])</code>。</p>
+<p>口诀：小样本用 Fisher 算。</p>
+</details>
+<h3 id="st10-95">ST10 · "两个成功率的 95% 区间重叠，所以差异不显著"对吗？</h3>
+<p>来源：<a href="lessons/02-two-proportions.html">第 2 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>不对。重叠判断相当于把误差算成 <span class="arithmatex">\(SE_1 + SE_2\)</span>，而差值的真实误差是 <span class="arithmatex">\(\sqrt{SE_1^2 + SE_2^2}\)</span>，更小。</p>
+<p>反例：40/50 [0.670, 0.888] 和 30/50 [0.462, 0.724] 重叠，但差值的 z 检验 p = 0.029。区间<strong>不重叠</strong>一定显著；<strong>重叠</strong>要算差值区间。</p>
+<p>口诀：区间重叠不算数，差值区间才算数。</p>
+</details>
+<h2 id="_4">功效、配对与判定规则</h2>
+<h3 id="st31">ST31 · 一类错误、二类错误、功效各是什么？惯例取多少？</h3>
+<p>来源：<a href="lessons/03-power-sample-size.html">第 3 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<ul>
+<li>一类错误（误报）：两个策略其实一样，却判"B 更好"，概率 α；</li>
+<li>二类错误（漏报）：B 确实更好，却判"说不出差别"，概率 β；</li>
+<li>功效 = 1 − β：真有差别时检出来的概率。</li>
+</ul>
+<p>惯例 α = 0.05（双侧，<span class="arithmatex">\(z_{0.025} = 1.96\)</span>），功效 80%（<span class="arithmatex">\(z_{0.20} = 0.84\)</span>）。p &lt; 0.05 只控制 α；测得太少时 β 可能很大，"没检出差别"不等于"没差别"。</p>
+<p>口诀：误报 α 漏报 β，没检出不等于没差别。</p>
+</details>
+<h3 id="st32">ST32 · 两组比较、每组要多少次？公式和一个数字例子。</h3>
+<p>来源：<a href="lessons/03-power-sample-size.html">第 3 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<div class="arithmatex">\[n = \frac{(z_{\alpha/2} + z_\beta)^2\,[p_A(1-p_A) + p_B(1-p_B)]}{\delta^2}\]</div>
+<p>0.70 vs 0.85、α = 0.05、功效 80%：每组 118 次；只想检出 0.70 vs 0.75：每组 1248 次。n ∝ 1/δ²：差值减半，次数翻 4 倍。Miller 2024 式 (9)：ω² = 1/9、δ = 0.03 → 969 题。</p>
+<p>口诀：次数等于 z 和平方乘方差，再除差值平方。</p>
+</details>
+<h3 id="st33-mde-30-07">ST33 · MDE（最小可检测效应）怎么算？每组 30 次、成功率约 0.7 时是多少？</h3>
+<p>来源：<a href="lessons/03-power-sample-size.html">第 3 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<div class="arithmatex">\[\text{MDE} = (z_{\alpha/2} + z_\beta)\sqrt{\frac{2p(1-p)}{n}}\]</div>
+<p>成功率约 0.7、α = 0.05、功效 80%：n = 30 → 0.331，n = 100 → 0.182，n = 300 → 0.105。开测之前先算，期望的提升比 MDE 小，就要加次数或换配对设计。</p>
+<p>口诀：开测先算 MDE。</p>
+</details>
+<h3 id="st34">ST34 · 为什么配对比较能省样本？写出差值方差的公式。</h3>
+<p>来源：<a href="lessons/04-paired-comparison.html">第 4 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<div class="arithmatex">\[\mathrm{Var}(A - B) = \mathrm{Var}(A) + \mathrm{Var}(B) - 2\,\mathrm{Cov}(A, B)\]</div>
+<p>不配对时 Cov = 0；同一个初始条件对两个策略都难或都易，配对后 Cov &gt; 0，这一项被扣掉。等方差、相关系数 ρ 时，配对方差是不配对的 1 − ρ 倍。Miller 式 (7)：配对 SE = 差值 <span class="arithmatex">\(d_i = A_i - B_i\)</span> 的标准差 / √n。</p>
+<p>口诀：方差减掉两倍协方差。</p>
+</details>
+<h3 id="st35-mcnemar-h0">ST35 · McNemar 检验用的是四格表里的哪两格？H₀ 下它们服从什么分布？</h3>
+<p>来源：<a href="lessons/04-paired-comparison.html">第 4 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>只用不一致的两格：b = A 成 B 败、c = A 败 B 成。H₀（两个策略一样好）下 <span class="arithmatex">\(b \sim \text{Binomial}(b + c, 0.5)\)</span>。卡方版（连续性校正）：<span class="arithmatex">\((\lvert b - c\rvert - 1)^2/(b + c)\)</span>，自由度 1。例：b = 8、c = 1，精确 p = 0.039。</p>
+<p>口诀：McNemar 只看一对一错。</p>
+</details>
+<h3 id="st36-bootstrap">ST36 · 百分位 bootstrap 区间怎么做？它的好处是什么？</h3>
+<p>来源：<a href="lessons/05-bootstrap-bayes.html">第 5 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>把手里的 n 个数据当总体，有放回抽 n 个、算一次统计量，重复几万次，取 2.5% 和 97.5% 分位数。40/50 → [0.680, 0.900]。好处：中位数、IQM、两组之差等写不出公式的统计量都能用。</p>
+<p>口诀：有放回重抽几万次，分位数就是区间。</p>
+</details>
+<h3 id="st37-kn">ST37 · 均匀先验下，k/n 的后验是什么分布？可信区间和置信区间有什么区别？</h3>
+<p>来源：<a href="lessons/05-bootstrap-bayes.html">第 5 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Beta(1 + k, 1 + n − k)，均值 (1 + k)/(2 + n)。40/50 → Beta(41, 11)，均值 0.788，95% 可信区间 [0.669, 0.887]。可信区间可以直接说"真值有 95% 概率在这里"；置信区间说的是"这种造区间的方法 100 次里约 95 次盖住真值"。</p>
+<p>口诀：均匀先验加 k 次成功，贝塔一加 k、一加 n 减 k。</p>
+</details>
+<h3 id="st38-pb-a-p">ST38 · P(B &gt; A) 怎么算？它和 p 值回答的问题有什么不同？</h3>
+<p>来源：<a href="lessons/05-bootstrap-bayes.html">第 5 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>两个后验各抽一个数比大小，重复几十万次，数 B 赢的比例（40/50 vs 30/50 → 0.984）。它回答"B 更好的可能性有多大"，可以直接用于决策；p 值回答"假设两者一样时，看到这么大差别的概率"，不是"一样的概率"。</p>
+<p>口诀：两个后验比大小，胜率就是 B 更好的概率。</p>
+</details>
+<h3 id="st39">ST39 · 为什么不能边测边看、一显著就停？开测前要定下哪些规则？</h3>
+<p>来源：<a href="lessons/06-ab-rules-multiple-comparisons.html">第 6 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>每次检验单看是 5% 误报，看很多次就累积起来：模拟（A、B 都是 0.7，每 10 次看一眼，最多 100 次）误报率 0.188，只在最后看一次是 0.049。开测前写死：主要指标和方向、每组次数、α 与检验方法、是否校正、提前停止的规则（要停就用专门的序贯方法）。</p>
+<p>口诀：先写规则再开测，偷看一次多一分误报。</p>
+</details>
+<h3 id="st40-k-bonferroni-holm">ST40 · k 个检验至少误报一个的概率是多少？Bonferroni 和 Holm 怎么校正？</h3>
+<p>来源：<a href="lessons/06-ab-rules-multiple-comparisons.html">第 6 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>FWER = 1 − (1 − α)^k：k = 10 → 0.401，k = 20 → 0.642。Bonferroni：每个用 α/m。Holm：p 值从小到大，第 i 个（从 0 数）和 α/(m − i) 比，一旦不过就停；同样控制 FWER ≤ α，检出更多。例：0.004、0.009、0.012、0.040、0.130、0.470 → Bonferroni 检出 1 个，Holm 检出 3 个。</p>
+<p>口诀：Bonferroni 除以 m，Holm 从小到大逐个放宽。</p>
+</details>
+<h3 id="st41-iqm">ST41 · IQM 是什么？多任务汇总为什么推荐它？</h3>
+<p>来源：<a href="lessons/06-ab-rules-multiple-comparisons.html">第 6 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Interquartile Mean：排序后去掉最低 25% 和最高 25%，剩下的取平均。均值被极端任务带偏，中位数只用中间一两个数、方差大；IQM 两头都不怕、又用了一半数据（Agarwal 2021）。要配分层 bootstrap 区间一起报。</p>
+<p>口诀：多任务报 IQM 加区间。</p>
+</details>
+<h3 id="st42-miller-4">ST42 · 题目成组出现时，标准误要怎么改？Miller 式 (4) 多出来的那一项是什么？</h3>
+<p>来源：<a href="lessons/06-ab-rules-multiple-comparisons.html">第 6 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<div class="arithmatex">\[SE_{\text{clustered}} = \Big(SE_{\text{CLT}}^2 + \frac{1}{n^2}\sum_c\sum_i\sum_{j\ne i}(s_{i,c} - \bar s)(s_{j,c} - \bar s)\Big)^{1/2}\]</div>
+<p>多出来的是"同一组内两两的协方差"。组内完全相关时一组相当于一个样本，完全不相关时退回普通 SE。例：5 篇文章各 4 道题，0.1095 → 0.1817；Miller 在真实评测上看到最多 3 倍。</p>
+<p>口诀：题目成组用聚类标准误。</p>
+</details>
+<h3 id="st43-pb-a">ST43 · 比较两个配置前，为什么要先看种子间标准差？P(B &gt; A) 指什么？</h3>
+<p>来源：<a href="lessons/07-read-curves-and-ablations.html">第 7 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>只换随机种子结果就会波动；差值比种子标准差小，单次运行的比较没有意义（例：B − A = +0.82，种子标准差约 1.3，Welch p = 0.351）。P(B &gt; A) = 所有 (B 种子, A 种子) 配对里 B 赢的比例（Bouthillier 式 9），回答"随便跑一次 B 比随便跑一次 A 好的概率"。分清 1 个点、标准差 1.31 时每边约要 27 个种子。</p>
+<p>口诀：先问换种子差多少。</p>
+</details>
+<h3 id="st44-tensorboard-ema">ST44 · TensorBoard 式 EMA 平滑会让一次突变滞后多少步？</h3>
+<p>来源：<a href="lessons/07-read-curves-and-ablations.html">第 7 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(s_t = \beta s_{t-1} + (1 - \beta)x_t\)</span>，对阶跃的响应是 <span class="arithmatex">\(1 - \beta^k\)</span>，走完 90% 要 <span class="arithmatex">\(k = \lceil\ln 0.1/\ln\beta\rceil\)</span> 步：β = 0.9 → 22 步，β = 0.99 → 230 步。比较两条曲线谁先收敛，平滑系数必须相同，最好看原始曲线。</p>
+<p>口诀：平滑像看后视镜，β 越大拖得越久。</p>
+</details>
+<h3 id="st45">ST45 · 拿到一张曲线或消融表，先问哪五个问题？</h3>
+<p>来源：<a href="lessons/07-read-curves-and-ablations.html">第 7 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<ol>
+<li>每个数几个种子 / 几次运行？标准差多少？</li>
+<li>报的是均值、最好的一个，还是挑过的？</li>
+<li>比了多少个变体？做没做多重比较校正？</li>
+<li>曲线平滑过吗？系数多少？验证集也画了吗？</li>
+<li>评测条件固定吗？换天、换人、换场地会怎样？</li>
+</ol>
+<p>口诀：五个问题逐个问。</p>
+</details>
+<h2 id="_5">概率与估计</h2>
+<h3 id="st11-n-1">ST11 · n 个独立同分布随机量求平均，平均的方差是多少？它和第 1 章的标准误有什么关系？</h3>
+<p>来源：<a href="lessons/08-probability-mle-map.html">第 8 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\mathrm{Var}(\bar X) = \mathrm{Var}(X)/n\)</span>，标准差按 <span class="arithmatex">\(1/\sqrt n\)</span> 缩。</p>
+<p>伯努利 <span class="arithmatex">\(\mathrm{Var} = p(1-p)\)</span>；p = 0.7、n = 30：0.21/30 = 0.007，开根号 0.084，就是第 1 章的 SE。</p>
+<p>口诀：n 次平均除以 n，标准误按根号缩。</p>
+</details>
+<h3 id="st12-095-090-02">ST12 · 写出贝叶斯公式。成功检测器灵敏度 0.95、特异度 0.90，任务真成功率 0.2 时，它说"成功"的回合真成功的概率是多少？</h3>
+<p>来源：<a href="lessons/08-probability-mle-map.html">第 8 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(P(A\mid B) = P(B\mid A)P(A)/P(B)\)</span>，<span class="arithmatex">\(P(B) = P(B\mid A)P(A) + P(B\mid\neg A)P(\neg A)\)</span>。</p>
+<p><span class="arithmatex">\(0.95\times0.2 / (0.95\times0.2 + 0.10\times0.8) = 0.19/0.27 = 0.704\)</span>；真成功率 0.7 时是 0.957。难任务上自动检测器的"成功"有约 30% 是假的。</p>
+<p>口诀：先验低时阳性假。</p>
+</details>
+<h3 id="st13-betaa-b-map">ST13 · 伯努利的最大似然估计怎么推？Beta(a, b) 先验下的 MAP 是什么？</h3>
+<p>来源：<a href="lessons/08-probability-mle-map.html">第 8 章</a> 第四、五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\log L = k\log p + (n-k)\log(1-p)\)</span>，求导 <span class="arithmatex">\(k/p - (n-k)/(1-p) = 0\)</span> → <span class="arithmatex">\(\hat p = k/n\)</span>。</p>
+<p>MAP：<span class="arithmatex">\((k + a - 1)/(n + a + b - 2)\)</span>。Beta(2, 2)：21/30 → 0.6875；3/3 → 0.80（MLE 是 1.00）。先验 = 正则项，高斯先验 ↔ L2 权重衰减。</p>
+<p>口诀：似然最大挑参数，先验往中拉一拉。</p>
+</details>
+<h3 id="st14">ST14 · 为什么说行为克隆就是最大似然？离散动作时它的损失是什么？</h3>
+<p>来源：<a href="lessons/08-probability-mle-map.html">第 8 章</a> 第六步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>把示范看成从专家策略采样的数据，最大化 <span class="arithmatex">\(\sum\log\pi_\theta(a_i\mid s_i)\)</span> = 最小化负对数似然 NLL。离散动作 token 时 NLL 就是交叉熵 <code>F.cross_entropy(logits, expert_bins)</code>；连续高斯头、固定方差时就是均方误差。</p>
+<p>例：示范动作概率 0.9、0.6、0.3 → NLL = 0.607，概率低的那条贡献最大。</p>
+<p>口诀：克隆就是 NLL。</p>
+</details>
+<h2 id="_6">高斯</h2>
+<h3 id="st15-2-12-12-1">ST15 · 协方差矩阵怎么"看"成一个椭圆？Σ = [[2, 1.2], [1.2, 1]] 的半轴是多少？</h3>
+<p>来源：<a href="lessons/09-gaussian.html">第 9 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>特征分解 <span class="arithmatex">\(\Sigma = V\Lambda V^\top\)</span>：主轴方向是特征向量，1σ 半轴长是 <span class="arithmatex">\(\sqrt\lambda\)</span>。</p>
+<p>特征值 0.2、2.8（和 = 迹 3，积 = 行列式 0.56），半轴 0.447、1.673，长轴方向 (0.832, 0.555)，相关系数 0.849。</p>
+<p>口诀：协方差是个椭圆，特征向量定方向。</p>
+</details>
+<h3 id="st16-x-az-b">ST16 · 高斯做线性变换 x = Az + b 后是什么分布？举三个用到它的地方。</h3>
+<p>来源：<a href="lessons/09-gaussian.html">第 9 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(z\sim\mathcal{N}(0, I)\)</span> 时 <span class="arithmatex">\(x \sim \mathcal{N}(b, AA^\top)\)</span>。</p>
+<p>① 从任意高斯采样：<span class="arithmatex">\(x = \mu + Lz\)</span>，<span class="arithmatex">\(L\)</span> = cholesky(Σ)；② 重参数化 <span class="arithmatex">\(a = \mu_\theta + \sigma_\theta\epsilon\)</span>，梯度能穿过；③ 扩散前向 <span class="arithmatex">\(x_t = \sqrt{\bar\alpha}x_0 + \sqrt{1-\bar\alpha}\epsilon\)</span>。</p>
+<p>口诀：线性变换还是高斯，采样加噪一条线。</p>
+</details>
+<h3 id="st17-x2x1">ST17 · 二维高斯已知 x₂，x₁ 的条件均值和条件方差公式是什么？方差有什么特点？</h3>
+<p>来源：<a href="lessons/09-gaussian.html">第 9 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\mu_{1\mid2} = \mu_1 + \Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2)\)</span>，<span class="arithmatex">\(\Sigma_{1\mid2} = \Sigma_{11} - \Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}\)</span>。方差只减不增，减多少看相关性；这是卡尔曼更新的核心。</p>
+<p>Σ = [[2, 1.2], [1.2, 1]]、x₂ = 1.5：N(1.80, 0.56)。</p>
+<p>口诀：知道一个缩另一个。</p>
+</details>
+<h3 id="st18-log-1-1">ST18 · 高斯动作头的 log 概率怎么写？示范动作一半 −1、一半 +1 时用单高斯会怎样？</h3>
+<p>来源：<a href="lessons/09-gaussian.html">第 9 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\log\pi(a) = -(a-\mu)^2/2\sigma^2 - \log\sigma - \frac12\log2\pi\)</span>；固定 σ 时最大化它 = 最小化均方误差。</p>
+<p>多峰时单高斯的 MLE 均值落在两峰中间（这里是 0），执行时输出"平均动作"，可能撞上障碍。解决：GMM、离散 token、扩散 / flow 动作头。</p>
+<p>口诀：单峰平均会撞墙。</p>
+</details>
+<h2 id="_7">信息论、线代、优化与采样</h2>
+<h3 id="st46-kl">ST46 · 熵、交叉熵、KL 三者是什么关系？</h3>
+<p>来源：<a href="lessons/10-information-kl.html">第 10 章</a> 第一到三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(H(P) = -\sum p\log p\)</span>；<span class="arithmatex">\(H(P, Q) = -\sum p\log q\)</span>；<span class="arithmatex">\(D_{KL}(P\|Q) = H(P, Q) - H(P) \ge 0\)</span>。P 是标签的经验分布时，交叉熵就是平均负对数似然 <span class="arithmatex">\(-\frac1n\sum\log q(y_i)\)</span>，所以分类 / 语言模型用交叉熵当 loss = 做最大似然。例：P = [0.7, 0.2, 0.1]、Q = [0.4, 0.4, 0.2]：H = 0.8018，H(P,Q) = 0.9856，KL = 0.1838；KL(Q‖P) = 0.1920，不对称。</p>
+<p>口诀：交叉熵用错的地图走路，多走的冤枉路是 KL。</p>
+</details>
+<h3 id="st47-kl-kl">ST47 · 用一个高斯拟合两峰分布，正向 KL 和反向 KL 的结果有什么不同？为什么？</h3>
+<p>来源：<a href="lessons/10-information-kl.html">第 10 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>正向 KL(P‖Q)：P 有密度的地方 Q 不能为 0，结果宽而居中、盖住两峰（μ = 0、s = 2.06），叫 mass-covering；反向 KL(Q‖P)：Q 有密度的地方 P 不能为 0，结果贴住一个峰（μ = −2、s = 0.5），叫 mode-seeking。MLE / 交叉熵训练是正向；变分推断（ELBO）里是反向。</p>
+<p>口诀：正向盖全、反向挑峰。</p>
+</details>
+<h3 id="st48-ix-y-0">ST48 · 互信息 I(X; Y) 怎么定义？什么时候为 0？</h3>
+<p>来源：<a href="lessons/10-information-kl.html">第 10 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(I(X;Y) = H(X) + H(Y) - H(X, Y) = D_{KL}(P_{XY}\|P_XP_Y) \ge 0\)</span>；X、Y 独立时为 0。例：联合表 [[0.4, 0.1], [0.1, 0.4]] → 0.1927 nat = 0.278 比特。对比学习的 InfoNCE 是它的下界。</p>
+<p>口诀：互信息是两个圆重叠的那一块。</p>
+</details>
+<h3 id="st49">ST49 · 矩阵乘法有哪三种看法？各在哪里用？</h3>
+<p>来源：<a href="lessons/11-linear-algebra-basics.html">第 11 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 点积表：<span class="arithmatex">\(C_{ij}\)</span> = A 的第 i 行 · B 的第 j 列（注意力分数 QKᵀ）；② 列的组合：C 的第 j 列 = A 的各列按 <span class="arithmatex">\(B_{:,j}\)</span> 加权（Ax、注意力输出）；③ 外积之和：<span class="arithmatex">\(C = \sum_k A_{:,k}B_{k,:}\)</span>（秩 1 分解、LoRA、∇W = Σ x δᵀ）。</p>
+<p>口诀：点积表、列的组合、外积相加。</p>
+</details>
+<h3 id="st50">ST50 · 矩阵的秩和零空间是什么？举一个机器人里的例子。</h3>
+<p>来源：<a href="lessons/11-linear-algebra-basics.html">第 11 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>秩 = 线性无关的列（行）的最大个数；秩不满时有非零向量被压成 0，构成零空间（秩 + 零空间维数 = 列数）。例：[[1,2,3],[2,4,6],[1,0,1]] 秩 2，零空间方向 [1, 1, −1]。机械臂雅可比秩下降 = 奇异位形，某个方向的末端速度做不出来。</p>
+<p>口诀：秩是独立方向数，秩不满就有零空间。</p>
+</details>
+<h3 id="st51">ST51 · 对称矩阵的特征分解长什么样？正定怎么判断？</h3>
+<p>来源：<a href="lessons/11-linear-algebra-basics.html">第 11 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(S = Q\Lambda Q^\top\)</span>，Q 的列是正交的单位特征向量；<span class="arithmatex">\(S^k = Q\Lambda^kQ^\top\)</span>。正定 ⇔ 特征值全 &gt; 0 ⇔ <span class="arithmatex">\(x^\top Sx &gt; 0\)</span> 对所有非零 x（朝上的碗）。例：[[2,1],[1,2]] 特征值 1、3（正定）；[[1,2],[2,1]] 特征值 −1、3（不定，x = [1, −1] 时 xᵀMx = −2）。实用判法：试 Cholesky。</p>
+<p>口诀：对称矩阵转拉转，特征值全正才是朝上的碗。</p>
+</details>
+<h3 id="st52-svd">ST52 · SVD 的形式是什么？和特征分解什么关系？</h3>
+<p>来源：<a href="lessons/12-svd-least-squares.html">第 12 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(A = U\Sigma V^\top = \sum\sigma_iu_iv_i^\top\)</span>，对任何形状的矩阵都成立，σ 从大到小。<span class="arithmatex">\(A^\top A = V\Sigma^2V^\top\)</span>：奇异值是 AᵀA 特征值的平方根。例：[[3,2],[2,3],[2,−2]] 的奇异值 5、3。</p>
+<p>口诀：任何矩阵转拉转。</p>
+</details>
+<h3 id="st53-k-lora">ST53 · 最好的秩 k 近似是什么，误差多大？LoRA 的参数量怎么算？</h3>
+<p>来源：<a href="lessons/12-svd-least-squares.html">第 12 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Eckart–Young：截断 SVD <span class="arithmatex">\(A_k = \sum_{i\le k}\sigma_iu_iv_i^\top\)</span> 最好，<span class="arithmatex">\(\|A - A_k\|_F = \sqrt{\sum_{i&gt;k}\sigma_i^2}\)</span>。LoRA：ΔW = BA，B 是 d×r、A 是 r×k，参数 r(d + k)；4096×4096、r = 8 → 65,536（0.39%）。</p>
+<p>口诀：留前 k 个，误差是丢掉的那几个。</p>
+</details>
+<h3 id="st54">ST54 · 最小二乘的解是什么？几何上是什么意思？</h3>
+<p>来源：<a href="lessons/12-svd-least-squares.html">第 12 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\theta = (X^\top X)^{-1}X^\top y\)</span>（正规方程）；<span class="arithmatex">\(X\theta\)</span> 是 y 在 X 列空间上的正交投影，残差垂直于每一列：<span class="arithmatex">\(X^\top r = 0\)</span>。数值上用 QR / SVD（lstsq、pinv）比正规方程稳，因为 XᵀX 把条件数平方。</p>
+<p>口诀：最小二乘是垂直投影。</p>
+</details>
+<h3 id="st55">ST55 · 条件数是什么？大了有什么后果？</h3>
+<p>来源：<a href="lessons/12-svd-least-squares.html">第 12 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>κ = σ_max/σ_min，相对误差最多被放大 κ 倍。例：[[1,1],[1,1.0001]] 的 κ ≈ 40,002，b 的第二个数只变 0.0001，解从 [1, 1] 变成 [0, 2]。机械臂接近奇异时 IK 给出巨大关节速度，用阻尼最小二乘 <span class="arithmatex">\(J^\top(JJ^\top + \lambda^2I)^{-1}\dot x\)</span> 压住。</p>
+<p>口诀：条件数大就加阻尼。</p>
+</details>
+<h3 id="st56">ST56 · 梯度下降的学习率上限是多少？条件数大会怎样？</h3>
+<p>来源：<a href="lessons/14-unconstrained-optimization.html">第 14 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>二次函数上每个特征方向每步乘 1 − ηλ，要全部收敛需要 η &lt; 2/L（L = 最大曲率）。例：½(x₁² + 10x₂²)：lr 0.05 → 135 步，0.18 → 36 步，0.21 发散。条件数 κ = L/μ 大时，陡的方向限制了步长，平的方向每步只缩 1 − ημ，很慢。</p>
+<p>口诀：步长小于二除 L，最陡方向说了算。</p>
+</details>
+<h3 id="st57-adam-adamw">ST57 · 写出 Adam 的更新式。AdamW 改了什么？</h3>
+<p>来源：<a href="lessons/14-unconstrained-optimization.html">第 14 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(m \leftarrow \beta_1m + (1-\beta_1)g\)</span>，<span class="arithmatex">\(v \leftarrow \beta_2v + (1-\beta_2)g^2\)</span>，偏差修正后 <span class="arithmatex">\(x \leftarrow x - \eta\hat m/(\sqrt{\hat v} + \epsilon)\)</span>。第一步每个坐标都走约 η，和梯度大小无关。AdamW：权重衰减不加进梯度（否则会被 √v̂ 归一化掉），而是单独 <span class="arithmatex">\(x \leftarrow x - \eta\cdot wd\cdot x\)</span>。</p>
+<p>口诀：Adam 按二阶矩归一，AdamW 衰减拿出来单做。</p>
+</details>
+<h3 id="st58-warmup-cosine">ST58 · warmup + cosine 学习率怎么写？梯度裁剪做什么？</h3>
+<p>来源：<a href="lessons/14-unconstrained-optimization.html">第 14 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>前 <span class="arithmatex">\(t_w\)</span> 步线性升到峰值，之后 <span class="arithmatex">\(\eta_t = \eta_{\min} + \frac12(\eta_{\max} - \eta_{\min})(1 + \cos\pi p)\)</span>，p 从 0 到 1。梯度裁剪：‖g‖ 超过门槛就按比例缩小、方向不变（[3, 4] 裁到 1 → [0.6, 0.8]），防止一次异常大的梯度把参数甩飞。</p>
+<p>口诀：先 warmup 后余弦，裁剪按范数。</p>
+</details>
+<h3 id="st59-lm">ST59 · 高斯-牛顿和 LM 的更新式是什么？各自的优缺点？</h3>
+<p>来源：<a href="lessons/14-unconstrained-optimization.html">第 14 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>高斯-牛顿 <span class="arithmatex">\(J^\top J\Delta = -J^\top r\)</span>（用 JᵀJ 近似 Hessian，不用二阶导，收敛快，但离解远时会跳过头）；LM <span class="arithmatex">\((J^\top J + \lambda I)\Delta = -J^\top r\)</span>，变差就拒绝并加大 λ（更像小步梯度下降），变好就减小 λ（更像高斯-牛顿），每步都下降。BA、标定、IK 常用 LM。</p>
+<p>口诀：怕跳过头就加阻尼成 LM。</p>
+</details>
+<h3 id="st60">ST60 · 等式约束下最优点满足什么条件？乘子 λ 有什么意思？</h3>
+<p>来源：<a href="lessons/15-constrained-convex-qp.html">第 15 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\nabla f + \lambda\nabla h = 0\)</span>，h(x) = 0：目标梯度和约束法向平行。例：min x² + y²、x + y = 1 → (0.5, 0.5)，λ = −1。λ 是影子价格：约束右端变一点，最优值约变 −λ 倍。</p>
+<p>口诀：梯度和法向平行，λ 是影子价格。</p>
+</details>
+<h3 id="st61-kkt">ST61 · KKT 条件有哪四条？互补松弛是什么意思？</h3>
+<p>来源：<a href="lessons/15-constrained-convex-qp.html">第 15 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>驻点 ∇f + μ∇g = 0；原始可行 g ≤ 0；对偶可行 μ ≥ 0；互补松弛 μ·g = 0：要么约束取等号，要么乘子为 0。例：min (x − 2)²、x ≤ 1 → x = 1、μ = 2。凸问题上 KKT 是充要条件。</p>
+<p>口诀：可行、μ 非负、驻点、互补松弛。</p>
+</details>
+<h3 id="st62-qp-qp">ST62 · QP 的标准形是什么？机器人里哪些问题是 QP？</h3>
+<p>来源：<a href="lessons/15-constrained-convex-qp.html">第 15 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\min\frac12x^\top Px + q^\top x\)</span> s.t. <span class="arithmatex">\(Gx \le h\)</span>、<span class="arithmatex">\(Ax = b\)</span>；P 半正定是凸 QP，有 OSQP、qpOASES 等快速求解器。带关节限位的速度 IK、线性 MPC、全身控制都写成 QP，每个控制周期解一次。</p>
+<p>口诀：限位 IK、MPC、全身控制都是 QP。</p>
+</details>
+<h3 id="st63">ST63 · 蒙特卡洛估计的误差有多大？</h3>
+<p>来源：<a href="lessons/16-monte-carlo-sampling.html">第 16 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\frac1n\sum f(x_i)\)</span> 的标准误 = <span class="arithmatex">\(\sqrt{\mathrm{Var}(f)/n}\)</span>，和维度无关。例：E[X²]（X ~ N(0,1)）n = 100 → 0.141，n = 10000 → 0.014。误差小 10 倍要 100 倍样本。</p>
+<p>口诀：误差根号 n 分之一，和维度无关。</p>
+</details>
+<h3 id="st64">ST64 · 重要性采样的公式是什么？提议分布要满足什么？</h3>
+<p>来源：<a href="lessons/16-monte-carlo-sampling.html">第 16 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\mathbb E_p[f] = \mathbb E_q[f\,p/q]\)</span>，从 q 抽、乘权重 p/q。q 要在 f·p 不为 0 的地方都不为 0，而且最好盖住贡献大的区域：估 P(X &gt; 3) 时 N(3, 1) 相对误差 0.06，直接数 0.82，N(−1, 1) 5.19。PPO 的比率 π_new/π_old 就是重要性权重，截断它防止方差爆炸。</p>
+<p>口诀：权重 p 比 q，提议分布要盖住关键处。</p>
+</details>
+<h3 id="st65-cem-mppi-mppi">ST65 · CEM 和 MPPI 各怎么更新？MPPI 的温度 λ 起什么作用？</h3>
+<p>来源：<a href="lessons/16-monte-carlo-sampling.html">第 16 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>CEM：从 N(μ, σ²) 抽候选，留代价最低的精英，用它们的均值、标准差更新。MPPI：每个样本按 <span class="arithmatex">\(w \propto \exp(-(c - c_{\min})/\lambda)\)</span> 加权平均。λ 小 → 只信最好的（代价 0.1/0.5/1/4、λ = 0.1 → 0.982 给第一个）；λ 大 → 接近平均。</p>
+<p>口诀：CEM 留精英，MPPI 按 e 的负代价除温度加权。</p>
+</details>
+<h3 id="st66-log-px-elbo-elbo">ST66 · log p(x) 和 ELBO 差多少？最大化 ELBO 有什么效果？</h3>
+<p>来源：<a href="lessons/17-generative-math.html">第 17 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\log p(x) = \text{ELBO} + D_{KL}(q(z)\|p(z\mid x))\)</span>，<span class="arithmatex">\(\text{ELBO} = \mathbb E_q\log p(x\mid z) - D_{KL}(q\|p(z))\)</span>。KL ≥ 0，所以 ELBO 是下界，q = 真后验时取等号。最大化 ELBO 同时抬高 log p(x)、把 q 拉向真后验。</p>
+<p>口诀：log p 等于 ELBO 加 KL。</p>
+</details>
+<h3 id="st67-score-function">ST67 · 对期望求梯度的两种估计（重参数化、score function）有什么区别？</h3>
+<p>来源：<a href="lessons/17-generative-math.html">第 17 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>重参数化：<span class="arithmatex">\(z = \mu + \sigma\epsilon\)</span>，对 <span class="arithmatex">\(f(\mu + \sigma\epsilon)\)</span> 求导，要求 f 可导、方差小；score function：<span class="arithmatex">\(f(z)\nabla\log p(z;\theta)\)</span>，只要能算 ∇log p，f 可以不可导（奖励），但方差大，要减基线。例：∇_μ E[z²]（μ = 1）：单样本标准差 2.00 vs 5.51（加基线 4.28）。策略梯度就是 score function。</p>
+<p>口诀：重参数化把随机挪出去，score function 要基线。</p>
+</details>
+<h3 id="st68-flow-matching-flow-matching">ST68 · 连续性方程是什么？为什么条件 flow matching 能代替边际 flow matching？</h3>
+<p>来源：<a href="lessons/17-generative-math.html">第 17 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\partial_tp + \nabla\cdot(pv) = 0\)</span>：密度的变化 = 净流入，速度场推着密度走。条件目标 <span class="arithmatex">\(\mathbb E\|v_\theta - (x_1 - x_0)\|^2\)</span> 和边际目标 <span class="arithmatex">\(\mathbb E\|v_\theta - v(x_t)\|^2\)</span> 只差一个和 θ 无关的常数（同一 x_t 上直线速度的条件方差），所以梯度相同（Lipman 定理 2）。</p>
+<p>口诀：每辆车猜自己的方向，学到的就是路口的平均。</p>
+</details>
+<h2 id="_8">微积分与自动微分</h2>
+<h3 id="st19-l1-l2-1-det-j">ST19 · 雅可比是什么？两连杆臂（l₁ = l₂ = 1）的 det J 等于什么，什么时候奇异？</h3>
+<p>来源：<a href="lessons/13-calculus-autodiff.html">第 13 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(J_{ij} = \partial f_i/\partial x_j\)</span>：每个输入对每个输出的偏导排成的矩阵。第 j 列 = 只转关节 j 时末端速度的方向。</p>
+<p><span class="arithmatex">\(\det J = l_1l_2\sin\theta_2\)</span>；θ₂ = 0（手臂伸直）时为 0，奇异，末端沿手臂方向动不了。θ = (30°, 60°)：J = [[−1.5, −1.0], [0.866, 0]]。</p>
+<p>口诀：雅可比是导数表，行列为零就奇异。</p>
+</details>
+<h3 id="st20">ST20 · 链式法则写成雅可比是什么形式？关节速度和末端速度是什么关系？</h3>
+<p>来源：<a href="lessons/13-calculus-autodiff.html">第 13 章</a> 第三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(J_{g\circ f} = J_g J_f\)</span>。末端速度 <span class="arithmatex">\(\mathbf{v} = J\dot\theta\)</span>；速度级逆运动学是解 <span class="arithmatex">\(J\dot\theta = \mathbf{v}\)</span>，J 奇异时解不出。深网络的雅可比是每层雅可比的连乘，连乘太长会爆炸或消失。</p>
+<p>口诀：链式法则矩阵乘，关节速度乘出末端。</p>
+</details>
+<h3 id="st21">ST21 · 前向模式和反向模式自动微分各算什么、各适合什么形状？训练神经网络为什么用反向模式？</h3>
+<p>来源：<a href="lessons/13-calculus-autodiff.html">第 13 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>前向模式一次算 <span class="arithmatex">\(J\mathbf{v}\)</span>（JVP），适合输入少、输出多；反向模式一次算 <span class="arithmatex">\(\mathbf{u}^\top J\)</span>（VJP），适合输出少、输入多。</p>
+<p>训练只有一个标量 loss、参数上亿，反向一遍拿到全部梯度，代价约 2–3 倍前向，但要存中间值（显存）。伴随量 = 上游伴随 × 局部导数，多条路径相加。</p>
+<p>口诀：一个 loss 反向推。</p>
+</details>
+<h3 id="st22">ST22 · 怎么检查自己写的导数对不对？有哪些坑？</h3>
+<p>来源：<a href="lessons/13-calculus-autodiff.html">第 13 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>中心差分 <span class="arithmatex">\((f(x+h e_i) - f(x-h e_i))/2h\)</span>，误差 <span class="arithmatex">\(O(h^2)\)</span>；PyTorch 用 <code>torch.autograd.gradcheck</code>。</p>
+<p>坑：必须 float64；h 太小被舍入误差淹没（误差先降后升）；PyTorch 梯度默认累加，每步要 <code>zero_grad()</code>。</p>
+<p>口诀：求导记得差分核。</p>
+</details>
+<h2 id="_9">旋转与位姿</h2>
+<h3 id="st23">ST23 · 旋转矩阵有哪四条性质？</h3>
+<p>来源：<a href="lessons/18-rotations-rigid-transforms.html">第 18 章</a> 第一步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 三列 = 物体三根轴在世界系的方向；② <span class="arithmatex">\(R^\top R = I\)</span>，求逆即转置；③ <span class="arithmatex">\(\det R = +1\)</span>；④ 乘法不交换（先转谁有区别）。9 个数只有 3 个自由度。</p>
+<p>口诀：三列就是三根轴，转置求逆不交换。</p>
+</details>
+<h3 id="st24-zyx-pitch-90">ST24 · 什么是万向锁？ZYX 欧拉角在 pitch = 90° 时发生了什么？</h3>
+<p>来源：<a href="lessons/18-rotations-rigid-transforms.html">第 18 章</a> 第二步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>中间的角到 ±90° 时，第一和第三个转轴重合，丢一个自由度。ZYX、pitch = 90°：只有 yaw − roll 起作用，(30°, 90°, 10°) 和 (50°, 90°, 30°) 是同一个姿态；反算欧拉角有无穷多解，附近会跳变。</p>
+<p>口诀：中间转到九十度，偏航横滚锁一起。</p>
+</details>
+<h3 id="st25-q-q">ST25 · 四元数怎么从轴角得到？q 和 −q 是什么关系？有什么约定陷阱？</h3>
+<p>来源：<a href="lessons/18-rotations-rigid-transforms.html">第 18 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\mathbf{q} = (\cos\frac\theta2, \sin\frac\theta2\mathbf{u})\)</span>，注意半角。q 和 −q 是同一个旋转（双覆盖）；比较两个四元数的距离要取 <span class="arithmatex">\(|\mathbf{q}_1\cdot\mathbf{q}_2|\)</span>。</p>
+<p>陷阱：顺序（scipy <code>as_quat()</code> 是 (x, y, z, w)，Eigen 构造是 (w, x, y, z)）和乘法约定（Hamilton / JPL）。</p>
+<p>口诀：四元半角无万向，q 和负 q 同一转。</p>
+</details>
+<h3 id="st26-6d">ST26 · 网络要输出一个旋转，为什么推荐 6D 表示？怎么还原成旋转矩阵？</h3>
+<p>来源：<a href="lessons/18-rotations-rigid-transforms.html">第 18 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Zhou 等 2019：3D 旋转在 ≤ 4 维实空间里的表示都不连续（欧拉角跳变、四元数双覆盖），网络难拟合；5D / 6D 有连续表示。</p>
+<p>还原：<span class="arithmatex">\(\mathbf{b}_1 = \mathbf{a}_1/\|\cdot\|\)</span>，<span class="arithmatex">\(\mathbf{b}_2\)</span> = （<span class="arithmatex">\(\mathbf{a}_2\)</span> 去掉 <span class="arithmatex">\(\mathbf{b}_1\)</span> 分量）归一化，<span class="arithmatex">\(\mathbf{b}_3 = \mathbf{b}_1\times\mathbf{b}_2\)</span>，<span class="arithmatex">\(R = [\mathbf{b}_1\,\mathbf{b}_2\,\mathbf{b}_3]\)</span>。</p>
+<p>口诀：网络输出用 6D。</p>
+</details>
+<h2 id="_10">策略梯度</h2>
+<h3 id="st27-score-function">ST27 · 似然比技巧（score function 估计）的恒等式是什么？为什么环境动力学会从梯度里消失？</h3>
+<p>来源：<a href="lessons/24-policy-gradient.html">第 24 章</a> 第二、三步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\nabla p_\theta = p_\theta\nabla\log p_\theta\)</span> ⇒ <span class="arithmatex">\(\nabla_\theta\mathbb{E}[R] = \mathbb{E}[R\,\nabla_\theta\log p_\theta(\tau)]\)</span>。</p>
+<p><span class="arithmatex">\(\log p_\theta(\tau) = \log p(s_0) + \sum_t[\log\pi_\theta(a_t\mid s_t) + \log P(s_{t+1}\mid s_t,a_t)]\)</span>，只有 π 项含 θ，所以 <span class="arithmatex">\(\nabla\log p_\theta(\tau) = \sum_t\nabla\log\pi_\theta(a_t\mid s_t)\)</span>，不需要环境模型或环境可导。</p>
+<p>口诀：参数藏在概率里，似然比把梯度搬；对数一拆环境掉。</p>
+</details>
+<h3 id="st28">ST28 · 证明减基线不改变策略梯度的期望。基线取什么最好？</h3>
+<p>来源：<a href="lessons/24-policy-gradient.html">第 24 章</a> 第四步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\mathbb{E}_{a\sim\pi}[b\nabla\log\pi(a)] = b\sum_a\nabla\pi(a) = b\nabla\sum_a\pi(a) = b\nabla 1 = 0\)</span>。</p>
+<p>b 接近期望回报（值函数 V(s)）时方差最小，<span class="arithmatex">\(G - V(s)\)</span> 即优势。两臂老虎机例子：均值都 ≈ 0.125，标准差 0.110 → 0.068。</p>
+<p>口诀：基线期望恒为零，减掉平均方差降。</p>
+</details>
+<h3 id="st29-ppo">ST29 · PPO 的截断目标是什么？优势为正和为负时各截哪一侧？</h3>
+<p>来源：<a href="lessons/24-policy-gradient.html">第 24 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(L^{CLIP} = \mathbb{E}[\min(r_tA_t, \mathrm{clip}(r_t, 1-\epsilon, 1+\epsilon)A_t)]\)</span>，<span class="arithmatex">\(r_t = \pi_\theta/\pi_{old}\)</span>。</p>
+<p>A &gt; 0：r 超过 1 + ε 后不再奖励；A &lt; 0：r 低于 1 − ε 后不再惩罚；对自己不利的一侧（好动作变少、坏动作变多）照常算。ε = 0.2：(1.5, +1) → 1.2，(0.5, −1) → −0.8，(1.5, −1) → −1.5。</p>
+<p>口诀：PPO 只截得利侧。</p>
+</details>
+<h3 id="st30-grpo">ST30 · GRPO 的优势怎么算？全对或全错的一组会怎样？</h3>
+<p>来源：<a href="lessons/24-policy-gradient.html">第 24 章</a> 第五步 · 加入 2026-11-23 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>对同一个问题采 G 条回答，<span class="arithmatex">\(\hat A_i = (r_i - \mathrm{mean})/\mathrm{std}\)</span>，用组内统计量当基线，不需要价值网络。[1, 0, 0, 1] → [+1, −1, −1, +1]。</p>
+<p>全对或全错时 std = 0，优势全为 0，这组不贡献梯度（实现里加 1e-8 防除零）。</p>
+<p>口诀：GRPO 组内比短长。</p>
+</details>
+<hr />
+<h2 id="_11">已掌握</h2>
+<p>（暂无）</p>
+</main>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

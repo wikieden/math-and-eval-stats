@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>置信区间覆盖率</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 1 章 · 95% 置信区间到底"95%"在哪：重复做实验，数有几个区间盖住真值</h1>
+<p class="sub">配套讲义：<a href="../lessons/01-success-rate-ci.html">第 1 章 · 一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a>。真成功率 p 是固定的（只有上帝知道）。每做一轮"测 n 次"，就算出一个区间：盖住真值画绿色，没盖住画红色。左边 Wald、右边 Wilson，用的是同一批实验结果。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 440"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">已做实验轮数</div><div class="v" id="sr">0</div></div>
+<div class="stat"><div class="l">Wald 覆盖率</div><div class="v" id="sw">—</div></div>
+<div class="stat"><div class="l">Wilson 覆盖率</div><div class="v" id="sl">—</div></div>
+<div class="stat"><div class="l">目标</div><div class="v">95%</div></div>
+</div>
+<div class="row ctl"><label>真成功率 p <b id="pv">0.90</b></label><input id="p" type="range" min="0.5" max="0.98" step="0.01" value="0.9"></div>
+<div class="row ctl"><label>每轮试验次数 n <b id="nv">30</b></label><input id="n" type="range" min="10" max="300" step="10" value="30"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：p = 0.9、n = 30 时，Wald 只盖住约 81%，明明叫"95% 区间"；Wilson 约 97%。原因是 Wald 在 p̂ 靠近 1 时把区间缩得太窄（30/30 时宽度是 0）。把 n 拖到 300，两者都接近 95%；把 p 拖到 0.5 附近，差别也变小。区间宽度跟着 1/√n 缩：n 变 4 倍，区间才窄一半。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const Z=1.959964,ROWS=40,MAXR=400;
+const PANELS=[{x0:30,name:'Wald：估计值 ± 1.96 × 标准误',f:wald},{x0:360,name:'Wilson',f:wilson}];const PW=290;
+function wald(k,n){const p=k/n,se=Math.sqrt(p*(1-p)/n);return[Math.max(0,p-Z*se),Math.min(1,p+Z*se)]}
+function wilson(k,n){const p=k/n,z2=Z*Z,d=1+z2/n,c=(p+z2/(2*n))/d,h=Z*Math.sqrt(p*(1-p)/n+z2/(4*n*n))/d;return[c-h,c+h]}
+const X=(P,v)=>P.x0+v*PW;
+let p,n,runs,hits,layer;
+PANELS.forEach(P=>{txt(P.name,{x:P.x0,y:20},sv);
+  el('line',{x1:P.x0,y1:392,x2:P.x0+PW,y2:392,stroke:'var(--line)'},sv);
+  [0,0.25,0.5,0.75,1].forEach(v=>{el('line',{x1:X(P,v),y1:388,x2:X(P,v),y2:396,stroke:'var(--muted)'},sv);txt(v.toFixed(2),{x:X(P,v)-12,y:412,class:'m'},sv)});
+  P.tl=el('line',{y1:30,y2:392,stroke:'var(--accent)','stroke-width':1.5,'stroke-dasharray':'4 3'},sv)});
+const lab=txt('',{x:30,y:432,class:'m'},sv);
+function reset(s){seed(s);p=+$('p').value;n=+$('n').value;runs=[];hits=[0,0];
+  if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  PANELS.forEach(P=>{P.tl.setAttribute('x1',X(P,p));P.tl.setAttribute('x2',X(P,p))});draw()}
+function binom(n,p){let k=0;for(let i=0;i<n;i++)if(rnd()<p)k++;return k}
+function next(){if(runs.length>=MAXR)return false;const k=binom(n,p);
+  const iv=PANELS.map(P=>P.f(k,n));iv.forEach((v,i)=>{if(v[0]<=p&&p<=v[1])hits[i]++});runs.push({k,iv});draw();return runs.length<MAXR}
+function draw(){clear(layer);const show=runs.slice(-ROWS),dy=(392-34)/ROWS;
+  show.forEach((r,j)=>{const y=36+j*dy+dy/2;PANELS.forEach((P,i)=>{const[a,b]=r.iv[i],ok=a<=p&&p<=b;
+    el('line',{x1:X(P,a),y1:y,x2:Math.max(X(P,b),X(P,a)+1.5),y2:y,stroke:ok?'var(--good)':'var(--bad)','stroke-width':Math.max(2,dy*0.55),'stroke-linecap':'round'},layer);
+    el('circle',{cx:X(P,r.k/n),cy:y,r:1.8,fill:'var(--text)'},layer)})});
+  const m=runs.length;$('sr').textContent=m;
+  $('sw').textContent=m?(hits[0]/m*100).toFixed(1)+'%':'—';$('sl').textContent=m?(hits[1]/m*100).toFixed(1)+'%':'—';
+  $('sw').className='v '+(m>20&&hits[0]/m<0.93?'bad':'');
+  lab.textContent='蓝色虚线 = 真值 p = '+p.toFixed(2)+'；每行一轮实验（黑点 = 这轮的估计值 k / '+n+'），只显示最近 '+ROWS+' 轮'}
+$('p').oninput=()=>{$('pv').textContent=(+$('p').value).toFixed(2);ANIM.stop();reset(Date.now())};
+$('n').oninput=()=>{$('nv').textContent=$('n').value;ANIM.stop();reset(Date.now())};
+setupPlayer({captureSeed:3,reset,next},60);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

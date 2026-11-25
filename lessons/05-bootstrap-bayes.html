@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 5 章 · Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html" class="cur"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="5-bootstrap-beta-b-a">第 5 章 · Bootstrap 与 Beta 后验："B 比 A 好的概率"怎么算</h1><div class="run"><a class="btn" href="../animations/05-bootstrap-bayes.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch05_bootstrap_bayes.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch05_bootstrap_bayes.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch05_bootstrap_bayes.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：不想背公式，能不能直接用数据"重抽"出一个区间？老板问"B 比 A 好的可能性有多大"，p 值回答不了这个问题，什么能回答？多个任务、每个任务几个种子的结果，区间该怎么算？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/04-paired-comparison.html">第 4 章 配对比较</a> · 下一章：<a href="../lessons/06-ab-rules-multiple-comparisons.html">第 6 章 A/B 判定规则与多重比较</a><br />
+对应原文：Kress-Gazit 等 <code>materials/text/papers/robot-eval-best-practices-2409.09491.txt</code> §6.4.2 L592–L596（均匀先验下的后验比较）；TRI LBM <code>materials/text/papers/tri-lbm-careful-examination-2507.05331.txt</code> L162–L165、L252–L254、L507–L510（Beta 后验的小提琴图）；Agarwal 2021 <code>materials/text/papers/rl-statistical-precipice-2108.13264.txt</code> L127–L133、L149（分层 bootstrap 区间）<br />
+本章缩写：bootstrap = 自助法（"拽着自己的鞋带把自己提起来"：只用手里的数据估计不确定性）；Beta(a, b) = 贝塔分布：0 到 1 之间的一族分布，常当成功率的先验 / 后验；prior = 先验；posterior = 后验；P(B &gt; A) = B 的真成功率高于 A 的概率。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="bootstrap2026-11-25">第一步：Bootstrap：把手里的数据当成总体，重抽很多次（2026-11-25）</h3>
+<p><strong>类比：从一锅汤里尝了 50 勺，想知道"再尝 50 勺会差多少"，就把这 50 勺倒回一个小碗，从小碗里有放回地再舀 50 勺，重复几万次。</strong></p>
+<p>做法（百分位 bootstrap）：</p>
+<ol>
+<li>手里有 n 次结果（k 个 1、n − k 个 0）；</li>
+<li>有放回地抽 n 个，算一次成功率；</li>
+<li>重复 B 次（比如 2 万次），得到 2 万个成功率；</li>
+<li>取它们的 2.5% 和 97.5% 分位数，就是 95% 区间。</li>
+</ol>
+<p><strong>例子</strong>（第 2 章的 40/50 和 30/50）：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>bootstrap 95% 区间</th>
+<th>对照：第 1 章 Wilson 区间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>40/50</td>
+<td>[0.680, 0.900]</td>
+<td>[0.670, 0.888]</td>
+</tr>
+<tr>
+<td>30/50</td>
+<td>[0.460, 0.740]</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>不用任何公式，区间和 Wilson 差不多。bootstrap 的价值在于<strong>任何统计量都能这么做</strong>：中位数、IQM（第 6 章）、两组之差、成功率之比，都只要"重抽 → 算 → 取分位数"。</p>
+<p><strong>一句话</strong>：bootstrap = 有放回重抽手里的数据很多次，用统计量的分位数当区间；公式写不出来的统计量也能用。</p>
+<h3 id="beta-k-2026-11-25">第二步：Beta 后验：均匀先验 + k 次成功（2026-11-25）</h3>
+<p><strong>类比：天气预报员一开始对明天下不下雨毫无把握（各种可能都一样），每看到一个云图证据，就更新一次判断。</strong></p>
+<p>成功率 p 的先验取均匀分布 Beta(1, 1)（"0 到 1 之间都一样可能"）。看到 k 次成功、n − k 次失败以后，后验是：</p>
+<div class="arithmatex">\[p \mid \text{数据} \sim \text{Beta}(1 + k,\ 1 + n - k)\]</div>
+<p>这就是 Kress-Gazit（L594–L595）和 TRI LBM（L162–L165、L507–L510：在 Bernoulli 参数上取均匀先验，画后验的小提琴图）用的方法。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>后验</th>
+<th>后验均值</th>
+<th>95% 可信区间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>40/50</td>
+<td>Beta(41, 11)</td>
+<td>0.788</td>
+<td>[0.669, 0.887]</td>
+</tr>
+<tr>
+<td>30/50</td>
+<td>Beta(31, 21)</td>
+<td>0.596</td>
+<td>[0.461, 0.724]</td>
+</tr>
+</tbody>
+</table>
+<p>后验均值 (1 + k)/(2 + n) 比 k/n 往 0.5 拉了一点（41/52 = 0.788，而 40/50 = 0.8）：先验像是多看了"1 次成功、1 次失败"。</p>
+<p><strong>可信区间 vs 置信区间</strong>：可信区间可以直接说"真成功率有 95% 的概率落在这里"；第 1 章的置信区间说的是"这种造区间的方法，100 次里约 95 次能盖住真值"。数据多时两者数值接近。</p>
+<p><img alt="两个 Beta 后验" src="../figures/05-bootstrap-bayes-posteriors.png" />
+<em>图 5-1 · Beta(41, 11)（40/50）和 Beta(31, 21)（30/50）的密度；重叠的部分越少，"B 比 A 好"越有把握</em></p>
+<p><strong>一句话</strong>：均匀先验下，k/n 的后验是 Beta(1 + k, 1 + n − k)；可信区间可以直接读成"真值落在这里的概率"。</p>
+<h3 id="pb-a2026-11-25">第三步：P(B &gt; A)：老板真正想问的那个数（2026-11-25）</h3>
+<p><strong>类比：两个射手各打了几枪，问"下一次比赛甲赢的概率"，比问"两人水平有没有显著差别"更直接。</strong></p>
+<p>两个后验各抽一个数，比大小，重复几十万次，数 B 赢的比例：</p>
+<div class="arithmatex">\[P(p_B &gt; p_A \mid \text{数据}) \approx \frac{1}{M}\sum_{m=1}^{M}\mathbb 1\big[p_B^{(m)} &gt; p_A^{(m)}\big]\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>比较</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P(40/50 的真成功率 &gt; 30/50 的)</td>
+<td><strong>0.984</strong></td>
+</tr>
+<tr>
+<td>差值的 bootstrap 95% 区间</td>
+<td>[+0.020, +0.380]</td>
+</tr>
+</tbody>
+</table>
+<p>和第 2 章一致：40/50 vs 30/50 在 5% 水平上显著（p &lt; 0.05），后验也说 B 更好的概率 98%。但 0.984 这个数能直接拿来做决策（"有 98% 的把握换成新策略"），p 值不能（p 值是"假设一样时看到这么大差别的概率"，不是"一样的概率"）。</p>
+<p>Kress-Gazit 的 13/20 vs 14/20（L594–L596）用的就是这种后验比较，结论是"不能说一个比另一个好"。</p>
+<p><strong>一句话</strong>：P(B &gt; A) = 两个后验各抽一个比大小的胜率；它回答"B 更好的可能性有多大"，p 值回答不了。</p>
+<h3 id="bootstrap2026-11-25_1">第四步：多任务、多种子：分层 bootstrap（2026-11-25）</h3>
+<p><strong>类比：评估一个学生，有 3 门课、每门考了 5 次。重抽时应该在每门课里各自重抽 5 次成绩，不能把 15 个成绩混在一起抽（那样可能抽出"全是数学"的组合）。</strong></p>
+<p>Agarwal 2021（L127–L133、L149）建议多任务结果用<strong>分层 bootstrap</strong>：每个任务内部对种子（或运行）有放回重抽，任务本身固定不动，再算汇总统计量。</p>
+<p><strong>例子</strong>（编的：3 个任务 × 5 个种子）：</p>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>5 个种子的分数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.62, 0.70, 0.58, 0.66, 0.64</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.31, 0.45, 0.38, 0.29, 0.40</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.88, 0.91, 0.85, 0.93, 0.90</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="分层 bootstrap 的做法" src="../figures/05-bootstrap-bayes-stratified.png" />
+<em>图 5-2 · 每一行（任务）内部有放回抽 5 个种子，任务本身不重抽；再对 15 个数取平均，重复 2 万次</em></p>
+<p>平均 0.633，分层 bootstrap 95% 区间 [0.611, 0.655]。区间只反映"种子带来的波动"，不包括"换一批任务"的波动：任务是我们选定的，不是随机抽的。</p>
+<p><strong>场景代码</strong>：Agarwal 等人开源的 <code>rliable</code> 库就是这么算的（真实库的写法；本书环境没装 rliable，没跑过）：</p>
+<pre><code class="language-python">from rliable import library as rly, metrics
+scores = {&quot;A&quot;: scores_A}                  # 每个算法一个 (运行数, 任务数) 的矩阵
+agg = lambda x: np.array([metrics.aggregate_iqm(x), metrics.aggregate_mean(x)])
+point, ci = rly.get_interval_estimates(scores, agg, reps=50000)   # 分层 bootstrap 区间
+</code></pre>
+<p><strong>一句话</strong>：多任务多种子时，在每个任务内部重抽种子，任务不动；区间反映的是种子的波动。</p>
+<h3 id="bootstrap">动画演示：bootstrap 重抽与后验更新</h3>
+<p><img alt="Bootstrap 与 Beta 后验" src="../animations/05-bootstrap-bayes.gif" /></p>
+<p>可交互版：<a href="../animations/05-bootstrap-bayes.html">animations/05-bootstrap-bayes.html</a>（滑块调成功次数 k 和总次数 n；下拉切换"bootstrap / 后验"）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>bootstrap：上排 n 个圆点是原始数据，每一帧有放回抽一遍（被抽中的亮起），下方直方图一点点长出来（第一步）；</li>
+<li>后验：从平的 Beta(1, 1) 开始，每加一次成功或失败，曲线就更新一次，最后停在 Beta(1 + k, 1 + n − k)（第二步）；</li>
+<li>两个后验同时画出来时，右上角显示 P(B &gt; A)（第三步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步 后验）：一个策略 9/10 成功。写出均匀先验下的后验分布，后验均值是多少？为什么不是 0.9？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一步 bootstrap）：一组 10 次结果全部成功（10/10）。百分位 bootstrap 给出的区间是什么？这说明 bootstrap 在什么情况下会出问题？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第三步、第四步）：一份报告写"5 个任务上 B 平均比 A 高 3 个点"，每个任务只跑了 1 个种子。你能用分层 bootstrap 给出区间吗？如果不能，要补什么数据？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>有放回重抽几万次，分位数就是区间，什么统计量都能套；<br />
+均匀先验加 k 次成功，后验是贝塔 1 加 k、1 加 n 减 k；<br />
+两个后验各抽一个比大小，胜率就是 B 更好的概率；<br />
+多任务多种子分层抽，任务不动只抽种子。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST36（百分位 bootstrap 的做法）、ST37（Beta 后验的形式、可信区间 vs 置信区间）、ST38（P(B &gt; A) 怎么算、它和 p 值的区别）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Kress-Gazit 等《Robot Learning as an Empirical Science》</td>
+<td>§6.4.2 L590–L600、图 11</td>
+<td>用后验分布比较两个策略的真实案例</td>
+</tr>
+<tr>
+<td>★ TRI LBM《A Careful Examination of Large Behavior Models》</td>
+<td>L160–L170、L250–L256、L505–L512</td>
+<td>大规模真机评测里怎么画后验小提琴图、怎么标"可区分"</td>
+</tr>
+<tr>
+<td>★ Agarwal 等《Deep RL at the Edge of the Statistical Precipice》</td>
+<td>§3–4；表 1 L140–L170</td>
+<td>分层 bootstrap 区间、为什么少量运行时点估计不可靠</td>
+</tr>
+<tr>
+<td>Bouthillier 2021</td>
+<td>L116–L118</td>
+<td>推荐用 out-of-bootstrap 代替固定的测试集</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>共轭先验</strong>：伯努利似然 <span class="arithmatex">\(p^k(1-p)^{n-k}\)</span> 乘以 Beta(a, b) 先验 <span class="arithmatex">\(p^{a-1}(1-p)^{b-1}\)</span>，结果还是 Beta(a + k, b + n − k)：先验和后验同一族，更新只是"加计数"（第 8 章贝叶斯公式）。</li>
+<li><strong>Beta 的均值</strong>：Beta(a, b) 的均值是 a/(a + b)，所以均匀先验下后验均值 = (1 + k)/(2 + n)，叫拉普拉斯平滑（加一平滑）。</li>
+<li><strong>bootstrap 为什么有效</strong>：经验分布是总体分布的估计；n 足够大时，"从经验分布里抽样"的波动接近"从总体里抽样"的波动。n 很小、或者统计量卡在取值范围的边上时，这个近似会变差。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(p \mid k, n \sim \text{Beta}(1 + k, 1 + n - k)\)</span></td>
+<td>均匀先验下的后验</td>
+</tr>
+<tr>
+<td>后验均值 <span class="arithmatex">\(= (1 + k)/(2 + n)\)</span></td>
+<td>加一平滑</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P(p_B &gt; p_A) \approx \frac1M\sum\mathbb 1[p_B^{(m)} &gt; p_A^{(m)}]\)</span></td>
+<td>蒙特卡洛估 B 更好的概率</td>
+</tr>
+<tr>
+<td>百分位区间 <span class="arithmatex">\(= [\hat\theta^*_{2.5\%},\ \hat\theta^*_{97.5\%}]\)</span></td>
+<td>bootstrap 区间</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch05_bootstrap_bayes.py</code>，配套测试 <code>tests/test_ch05.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch05_bootstrap_bayes.py  
+uv run pytest tests/test_ch05.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 bootstrap</td>
+<td>百分位</td>
+<td><code>bootstrap_ci(40, 50)</code></td>
+<td>[0.680, 0.900]</td>
+</tr>
+<tr>
+<td>第二步 后验</td>
+<td>Beta(1+k, 1+n−k)</td>
+<td><code>beta_posterior(40, 50)</code>、<code>credible_interval(40, 50)</code></td>
+<td>均值 0.788，[0.669, 0.887]</td>
+</tr>
+<tr>
+<td>第三步 P(B &gt; A)</td>
+<td>蒙特卡洛</td>
+<td><code>prob_b_better(40, 50, 30, 50)</code></td>
+<td>0.984</td>
+</tr>
+<tr>
+<td>第三步 差值区间</td>
+<td>bootstrap</td>
+<td><code>diff_bootstrap(40, 50, 30, 50)</code></td>
+<td>[+0.020, +0.380]</td>
+</tr>
+<tr>
+<td>第四步 分层</td>
+<td>任务内重抽</td>
+<td><code>stratified_bootstrap_mean(SCORES)</code></td>
+<td>0.633，[0.611, 0.655]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">means = rng.choice(data, (reps, n), replace=True).mean(1)      # 一次抽 reps 组，每组有放回抽 n 个
+pb = rng.beta(1 + kb, 1 + nb - kb, draws)                      # B 的后验样本
+pa = rng.beta(1 + ka, 1 + na - ka, draws)                      # A 的后验样本
+prob = np.mean(pb &gt; pa)                                        # B 赢的比例
+idx = rng.integers(0, s, (reps, t, s))                         # 分层：每个任务各自抽种子的下标
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>成功率的 bootstrap 可以直接用二项分布抽</strong>：<code>diff_bootstrap</code> 里写成 <code>rng.binomial(n, k/n)</code>，和"有放回抽 n 个 0/1"是同一个分布，只是快得多。</li>
+<li><strong>蒙特卡洛的误差</strong>：40 万次抽样时 P(B &gt; A) 的标准误约 √(0.984 × 0.016 / 400000) ≈ 0.0002，小数点后三位稳定。</li>
+<li><strong>分层 bootstrap 用 <code>take_along_axis</code> 一次算完</strong>：<code>(reps, 任务, 种子)</code> 三维下标，避免写 2 万次循环。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把先验换成 Beta(10, 10)（"我相信成功率在 0.5 附近"），40/50 的后验均值变成多少？</li>
+<li><code>stratified_bootstrap_mean</code> 里把任务 2 的分数全部加 0.3，区间的宽度变不变？为什么？</li>
+</ol><nav class="pager"><a href="04-paired-comparison.html">← 第 4 章 · 配对比较：同一批初始条件交替跑，省下一半样本</a><a href="06-ab-rules-multiple-comparisons.html">第 6 章 · A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

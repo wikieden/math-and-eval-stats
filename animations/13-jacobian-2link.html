@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>两连杆雅可比</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 13 章 · 雅可比：关节转一点，末端动多少；手臂伸直时动不了</h1>
+<p class="sub">配套讲义：<a href="../lessons/13-calculus-autodiff.html">第 13 章 · 多元微积分与自动微分：从机械臂雅可比到反向传播</a>。两连杆平面臂，l₁ = l₂ = 1。蓝 / 橙箭头是雅可比 J 的两列（只转关节 1 / 只转关节 2 时末端的速度方向），绿色椭圆是单位长度关节速度能达到的所有末端速度 J·θ̇。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 400"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">θ₁ / θ₂</div><div class="v" id="st">—</div></div>
+<div class="stat"><div class="l">末端位置</div><div class="v" id="sp">—</div></div>
+<div class="stat"><div class="l">det J = sin θ₂</div><div class="v" id="sd">—</div></div>
+<div class="stat"><div class="l">状态</div><div class="v" id="ss">—</div></div>
+</div>
+<div class="row ctl"><label>θ₁ <b id="av">30</b>°</label><input id="a" type="range" min="-90" max="180" step="1" value="30"></div>
+<div class="row ctl"><label>θ₂ <b id="bv">150</b>°</label><input id="b" type="range" min="0" max="170" step="1" value="150"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：播放时 θ₂ 从当前值慢慢转到 0°。det J 跟着 sin θ₂ 变小，两支箭头越来越接近共线，椭圆压扁成一条线：手臂伸直，末端沿手臂方向的速度为 0。θ₂ = 60° 时就是讲义的例子，J = [[−1.5, −1.0], [0.866, 0]]（θ₁ = 30°）。拖 θ₁ 只会让整个椭圆转动，形状不变。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const OX=250,OY=300,S=110,AS=0.55;const P=(x,y)=>[OX+x*S,OY-y*S];
+let t1,t2,layer;
+el('line',{x1:OX-240,y1:OY,x2:OX+260,y2:OY,stroke:'var(--line)'},sv);el('line',{x1:OX,y1:OY+60,x2:OX,y2:OY-270,stroke:'var(--line)'},sv);
+function reset(){t1=+$('a').value;t2=+$('b').value;draw()}
+function next(){if(t2<=0)return false;t2=Math.max(0,t2-3);$('b').value=t2;$('bv').textContent=t2;draw();return t2>0}
+function arrow(x0,y0,x1,y1,c){const [a,b]=P(x0,y0),[e,f]=P(x1,y1);el('line',{x1:a,y1:b,x2:e,y2:f,stroke:c,'stroke-width':3},layer);
+  const ang=Math.atan2(f-b,e-a);[0.5,-0.5].forEach(d=>el('line',{x1:e,y1:f,x2:e-10*Math.cos(ang+d),y2:f-10*Math.sin(ang+d),stroke:c,'stroke-width':3},layer))}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const a=t1*Math.PI/180,b=t2*Math.PI/180;const x1=Math.cos(a),y1=Math.sin(a),xe=x1+Math.cos(a+b),ye=y1+Math.sin(a+b);
+  const J=[[-Math.sin(a)-Math.sin(a+b),-Math.sin(a+b)],[Math.cos(a)+Math.cos(a+b),Math.cos(a+b)]];
+  const pts=[];for(let i=0;i<=120;i++){const t=i/120*2*Math.PI,c=Math.cos(t),s=Math.sin(t);const [px,py]=P(xe+AS*(J[0][0]*c+J[0][1]*s),ye+AS*(J[1][0]*c+J[1][1]*s));pts.push(px+','+py)}
+  el('polyline',{points:pts.join(' '),fill:'var(--good)','fill-opacity':0.12,stroke:'var(--good)','stroke-width':2},layer);
+  const [p0x,p0y]=P(0,0),[p1x,p1y]=P(x1,y1),[pex,pey]=P(xe,ye);
+  el('polyline',{points:`${p0x},${p0y} ${p1x},${p1y} ${pex},${pey}`,fill:'none',stroke:'var(--text)','stroke-width':7,'stroke-linecap':'round','stroke-linejoin':'round'},layer);
+  [[p0x,p0y],[p1x,p1y]].forEach(([x,y])=>el('circle',{cx:x,cy:y,r:7,fill:'var(--card)',stroke:'var(--text)','stroke-width':2},layer));
+  arrow(xe,ye,xe+AS*J[0][0],ye+AS*J[1][0],'var(--accent)');arrow(xe,ye,xe+AS*J[0][1],ye+AS*J[1][1],'var(--warm)');
+  txt('蓝 = J 第 1 列（只转关节 1）　橙 = J 第 2 列（只转关节 2）　绿 = 末端速度椭圆',{x:20,y:22,class:'m'},layer);
+  const d=Math.sin(b);$('st').textContent=t1+'° / '+t2+'°';$('sp').textContent='('+xe.toFixed(2)+', '+ye.toFixed(2)+')';$('sd').textContent=d.toFixed(3);
+  $('ss').textContent=Math.abs(d)<0.05?'奇异':'正常';$('ss').className='v '+(Math.abs(d)<0.05?'bad':'good')}
+$('a').oninput=()=>{$('av').textContent=$('a').value;ANIM.stop();reset()};
+$('b').oninput=()=>{$('bv').textContent=$('b').value;ANIM.stop();reset()};
+setupPlayer({captureSeed:1,reset:()=>{if(CAPTURE){$('a').value=30;$('b').value=150;$('av').textContent=30;$('bv').textContent=150}reset()},next},120);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

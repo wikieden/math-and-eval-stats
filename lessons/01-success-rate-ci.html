@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 1 章 · 一个成功率有多准：30 次试验里成了 21 次，真实水平在哪 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html" class="cur"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="1-30-21">第 1 章 · 一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</h1><div class="run"><a class="btn" href="../animations/01-ci-coverage.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch01_success_rate_ci.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch01_success_rate_ci.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch01_success_rate_ci.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：团队说"新模型成功率 70%（21/30）"。这个 70% 有多可信？真实成功率可能低到多少、高到多少？要把误差缩到 ±5 个点，得测多少次？<br />
+讲解日期：2026-11-23 · 上一章：无（本书第 1 章） · 下一章：<a href="../lessons/02-two-proportions.html">第 2 章 两个成功率比一比</a><br />
+对应原文：NIST e-Handbook §7.2.4.1 <code>materials/text/web/nist/prc241.txt</code> L22–L60（Wilson 区间公式）；Miller《Adding Error Bars to Evals》§2.1 <code>materials/text/papers/adding-error-bars-to-evals-2411.00640.txt</code> L91–L141（伯努利标准误、95% 区间）；Kress-Gazit 等《Robot Learning as an Empirical Science》§6.4.2 <code>materials/text/papers/robot-eval-best-practices-2409.09491.txt</code> L593–L596（13/20 对 14/20 分不出高下）<br />
+本章缩写：CI = Confidence Interval（置信 / 区间）；SE = Standard Error（标准 / 误差）；CLT = Central Limit Theorem（中心 / 极限 / 定理）；NIST = National Institute of Standards and Technology（美国国家 / 标准 / 与技术 / 研究院）；p̂ 读作"p hat"（p 戴帽子，表示"估计出来的 p"）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-23">第一步：成功率是"估计"，不是"真值"（2026-11-23）</h3>
+<p><strong>类比：尝一勺汤判断整锅咸淡。</strong> 整锅汤的咸度是固定的（真值），但你每次舀一勺尝到的都略有不同。勺子越小，尝到的越不准。机器人测 30 次，就是从"无穷多次可能的试验"这锅汤里舀了 30 勺。</p>
+<p>把每次试验看成抛一枚不均匀的硬币：成功的概率是 <span class="arithmatex">\(p\)</span>（真实成功率，谁也不知道），失败的概率是 <span class="arithmatex">\(1-p\)</span>。测 <span class="arithmatex">\(n\)</span> 次，成功了 <span class="arithmatex">\(k\)</span> 次。</p>
+<div class="arithmatex">\[\hat p = \frac{k}{n}\]</div>
+<ul>
+<li><span class="arithmatex">\(p\)</span>：真实成功率，固定但未知。</li>
+<li><span class="arithmatex">\(\hat p\)</span>：读作"p hat"，从这 <span class="arithmatex">\(n\)</span> 次里<strong>估计</strong>出来的成功率。</li>
+<li><span class="arithmatex">\(k\)</span>：成功次数。如果每次试验互相独立、<span class="arithmatex">\(p\)</span> 不变，<span class="arithmatex">\(k\)</span> 服从二项分布 <span class="arithmatex">\(\text{Binomial}(n, p)\)</span>（n 次、每次成功概率 p 的"数成功次数"分布）。</li>
+</ul>
+<p><strong>例子</strong>：21/30，<span class="arithmatex">\(\hat p = 0.70\)</span>。但真实的 <span class="arithmatex">\(p\)</span> 完全可能是 0.6，运气好测出了 21 次；也可能是 0.8，运气差只测出 21 次。</p>
+<p><img alt="二项分布：真成功率 0.7 测 30 次" src="../figures/01-success-rate-ci-binomial.png" /></p>
+<p><em>图 1-1 · 真成功率 0.7 时重测 30 次，成功次数大多落在 16 到 26 之间。21/30 只是其中一次的结果。</em></p>
+<p><strong>一句话</strong>：报告里的 70% 是一勺汤的味道，不是整锅的咸度；下面几步就是算"整锅可能在哪个范围"。</p>
+<h3 id="wald-2026-11-23">第二步：标准误和最朴素的区间（Wald 区间）（2026-11-23）</h3>
+<p><strong>类比：同一个实验重做一遍，数字会晃多少。</strong> 标准误就是"晃动幅度"的尺子。</p>
+<div class="arithmatex">\[SE = \sqrt{\frac{\hat p(1-\hat p)}{n}}\]</div>
+<ul>
+<li><span class="arithmatex">\(SE\)</span>：Standard Error，标准误。意思是：如果把"测 n 次"这件事重做很多遍，每遍得到的 <span class="arithmatex">\(\hat p\)</span> 会围着真值上下晃，晃动的标准差大约就是 SE。</li>
+<li><span class="arithmatex">\(\hat p(1-\hat p)\)</span>：单次试验（成 = 1、败 = 0）的方差。<span class="arithmatex">\(\hat p\)</span> 在 0.5 时最大（0.25），靠近 0 或 1 时变小。</li>
+<li>除以 <span class="arithmatex">\(n\)</span> 再开方：试验次数越多，平均值晃得越少，按 <span class="arithmatex">\(1/\sqrt n\)</span> 缩。</li>
+</ul>
+<p>根据中心极限定理（CLT：很多独立小随机量加起来近似正态分布），<span class="arithmatex">\(\hat p\)</span> 近似服从正态分布，于是得到教科书上最常见的 95% 区间（Wald 区间，以统计学家 Abraham Wald 命名）：</p>
+<div class="arithmatex">\[\hat p \pm 1.96 \times SE\]</div>
+<p>1.96 是标准正态分布中间 95% 面积的边界：左右各留 2.5%。</p>
+<p>Miller 的评测报告里就是这两个公式：伯努利情形 <span class="arithmatex">\(SE=\sqrt{\bar s(1-\bar s)/n}\)</span>（L130–L131），95% 区间 <span class="arithmatex">\(\bar s \pm 1.96\times SE\)</span>（L141）。</p>
+<p><strong>例子（21/30）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>量</th>
+<th>算式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\hat p\)</span></td>
+<td>21 / 30</td>
+<td>0.70</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(SE\)</span></td>
+<td><span class="arithmatex">\(\sqrt{0.7 \times 0.3 / 30} = \sqrt{0.007}\)</span></td>
+<td>0.0837</td>
+</tr>
+<tr>
+<td>半宽</td>
+<td><span class="arithmatex">\(1.96 \times 0.0837\)</span></td>
+<td>0.164</td>
+</tr>
+<tr>
+<td>Wald 95% CI</td>
+<td><span class="arithmatex">\(0.70 \pm 0.164\)</span></td>
+<td>[0.536, 0.864]</td>
+</tr>
+</tbody>
+</table>
+<p>也就是说：<strong>"70%"背后的真实成功率，从 54% 到 86% 都说得通。</strong> 区间宽 33 个点。</p>
+<p><strong>一句话</strong>：30 次试验的成功率，误差大约是 ±16 个点；比"提升 10 个点"还大。</p>
+<h3 id="wald-wilson-2026-11-23">第三步：Wald 区间什么时候坏掉，换 Wilson 区间（2026-11-23）</h3>
+<p><strong>Wald 的毛病</strong>：它用估计值 <span class="arithmatex">\(\hat p\)</span> 去算误差。<span class="arithmatex">\(\hat p\)</span> 靠近 0 或 1 时，误差被算得太小。最极端的例子：</p>
+<table>
+<thead>
+<tr>
+<th>结果</th>
+<th>Wald 区间</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30/30</td>
+<td><span class="arithmatex">\(1.0 \pm 1.96 \times \sqrt{1\times 0/30}\)</span> = [1.000, 1.000]</td>
+<td>宽度 0，等于说"真实成功率一定是 100%"，荒谬</td>
+</tr>
+</tbody>
+</table>
+<p>机器人评测里，成功率 90% 以上、试验次数 20–50 次的情形非常常见，恰好是 Wald 最不靠谱的区域。</p>
+<p><strong>Wilson 区间</strong>（Wilson 1927 年提出；NIST 手册推荐它，L22–L27）：</p>
+<div class="arithmatex">\[\text{中心} = \frac{\hat p + \dfrac{z^2}{2n}}{1+\dfrac{z^2}{n}}, \qquad \text{半宽} = \frac{z\sqrt{\dfrac{\hat p(1-\hat p)}{n} + \dfrac{z^2}{4n^2}}}{1+\dfrac{z^2}{n}}\]</div>
+<ul>
+<li><span class="arithmatex">\(z\)</span>：95% 区间取 1.96，<span class="arithmatex">\(z^2 \approx 3.84\)</span>。</li>
+<li>中心：分子多了 <span class="arithmatex">\(z^2/2n\)</span>，分母多了 <span class="arithmatex">\(z^2/n\)</span>，效果是把中心<strong>往 0.5 拉一点</strong>。相当于在 n 次试验之外，假装多做了约 <span class="arithmatex">\(z^2 \approx 4\)</span> 次、一半成一半败。</li>
+<li>半宽：根号里多了 <span class="arithmatex">\(z^2/4n^2\)</span>，所以 <span class="arithmatex">\(\hat p = 0\)</span> 或 1 时宽度也不会变成 0。</li>
+</ul>
+<p>NIST 原文说 Wilson 区间是对假设检验"反解"出来的（L22–L27 "based on inverting the hypothesis test"）：所有"不会被 21/30 这个结果拒绝"的 <span class="arithmatex">\(p\)</span> 值，组成区间。这个思路第 2 章讲检验时会再用。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>结果</th>
+<th>中心</th>
+<th>半宽</th>
+<th>Wilson 95% CI</th>
+<th>对比 Wald</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21/30</td>
+<td><span class="arithmatex">\((0.7 + 3.84/60) / (1 + 3.84/30) = 0.677\)</span></td>
+<td>0.156</td>
+<td>[0.521, 0.833]</td>
+<td>[0.536, 0.864]：Wilson 整体往下挪了一点</td>
+</tr>
+<tr>
+<td>30/30</td>
+<td>0.943</td>
+<td>0.057</td>
+<td>[0.886, 1.000]</td>
+<td>[1.000, 1.000]：Wilson 承认真实成功率可能只有 89%</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Wald 与 Wilson 的实际覆盖率" src="../figures/01-success-rate-ci-coverage-vs-p.png" /></p>
+<p><em>图 1-2 · n = 30 时，按二项分布精确算出每个真成功率下两种区间的覆盖率。Wald 在两端掉到 50% 以下；Wilson 一直在 95% 附近（锯齿来自二项分布是离散的）。</em></p>
+<p><strong>一句话</strong>：小样本、成功率靠近 0 或 1 时一律用 Wilson；报告写"21/30 = 70%，95% Wilson CI [52%, 83%]"。</p>
+<p><strong>场景代码</strong>：真实项目里不用手算，<code>scipy</code> 和 <code>statsmodels</code> 都有现成函数。注意 <code>scipy</code> 默认是精确的 Clopper-Pearson 区间（更保守、更宽），要 Wilson 得显式指定：</p>
+<pre><code class="language-python">from scipy.stats import binomtest
+from statsmodels.stats.proportion import proportion_confint
+
+ci = binomtest(k=21, n=30).proportion_ci(confidence_level=0.95, method=&quot;wilson&quot;)
+print(ci)  # ConfidenceInterval(low=0.521..., high=0.833...)  ← 第三步的 Wilson 区间
+
+print(binomtest(21, 30).proportion_ci())  # 默认 method=&quot;exact&quot;：[0.506, 0.853]，Clopper-Pearson，比 Wilson 宽
+print(proportion_confint(21, 30, alpha=0.05, method=&quot;wilson&quot;))  # statsmodels 同一个结果
+print(proportion_confint(21, 30, alpha=0.05, method=&quot;normal&quot;))  # 这就是 Wald：[0.536, 0.864]
+</code></pre>
+<p>评测脚本里通常把它包进汇报表：每个任务一行，列"成功 / 总数、成功率、Wilson 下界、Wilson 上界"。<a href="https://wikieden.github.io/reading-gr00t2/lessons/06-rl-post-training.html">GR00T 2 第 6 章</a>的真机结果就是这样报的：每柱 50 次，画 95% Wilson 区间。</p>
+<h3 id="2026-11-23_1">第四步：要多少次试验，区间才够窄（2026-11-23）</h3>
+<p><strong>类比：拍照的曝光时间。</strong> 想让画面噪点减半，曝光时间要翻 4 倍，不是翻 2 倍。区间宽度也一样，按 <span class="arithmatex">\(1/\sqrt n\)</span> 缩。</p>
+<p>把 Wald 半宽公式反过来解 <span class="arithmatex">\(n\)</span>：</p>
+<div class="arithmatex">\[n \approx \frac{z^2\, p(1-p)}{h^2}\]</div>
+<ul>
+<li><span class="arithmatex">\(h\)</span>：想要的半宽（比如 0.05 = ±5 个点）。</li>
+<li><span class="arithmatex">\(p\)</span>：预计的成功率（不知道时取 0.5，最保守）。</li>
+</ul>
+<p><strong>例子</strong>（<span class="arithmatex">\(p \approx 0.7\)</span>，Wilson 半宽）：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>10</th>
+<th>30</th>
+<th>100</th>
+<th>300</th>
+<th>1000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>半宽（个点）</td>
+<td>±24.8</td>
+<td>±15.6</td>
+<td>±8.8</td>
+<td>±5.2</td>
+<td>±2.8</td>
+</tr>
+</tbody>
+</table>
+<p>想要 ±5 个点：<span class="arithmatex">\(n \approx 1.96^2 \times 0.7 \times 0.3 / 0.05^2 = 3.84 \times 0.21 / 0.0025 \approx 323\)</span> 次。</p>
+<p><img alt="区间半宽随试验次数变化" src="../figures/01-success-rate-ci-width-vs-n.png" /></p>
+<p><em>图 1-3 · 95% Wilson 区间半宽随 n 变化（对数横轴）。成功率 0.7 时，30 次是 ±15.6 个点；要到 ±5 个点得 323 次。红虚线是"提升 10 个点"：n = 30 时，单个成功率的误差就已经比它大。</em></p>
+<p>注意：这里算的是<strong>单个</strong>成功率的精度。"新旧两个模型差多少"是两个成功率相减，误差更大；"要测多少次才分得出 10 个点的差距"要用功效分析，第 3 章讲。</p>
+<p><strong>一句话</strong>：区间半宽 ∝ <span class="arithmatex">\(1/\sqrt n\)</span>；30 次只能看出 ±15 个点量级的东西。</p>
+<h3 id="95-2026-11-23">第五步：95% 到底指什么（2026-11-23）</h3>
+<p><strong>最常见的误读</strong>："真实成功率有 95% 的概率落在 [0.52, 0.83] 里。"在经典（频率学派）统计里，真值 <span class="arithmatex">\(p\)</span> 是固定的，不是随机的；随机的是区间。</p>
+<p><strong>正确的说法</strong>：如果把"测 30 次、算一个区间"这件事重复很多遍，大约 95% 的区间会盖住真值。这个比例叫<strong>覆盖率</strong>（coverage）。"95%"是<strong>方法</strong>的性质，不是某一个区间的性质。</p>
+<p><strong>例子（模拟，编的真值）</strong>：设真成功率 <span class="arithmatex">\(p = 0.9\)</span>，每轮测 30 次，重复 20000 轮，数区间盖住 0.9 的比例：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>名义</th>
+<th>实际覆盖率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wald</td>
+<td>95%</td>
+<td>0.809</td>
+</tr>
+<tr>
+<td>Wilson</td>
+<td>95%</td>
+<td>0.974</td>
+</tr>
+</tbody>
+</table>
+<p>Wald 说自己是 95% 区间，实际只有约 81% 的时候是对的。这正是第三步说的"<span class="arithmatex">\(\hat p\)</span> 靠近 1 时区间太窄"。</p>
+<p>想要"真值落在区间里的概率"这种说法，要用贝叶斯后验（Beta 分布）的可信区间，第 5 章讲；Kress-Gazit 等的机器人评测指南就是用均匀先验下的 Beta 后验判断 13/20 和 14/20 分不出高下（L593–L596）。</p>
+<p><strong>一句话</strong>：95% 是"这套方法长期来看 95% 的时候对"，不是"这一个区间 95% 对"。</p>
+<h3 id="_2">动画演示：重复做实验，数有几个区间盖住真值</h3>
+<p><img alt="置信区间覆盖率" src="../animations/01-ci-coverage.gif" /></p>
+<p>可交互版：<a href="../animations/01-ci-coverage.html">animations/01-ci-coverage.html</a>（滑块：真成功率 p、每轮试验次数 n）</p>
+<p><strong>怎么看</strong>：
+1. 蓝色虚线是真值 <span class="arithmatex">\(p\)</span>；每一行是一轮"测 n 次"，黑点是这轮的估计值 <span class="arithmatex">\(\hat p\)</span>（第一步）。
+2. 每行画出这一轮的区间，左边 Wald、右边 Wilson，用的是同一批结果（第二、三步）。
+3. 绿色 = 盖住真值，红色 = 没盖住。下面的覆盖率就是第五步表里的数：p = 0.9、n = 30 时，Wald 明显低于 95%（红条多是右端点贴在 1.0 上的那些行）。
+4. 把 n 拖到 300：区间变窄（第四步），两种方法的覆盖率都接近 95%。</p>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二、三步）：旧模型是 18/30。（a）手算它的 Wald 95% 区间；（b）用 Wilson 公式算（可以用代码核对）；（c）和 21/30 的 Wilson 区间 [0.521, 0.833] 放在一起看，你对"提升 10 个点"的第一反应是什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：同事报告某抓取任务"20/20，成功率 100%"。（a）Wald 区间是多少，为什么不能用；（b）你会让他报成什么样的一句话（含区间）？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：下面两句话哪句对？（a）"真实成功率有 95% 的概率在 [0.52, 0.83] 里"；（b）"用这个方法算区间，长期来看约 95% 的区间会盖住真实成功率"。错的那句错在哪？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 4</strong>（第四步）：老板要求"成功率报告的误差不超过 ±3 个点"，预计成功率 80% 左右。大约要测多少次？每次 2 分钟，要多少小时？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>一勺汤不是一锅汤，七成背后正负十五；<br />
+靠零靠一 Wald 塌，Wilson 往中拉一拉；<br />
+想窄一半测四倍，九五说的是方法。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST01–ST05（必须记住的公式和概念）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Miller《Adding Error Bars to Evals》（2024）</td>
+<td>§2.1 L91–L145</td>
+<td>评测分数的标准误怎么算、怎么在表里报（括号里写 SE，L136–L138）</td>
+</tr>
+<tr>
+<td>★ NIST/SEMATECH e-Handbook §7.2.4.1</td>
+<td><code>text/web/nist/prc241.txt</code> L22–L80</td>
+<td>Wilson 区间公式和为什么推荐它；L153 起是精确（Clopper-Pearson）区间</td>
+</tr>
+<tr>
+<td>Kress-Gazit 等《Robot Learning as an Empirical Science》（2024）</td>
+<td>§6.4.2 L593–L596；评测建议清单 L170–L185</td>
+<td>真机评测怎么设计；13/20 对 14/20 的真实案例</td>
+</tr>
+<tr>
+<td>Brown, Cai, DasGupta《Interval Estimation for a Binomial Proportion》，Statistical Science 16(2), 2001</td>
+<td>全文（本地未归档）</td>
+<td>系统比较 Wald、Wilson、Agresti-Coull、Clopper-Pearson 的覆盖率，证明 Wald 在小样本下不可用</td>
+</tr>
+<tr>
+<td>MML（Mathematics for Machine Learning）§6.4</td>
+<td><code>text/books/mml-book.txt</code> L10499 起</td>
+<td>期望、方差、独立性；第 8 章补基础时用</td>
+</tr>
+<tr>
+<td>《从零造 Agent Harness》第 14 章 评估</td>
+<td>全章</td>
+<td>Agent 评测里同样的"成功率 + 标准误"问题</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>二项分布</strong>：<span class="arithmatex">\(n\)</span> 次独立试验、每次成功概率 <span class="arithmatex">\(p\)</span>，成功次数 <span class="arithmatex">\(k\)</span> 的分布。均值 <span class="arithmatex">\(np\)</span>，方差 <span class="arithmatex">\(np(1-p)\)</span>；所以 <span class="arithmatex">\(\hat p = k/n\)</span> 的方差是 <span class="arithmatex">\(p(1-p)/n\)</span>。</li>
+<li><strong>中心极限定理（CLT）</strong>：很多独立同分布的随机量求平均，平均值近似正态分布，标准差按 <span class="arithmatex">\(1/\sqrt n\)</span> 缩。Wald 区间完全靠它；n 小或 p 靠边时近似变差。</li>
+<li><strong>区间 = 反解检验</strong>：Wilson 区间是"所有不会被观测结果在 5% 水平拒绝的 <span class="arithmatex">\(p\)</span>"的集合。第 2 章讲检验时会正着用一次。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\hat p = k/n\)</span></td>
+<td>成功率的点估计</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(SE = \sqrt{\hat p(1-\hat p)/n}\)</span></td>
+<td>成功率的标准误</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat p \pm 1.96\,SE\)</span></td>
+<td>Wald 95% 区间（小样本、靠边时别用）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\dfrac{\hat p + z^2/2n \pm z\sqrt{\hat p(1-\hat p)/n + z^2/4n^2}}{1+z^2/n}\)</span></td>
+<td>Wilson 区间（默认用它）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(n \approx z^2 p(1-p)/h^2\)</span></td>
+<td>想要半宽 <span class="arithmatex">\(h\)</span> 大约要多少次试验</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>Python 标准库 + NumPy（Numerical Python：数值 / Python）+ SciPy（Scientific Python：科学 / Python）。代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch01_success_rate_ci.py</code>，配套测试 <code>tests/test_ch01.py</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch01_success_rate_ci.py   # 一步一步打印  
+uv run pytest tests/test_ch01.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步</td>
+<td><span class="arithmatex">\(\hat p = k/n\)</span></td>
+<td><code>point_estimate(21, 30)</code></td>
+<td>0.70</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td><span class="arithmatex">\(SE\)</span>、Wald</td>
+<td><code>standard_error(21, 30)</code>、<code>wald_ci(21, 30)</code></td>
+<td>0.0837、[0.536, 0.864]；30/30 → [1.000, 1.000]</td>
+</tr>
+<tr>
+<td>第三步</td>
+<td>Wilson</td>
+<td><code>wilson_ci(21, 30)</code>、<code>wilson_ci(30, 30)</code></td>
+<td>[0.521, 0.833]、[0.886, 1.000]</td>
+</tr>
+<tr>
+<td>第四步</td>
+<td><span class="arithmatex">\(n \approx z^2p(1-p)/h^2\)</span></td>
+<td><code>n_for_half_width(0.7, 0.05)</code></td>
+<td>323</td>
+</tr>
+<tr>
+<td>第五步</td>
+<td>覆盖率</td>
+<td><code>coverage(wald_ci, 0.9, 30)</code>、<code>coverage(wilson_ci, 0.9, 30)</code></td>
+<td>0.809、0.974</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def wilson_ci(k, n, z=1.959964):
+    p, z2 = k / n, z * z
+    denom = 1 + z2 / n                                    # 分母：1 + z²/n
+    center = (p + z2 / (2 * n)) / denom                   # 中心往 0.5 拉
+    half = z * math.sqrt(p * (1 - p) / n + z2 / (4 * n * n)) / denom   # 多一项 z²/4n²，靠边也不为 0
+    return center - half, center + half
+
+ks = rng.binomial(n, p_true, size=reps)                   # 覆盖率：一次抽 reps 轮实验的成功次数
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><code>z</code> 用的是 1.959964 不是 1.96，所以和 <code>scipy</code> 的结果对到小数点后 6 位；讲义里四舍五入成 1.96，第三位小数不受影响。</li>
+<li><code>wald_ci</code> 把区间截在 [0, 1] 里（<code>max(0, …)</code>、<code>min(1, …)</code>），否则 Wald 区间会超出 100%；Wilson 天然不会出界。</li>
+<li>覆盖率是模拟出来的，换随机种子会在第三位小数上抖动；测试里放宽到 ±0.02。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>coverage</code> 的真值改成 0.5、n 改成 30，看 Wald 和 Wilson 的差距是不是变小了。</li>
+<li>把 n 改成 10、真值 0.95，看 Wald 的覆盖率能掉到多低。</li>
+<li>对照 notebook，把 <code>z</code> 换成 1.645（90% 区间），看第四步要的次数变成多少。</li>
+</ol><nav class="pager"><span></span><a href="02-two-proportions.html">第 2 章 · 两个成功率比一比：差 5 个点、差 20 个点，哪个算数 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

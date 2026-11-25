@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>功效与样本量</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 3 章 · 拖动次数，看两个分布什么时候分得开</h1>
+<p class="sub">配套讲义：<a href="../lessons/03-power-sample-size.html">第 3 章 · 要测多少次：功效、最小可检测效应和样本量</a>。A 的真成功率 0.70。左边的山是"A、B 其实一样"时观测差值的分布，右边的山是"B 真有那么好"时的分布；竖线是判显著的门槛（双侧 α = 0.05）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="n">每组次数 n</label><input type="range" id="n" min="10" max="300" step="10" value="30"><span id="nv">30</span><label for="pb">B 的真成功率</label><input type="range" id="pb" min="0.72" max="0.95" step="0.01" value="0.85"><span id="pbv">0.85</span></div>
+<p class="note">看点：① 红色面积是 α（误报）；蓝色面积是功效；② n 从 30 拖到 120：两座山变窄，蓝色面积超过 80%；③ B 的真成功率拉近 0.70：右边的山往左挪，要更大的 n 才分得开。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const PHI=z=>0.5*(1+erf(z/Math.SQRT2));
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}
+const npdf=(x,m,s)=>Math.exp(-0.5*((x-m)/s)**2)/(s*2.5066283);
+const IDS=['n','pb'],F=[[30,0.85],[60,0.85],[120,0.85],[120,0.75],[300,0.75]];
+function render(n,pb){const pa=0.7,se0=Math.sqrt(2*0.775*0.225/n),se1=Math.sqrt((pa*(1-pa)+pb*(1-pb))/n),d=pb-pa,thr=1.96*se0,pw=1-PHI((thr-d)/se1);
+ cap(`每组 ${n} 次、B = ${(+pb).toFixed(2)}：差值 ${d.toFixed(2)}，门槛 ±${thr.toFixed(3)}，功效 ${(pw*100).toFixed(1)}%`);
+ const xmax=Math.max(0.45,d+4*se1),ymax=npdf(0,0,Math.min(se0,se1))*1.05;frame(40,50,600,260);const m=PM(40,50,600,260,[-0.25,xmax],[0,ymax]);
+ const A0=[],A1=[];for(let i=0;i<=300;i++){const x=-0.25+(xmax+0.25)*i/300;A0.push([x,npdf(x,0,se0)]);A1.push([x,npdf(x,d,se1)])}
+ A1.filter(p=>p[0]>=thr).forEach((p,i,arr)=>{if(i<arr.length-1){const q=m(p[0],0),r=m(arr[i+1][0],p[1]);R(q[0],r[1],r[0]-q[0]+0.5,q[1]-r[1],'var(--accent)',.35)}});
+ A0.filter(p=>p[0]>=thr).forEach((p,i,arr)=>{if(i<arr.length-1){const q=m(p[0],0),r=m(arr[i+1][0],p[1]);R(q[0],r[1],r[0]-q[0]+0.5,q[1]-r[1],'var(--bad)',.5)}});
+ P(A0.map(p=>m(p[0],p[1])),'var(--muted)',2);P(A1.map(p=>m(p[0],p[1])),'var(--accent)',2);
+ const t=m(thr,0);L(t[0],50,t[0],310,'var(--bad)',2,'5 4');T('门槛',t[0]+4,66,'start','s');
+ T('一样时',m(0,0)[0],328,'middle','s');T('B 真更好时',m(d,0)[0],346,'middle','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>欧拉角与万向锁</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 18 章 · 欧拉角的万向锁：pitch 到 90° 时，yaw 和 roll 绕同一根轴转</h1>
+<p class="sub">配套讲义：<a href="../lessons/18-rotations-rigid-transforms.html">第 18 章 · 3D 旋转与刚体变换：动作里的姿态该用什么表示</a>。ZYX 欧拉角：R = Rz(yaw)·Ry(pitch)·Rx(roll)。方块上的红 / 绿 / 蓝箭头是它自己的 x / y / z 轴，也就是 R 的三列；灰色细线是世界坐标轴。下方实时显示 R 和对应的四元数 (w, x, y, z)。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 380"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">yaw / pitch / roll</div><div class="v" id="se">—</div></div>
+<div class="stat"><div class="l">四元数 (w, x, y, z)</div><div class="v" id="sq" style="font-size:15px">—</div></div>
+<div class="stat"><div class="l">阶段</div><div class="v" id="sph" style="font-size:15px">—</div></div>
+</div>
+<div class="row ctl"><label>yaw <b id="yv">0</b>°</label><input id="y" type="range" min="-180" max="180" step="1" value="0"></div>
+<div class="row ctl"><label>pitch <b id="pv">0</b>°</label><input id="p" type="range" min="-90" max="90" step="1" value="0"></div>
+<div class="row ctl"><label>roll <b id="rv">0</b>°</label><input id="r" type="range" min="-180" max="180" step="1" value="0"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：播放分三段。① pitch 从 0° 推到 90°；② yaw 和 roll 同时各加 60°：方块纹丝不动（只有 yaw − roll 起作用，丢了一个自由度）；③ 只转 yaw：方块绕一根轴转。自己把 pitch 拖到 90°，再分别拖 yaw 和 roll，会发现两者效果一样（方向相反）。四元数一栏在整个过程中都是连续变化的。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const CX=230,CY=200,S=120;
+const D=Math.PI/180;let yaw,pitch,roll,ph,cnt,layer;
+// 观察方向：先绕 z 转 -35°，再绕 x 转 -65°，正交投影
+const V=mul(rx(-65*D),rz(-35*D));
+function rx(a){const c=Math.cos(a),s=Math.sin(a);return[[1,0,0],[0,c,-s],[0,s,c]]}
+function ry(a){const c=Math.cos(a),s=Math.sin(a);return[[c,0,s],[0,1,0],[-s,0,c]]}
+function rz(a){const c=Math.cos(a),s=Math.sin(a);return[[c,-s,0],[s,c,0],[0,0,1]]}
+function mul(A,B){return A.map((r,i)=>B[0].map((_,j)=>r.reduce((s,_,k)=>s+A[i][k]*B[k][j],0)))}
+function mv(A,v){return A.map(r=>r[0]*v[0]+r[1]*v[1]+r[2]*v[2])}
+function proj(v){const p=mv(V,v);return[CX+p[0]*S,CY-p[1]*S,p[2]]}
+function quat(R){const tr=R[0][0]+R[1][1]+R[2][2];let w,x,y,z;
+  if(tr>0){const s=Math.sqrt(tr+1)*2;w=s/4;x=(R[2][1]-R[1][2])/s;y=(R[0][2]-R[2][0])/s;z=(R[1][0]-R[0][1])/s}
+  else if(R[0][0]>R[1][1]&&R[0][0]>R[2][2]){const s=Math.sqrt(1+R[0][0]-R[1][1]-R[2][2])*2;w=(R[2][1]-R[1][2])/s;x=s/4;y=(R[0][1]+R[1][0])/s;z=(R[0][2]+R[2][0])/s}
+  else if(R[1][1]>R[2][2]){const s=Math.sqrt(1+R[1][1]-R[0][0]-R[2][2])*2;w=(R[0][2]-R[2][0])/s;x=(R[0][1]+R[1][0])/s;y=s/4;z=(R[1][2]+R[2][1])/s}
+  else{const s=Math.sqrt(1+R[2][2]-R[0][0]-R[1][1])*2;w=(R[1][0]-R[0][1])/s;x=(R[0][2]+R[2][0])/s;y=(R[1][2]+R[2][1])/s;z=s/4}
+  if(w<0){w=-w;x=-x;y=-y;z=-z}return[w,x,y,z]}
+[[1.4,0,0],[0,1.4,0],[0,0,1.4]].forEach((v,i)=>{const[a,b]=proj([0,0,0]),[c,d]=proj(v);el('line',{x1:a,y1:b,x2:c,y2:d,stroke:'var(--line)','stroke-width':1},sv);txt(['X','Y','Z'][i],{x:c+4,y:d,class:'m'},sv)});
+function reset(){yaw=+$('y').value;pitch=+$('p').value;roll=+$('r').value;ph=0;cnt=0;if(CAPTURE){yaw=pitch=roll=0}draw()}
+function next(){if(ph===0){pitch=Math.min(90,pitch+3);if(pitch>=90){ph=1;cnt=0}}
+  else if(ph===1){yaw+=3;roll+=3;cnt++;if(cnt>=20){ph=2;cnt=0}}
+  else if(ph===2){yaw+=3;cnt++;if(cnt>=20){ph=3;draw();return false}}
+  draw();return true}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const R=mul(mul(rz(yaw*D),ry(pitch*D)),rx(roll*D));
+  const h=0.45,corners=[];for(const sx of[-1,1])for(const sy of[-1,1])for(const sz of[-1,1])corners.push([sx*h*1.4,sy*h,sz*h*0.6]);
+  const edges=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
+  const pc=corners.map(c=>proj(mv(R,c)));
+  edges.forEach(([i,j])=>el('line',{x1:pc[i][0],y1:pc[i][1],x2:pc[j][0],y2:pc[j][1],stroke:'var(--muted)','stroke-width':1.5},layer));
+  ['var(--bad)','var(--good)','var(--accent)'].forEach((col,k)=>{const e=[0,0,0];e[k]=1.1;const[a,b]=proj([0,0,0]),[c,d]=proj(mv(R,e));
+    el('line',{x1:a,y1:b,x2:c,y2:d,stroke:col,'stroke-width':4,'stroke-linecap':'round'},layer);el('circle',{cx:c,cy:d,r:4,fill:col},layer)});
+  const MX=470,MY=110;txt('R =',{x:MX-40,y:MY+40},layer);
+  R.forEach((row,i)=>row.forEach((v,j)=>txt((Math.abs(v)<0.005?' 0.00':(v>=0?' ':'')+v.toFixed(2)),{x:MX+j*62,y:MY+i*28+12,fill:['var(--bad)','var(--good)','var(--accent)'][j]},layer)));
+  txt('三列 = 方块的 x / y / z 轴',{x:MX-40,y:MY+100,class:'m'},layer);
+  const q=quat(R);
+  $('se').textContent=yaw+'° / '+pitch+'° / '+roll+'°';$('sq').textContent=q.map(v=>v.toFixed(3)).join(', ');
+  $('sph').textContent=['① 抬 pitch','② yaw、roll 同时转：不动','③ 只转 yaw','完成'][ph];
+  ['y','p','r'].forEach((id,i)=>{$(id).value=[yaw,pitch,roll][i];$(id+'v').textContent=[yaw,pitch,roll][i]})}
+['y','p','r'].forEach(id=>$(id).oninput=()=>{$(id+'v').textContent=$(id).value;ANIM.stop();yaw=+$('y').value;pitch=+$('p').value;roll=+$('r').value;draw()});
+setupPlayer({captureSeed:1,reset,next},120);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

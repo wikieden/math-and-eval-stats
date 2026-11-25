@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<a class="brand" href="index.html">数学与实验统计</a>
+<a href="lessons/index.html">讲义目录</a>
+<a href="animations/index.html">动画</a>
+<a href="review.html">复习卡片</a>
+<a href="lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<main>
+<h1>数学与实验统计</h1>
+<p class="lead">Physical AI 要用到的数学，从一个最实际的问题讲起：机器人测了 30 次成功 21 次，这个 70% 有多可信？先把评测统计讲透（区间、检验、功效、配对、bootstrap、多重比较、读曲线），再补概率与信息、线代与微积分、优化、采样与生成模型、旋转与估计，最后是 RL / 控制 / 扩散的推导和 CNN、Transformer、LLM、导航感知、多模态的数学。连载中，计划 66 章，已写 19 章，每章配静态图、动画、代码和 notebook。</p>
+<p>配合阅读：<a href="https://wikieden.github.io/vla-from-scratch/">《VLA 从零到 π0》</a>（第 19 章评测）、<a href="https://wikieden.github.io/diffusion-from-scratch/">《从零读懂扩散模型》</a>、<a href="https://wikieden.github.io/rl-from-scratch/">《从零学强化学习》</a>。</p>
+<p>每章的结构：本章回答的问题 → 讲解（白话类比 → 公式 → 例子）→ 练习与作答记录 → 口诀 → 复习卡片 → 延伸阅读。</p>
+<p><a class="btn" href="lessons/01-success-rate-ci.html">从第 1 章开始</a><a class="btn" href="lessons/index.html">讲义目录</a><a class="btn" href="animations/index.html">全部动画</a><a class="btn" href="review.html">复习卡片</a></p>
+<h2>怎么看</h2>
+<ul>
+<li><b>讲义</b>：每章正文里嵌着 GIF 动画，打开就能播放。</li>
+<li><b>可交互动画</b>：章节标题下的"打开本章可交互动画"，或点下面的卡片进入讲义后再打开。按钮：▶ 播放自动演示，→ 单步自己控制节奏，↺ 从头开始；有滑块的可以拖动参数。</li>
+<li><b>复习卡片</b>：先看问题自己答，再点开折叠的答案核对。</li>
+<li><b>跑代码</b>：章节标题下点"在 Colab 运行本章代码"，浏览器里直接跑；也可以下载 notebook 在本地 Jupyter / VS Code 运行。</li>
+<li><b>章节栏与阅读设置</b>：章节页左侧是全书章节列表（窄屏点"☰ 章节"）；右上角 A− / A+ 调字号，下拉框换主题色，设置在所有书之间通用。</li>
+<li><b>查词</b>：缩写和专业词先查本书"缩写表"，跨书的查<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇表</a>。</li>
+</ul>
+<h2>全部章节</h2>
+<div class="grid"><a class="card" href="lessons/01-success-rate-ci.html"><img loading="lazy" src="animations/01-ci-coverage.gif" alt=""><span class="no">第 1 章</span><span class="t">一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</span></a><a class="card" href="lessons/02-two-proportions.html"><img loading="lazy" src="animations/02-null-distribution.gif" alt=""><span class="no">第 2 章</span><span class="t">两个成功率比一比：差 5 个点、差 20 个点，哪个算数</span></a><a class="card" href="lessons/03-power-sample-size.html"><img loading="lazy" src="animations/03-power-sample-size.gif" alt=""><span class="no">第 3 章</span><span class="t">要测多少次：功效、最小可检测效应和样本量</span></a><a class="card" href="lessons/04-paired-comparison.html"><img loading="lazy" src="animations/04-paired-comparison.gif" alt=""><span class="no">第 4 章</span><span class="t">配对比较：同一批初始条件交替跑，省下一半样本</span></a><a class="card" href="lessons/05-bootstrap-bayes.html"><img loading="lazy" src="animations/05-bootstrap-bayes.gif" alt=""><span class="no">第 5 章</span><span class="t">Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</span></a><a class="card" href="lessons/06-ab-rules-multiple-comparisons.html"><img loading="lazy" src="animations/06-ab-rules-multiple-comparisons.gif" alt=""><span class="no">第 6 章</span><span class="t">A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</span></a><a class="card" href="lessons/07-read-curves-and-ablations.html"><img loading="lazy" src="animations/07-read-curves-and-ablations.gif" alt=""><span class="no">第 7 章</span><span class="t">批判地读 loss 曲线和消融表：一张图先问五个问题</span></a><a class="card" href="lessons/08-probability-mle-map.html"><img loading="lazy" src="animations/08-likelihood-posterior.gif" alt=""><span class="no">第 8 章</span><span class="t">概率补课：期望方差、贝叶斯、最大似然与最大后验</span></a><a class="card" href="lessons/09-gaussian.html"><img loading="lazy" src="animations/09-gaussian-conditional.gif" alt=""><span class="no">第 9 章</span><span class="t">高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</span></a><a class="card" href="lessons/10-information-kl.html"><img loading="lazy" src="animations/10-information-kl.gif" alt=""><span class="no">第 10 章</span><span class="t">信息论：熵、交叉熵、KL 和互信息</span></a><a class="card" href="lessons/11-linear-algebra-basics.html"><img loading="lazy" src="animations/11-linear-algebra-basics.gif" alt=""><span class="no">第 11 章</span><span class="t">线代一：矩阵乘法的三种看法、秩、特征分解与正定</span></a><a class="card" href="lessons/12-svd-least-squares.html"><img loading="lazy" src="animations/12-svd-least-squares.gif" alt=""><span class="no">第 12 章</span><span class="t">线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</span></a><a class="card" href="lessons/13-calculus-autodiff.html"><img loading="lazy" src="animations/13-jacobian-2link.gif" alt=""><span class="no">第 13 章</span><span class="t">多元微积分与自动微分：从机械臂雅可比到反向传播</span></a><a class="card" href="lessons/14-unconstrained-optimization.html"><img loading="lazy" src="animations/14-unconstrained-optimization.gif" alt=""><span class="no">第 14 章</span><span class="t">无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</span></a><a class="card" href="lessons/15-constrained-convex-qp.html"><img loading="lazy" src="animations/15-constrained-convex-qp.gif" alt=""><span class="no">第 15 章</span><span class="t">约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</span></a><a class="card" href="lessons/16-monte-carlo-sampling.html"><img loading="lazy" src="animations/16-monte-carlo-sampling.gif" alt=""><span class="no">第 16 章</span><span class="t">蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</span></a><a class="card" href="lessons/17-generative-math.html"><img loading="lazy" src="animations/17-generative-math.gif" alt=""><span class="no">第 17 章</span><span class="t">生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</span></a><a class="card" href="lessons/18-rotations-rigid-transforms.html"><img loading="lazy" src="animations/18-euler-gimbal-lock.gif" alt=""><span class="no">第 18 章</span><span class="t">3D 旋转与刚体变换：动作里的姿态该用什么表示</span></a><a class="card" href="lessons/24-policy-gradient.html"><img loading="lazy" src="animations/24-reinforce-baseline.gif" alt=""><span class="no">第 24 章</span><span class="t">策略梯度推导：从似然比技巧到 PPO 和 GRPO</span></a></div>
+
+</main>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 2 章 · 两个成功率比一比：差 5 个点、差 20 个点，哪个算数 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html" class="cur"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="2-5-20">第 2 章 · 两个成功率比一比：差 5 个点、差 20 个点，哪个算数</h1><div class="run"><a class="btn" href="../animations/02-null-distribution.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch02_two_proportions.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch02_two_proportions.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch02_two_proportions.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：新策略 14/20，旧策略 13/20，新的更好吗？差 20 个点（40/50 对 30/50）呢？"显著"到底是什么意思，p 值该怎么读？<br />
+讲解日期：2026-11-23 · 上一章：<a href="../lessons/01-success-rate-ci.html">第 1 章 一个成功率有多准</a> · 下一章：<a href="../lessons/03-power-sample-size.html">第 3 章 要测多少次</a><br />
+对应原文：Kress-Gazit 等《Robot Learning as an Empirical Science》§6.4.2 <code>materials/text/papers/robot-eval-best-practices-2409.09491.txt</code> L593–L596（13/20 对 14/20）；NIST e-Handbook §7.3.3 <code>materials/text/web/nist/prc33.txt</code> L64–L111（Fisher 精确检验）；§7.1.3 <code>prc13.txt</code>、§7.1.3.1 <code>prc131.txt</code>（检验与 p 值）；Miller《Adding Error Bars to Evals》§4.1 <code>materials/text/papers/adding-error-bars-to-evals-2411.00640.txt</code> L306 起（不配对比较）<br />
+本章缩写：SE = Standard Error（标准 / 误差）；CI = Confidence Interval（置信 / 区间）；H₀ 读作"H naught"，零假设（null hypothesis：没有差别的那个假设）；p 值 = p-value（probability value：概率 / 值）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-23">第一步：差值也有误差，而且比单个更大（2026-11-23）</h3>
+<p><strong>类比：两个人各自称体重，算体重差。</strong> 每台秤都有 ±1 kg 的误差，两人体重差的误差不是 ±1 kg，而是两份误差叠在一起，约 ±1.4 kg。</p>
+<p>两组独立试验，差值 <span class="arithmatex">\(\hat p_1 - \hat p_2\)</span> 的方差等于两份方差相加：</p>
+<div class="arithmatex">\[SE_{diff} = \sqrt{\frac{\hat p_1(1-\hat p_1)}{n_1} + \frac{\hat p_2(1-\hat p_2)}{n_2}}\]</div>
+<ul>
+<li>下标 1、2：两个策略（两组试验）。</li>
+<li>根号里两项就是第 1 章的 <span class="arithmatex">\(SE^2\)</span>，各算各的再相加。</li>
+<li>95% 区间仍是 差值 <span class="arithmatex">\(\pm 1.96 \times SE_{diff}\)</span>（Wald 版）。</li>
+</ul>
+<p><strong>例子（真实案例）</strong>：Kress-Gazit 等在一个"把能量棒放到托盘上"的任务上比较两个策略：A 成功 13/20，B 成功 14/20（L593–L595）。</p>
+<table>
+<thead>
+<tr>
+<th>量</th>
+<th>算式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>差值</td>
+<td>0.70 − 0.65</td>
+<td>+0.05</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(SE_{diff}\)</span></td>
+<td><span class="arithmatex">\(\sqrt{0.7\times0.3/20 + 0.65\times0.35/20} = \sqrt{0.021875}\)</span></td>
+<td>0.148</td>
+</tr>
+<tr>
+<td>Wald 95% CI</td>
+<td><span class="arithmatex">\(0.05 \pm 1.96 \times 0.148\)</span></td>
+<td>[−0.240, +0.340]</td>
+</tr>
+<tr>
+<td>Newcombe 95% CI（用两个 Wilson 区间拼，小样本更稳）</td>
+<td>见代码</td>
+<td>[−0.226, +0.317]</td>
+</tr>
+</tbody>
+</table>
+<p>区间从 −24 个点跨到 +34 个点，包含 0。B 可能比 A 好 30 个点，也可能差 20 多个点。原文结论是"cannot state that one policy outperforms the other"（L596）。</p>
+<p><strong>一句话</strong>：比较两个成功率，先算差值的区间；区间跨过 0，就说不出谁更好。</p>
+<h3 id="p-2026-11-23">第二步：假设检验与 p 值（2026-11-23）</h3>
+<p><strong>类比：法庭上的"无罪推定"。</strong> 先假定被告无罪（两个策略一样好），再看证据（观测到的差值）在"无罪"的世界里有多罕见。罕见到一定程度，才推翻无罪假定。</p>
+<ul>
+<li><strong>零假设 H₀</strong>：两个策略的真成功率相同，<span class="arithmatex">\(p_1 = p_2\)</span>。</li>
+<li><strong>p 值</strong>：如果 H₀ 成立，重做实验，看到"至少这么大"的差值的概率。</li>
+<li>约定：p &lt; 0.05 叫"在 5% 水平上显著"，推翻 H₀。</li>
+</ul>
+<p>双比例 z 检验：H₀ 下两组成功率一样，所以用<strong>合并成功率</strong>算标准误：</p>
+<div class="arithmatex">\[\bar p = \frac{k_1+k_2}{n_1+n_2}, \quad SE_0 = \sqrt{\bar p(1-\bar p)\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}, \quad z = \frac{\hat p_1 - \hat p_2}{SE_0}\]</div>
+<ul>
+<li><span class="arithmatex">\(\bar p\)</span>：读作"p bar"，两组合在一起的成功率。</li>
+<li><span class="arithmatex">\(z\)</span>：差值是"零假设下标准误"的几倍。<span class="arithmatex">\(|z| &gt; 1.96\)</span> 对应双侧 p &lt; 0.05。</li>
+</ul>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>案例</th>
+<th><span class="arithmatex">\(\bar p\)</span></th>
+<th><span class="arithmatex">\(SE_0\)</span></th>
+<th>z</th>
+<th>双侧 p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14/20 vs 13/20</td>
+<td>27/40 = 0.675</td>
+<td>0.148</td>
+<td>0.338</td>
+<td>0.736</td>
+</tr>
+<tr>
+<td>40/50 vs 30/50（编的）</td>
+<td>70/100 = 0.70</td>
+<td>0.0917</td>
+<td>2.182</td>
+<td>0.029</td>
+</tr>
+</tbody>
+</table>
+<p>第二个例子差 20 个点、每组 50 次，p = 0.029 &lt; 0.05，显著；它的差值区间 [+0.025, +0.375] 也不跨 0。<strong>区间不跨 0 和 p &lt; 0.05 是同一件事的两种说法</strong>（Wald 版近似一致）。</p>
+<p><strong>一句话</strong>：p 值回答"假如两者一样，这么大的差有多常见"；常见（p 大）就不能说有差别。</p>
+<h3 id="fisher-2026-11-23">第三步：小样本用 Fisher 精确检验（2026-11-23）</h3>
+<p>z 检验靠正态近似，n = 20 时不太准。Fisher 精确检验不近似：固定两组的总次数和总成功次数，按超几何分布精确算"这么极端或更极端"的表格出现的概率。NIST 称它"excellent nonparametric technique"（L67），适合 2×2 表（L74 起是例子）。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>案例</th>
+<th>z 检验 p</th>
+<th>模拟 p（零假设下重做 20 万次）</th>
+<th>Fisher p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14/20 vs 13/20</td>
+<td>0.736</td>
+<td>≈ 0.87</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>40/50 vs 30/50</td>
+<td>0.029</td>
+<td>≈ 0.038</td>
+<td>0.049</td>
+</tr>
+</tbody>
+</table>
+<p>n 小时 z 检验偏乐观（p 偏小）。40/50 对 30/50 用 Fisher 是 0.049，刚好压线；<strong>压线的结论很脆弱</strong>，多测几次可能就翻了。</p>
+<p><strong>场景代码</strong>：评测脚本里直接调库，三种检验一起报：</p>
+<pre><code class="language-python">from scipy.stats import fisher_exact
+from statsmodels.stats.proportion import proportions_ztest, confint_proportions_2indep
+
+k, n = [40, 30], [50, 50]                                     # 新、旧策略的成功次数和总次数
+z, p_z = proportions_ztest(k, n)                              # 第二步：双比例 z 检验（合并 p）
+_, p_f = fisher_exact([[40, 10], [30, 20]])                   # 第三步：Fisher 精确检验，表是 [[成, 败], [成, 败]]
+lo, hi = confint_proportions_2indep(40, 50, 30, 50, method=&quot;newcomb&quot;)  # 第一步：Newcombe 差值区间
+print(f&quot;差 = {40/50 - 30/50:+.2f} [{lo:+.3f}, {hi:+.3f}]，z 检验 p = {p_z:.3f}，Fisher p = {p_f:.3f}&quot;)
+</code></pre>
+<p><img alt="p 值随试验次数变化" src="../figures/02-two-proportions-p-vs-n.png" /></p>
+<p><em>图 2-1 · 左边是同样 80% vs 60%，每组次数变化时两种检验的 p 值：z 检验一直比 Fisher 小，小样本时更容易"显著"。右边对应第五步：p 值同时取决于差值和 n，差 5 个点每组测到七百次左右也会 p &lt; 0.05。</em></p>
+<p><strong>一句话</strong>：每组几十次的机器人评测，报 Fisher 精确检验的 p 值。</p>
+<h3 id="2026-11-23_1">第四步：两个区间重叠 ≠ 差异不显著（2026-11-23）</h3>
+<p>常见的偷懒判断："两个成功率的 95% 区间有重叠，所以没差别。"这不对。</p>
+<p><strong>例子（40/50 vs 30/50）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Wilson 95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>40/50</td>
+<td>[0.670, 0.888]</td>
+</tr>
+<tr>
+<td>30/50</td>
+<td>[0.462, 0.724]</td>
+</tr>
+</tbody>
+</table>
+<p>两个区间在 0.670–0.724 之间重叠，但第二步算出 z 检验 p = 0.029。原因：两份误差合起来是 <span class="arithmatex">\(\sqrt{SE_1^2 + SE_2^2}\)</span>，小于 <span class="arithmatex">\(SE_1 + SE_2\)</span>。看"重叠"等于把误差算成了 <span class="arithmatex">\(SE_1 + SE_2\)</span>，太保守。</p>
+<p>反过来：<strong>区间不重叠，差异一定显著</strong>；<strong>区间重叠，要算差值区间才知道</strong>。</p>
+<p><img alt="各自的区间与差值的区间" src="../figures/02-two-proportions-forest.png" /></p>
+<p><em>图 2-2 · 左边两组各自的 Wilson 区间都重叠；右边差值的 Newcombe 区间，14/20 vs 13/20 跨过 0，40/50 vs 30/50 不跨 0。只看左边会把第二组也判成"没差别"。</em></p>
+<p><strong>一句话</strong>：比较两组，看差值的区间，不看两个区间重不重叠。</p>
+<h3 id="p-2026-11-23_1">第五步：p 值不是什么（2026-11-23）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>为什么错</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"p = 0.03，所以新模型更好的概率是 97%"</td>
+<td>p 值是"假设一样时看到这种数据的概率"，不是"假设成立的概率"。后者要用贝叶斯（第 5 章）</td>
+</tr>
+<tr>
+<td>"p = 0.74，说明两个模型一样好"</td>
+<td>不显著只说明<strong>这次实验分不出来</strong>。14/20 vs 13/20 的差值区间是 [−24, +34] 个点，什么都可能</td>
+</tr>
+<tr>
+<td>"p 越小，提升越大"</td>
+<td>p 同时取决于差值和样本量。n 足够大，0.5 个点的差也能 p &lt; 0.001</td>
+</tr>
+<tr>
+<td>"测完一看 p = 0.06，再多测 10 次看看"</td>
+<td>边测边看、到显著就停，会把假阳性率抬高（第 6 章）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：报结论时三样一起给：差值、差值的区间、p 值；只给 p 值等于什么都没说。</p>
+<h3 id="_2">动画演示：在"两者一样"的世界里重做实验</h3>
+<p><img alt="零假设下的差值分布" src="../animations/02-null-distribution.gif" /></p>
+<p>可交互版：<a href="../animations/02-null-distribution.html">animations/02-null-distribution.html</a>（滑块：每组次数 n、观测到的差值、合并成功率）</p>
+<p><strong>怎么看</strong>：
+1. 两个策略的真成功率设成一样（H₀，第二步）。每一帧重做一轮 A/B 实验，把得到的差值落进直方图。
+2. 红色竖线是你实际观测到的差值；红色区域（|差值| ≥ 观测值）占的比例就是模拟出来的 p 值（第二、三步）。
+3. 每组 20 次时，差 5 个点落在直方图正中间，很常见；每组 50 次、差 20 个点时，红色区域只剩 3–4%。
+4. 把 n 拖大，直方图变窄（第一步：SE ∝ 1/√n），同样的差值就变得罕见。</p>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（锚点题，第一、二、三步）：团队报告"新模型 21/30，旧模型 18/30，提升 10 个点"。（a）算差值的 Wald 区间；（b）算双比例 z 检验和 Fisher 精确检验的 p 值；（c）用一句话告诉团队能不能下"新模型更好"的结论。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第四步）：同事说"两个模型的 95% 区间不重叠，所以差异显著"；另一个同事说"两个区间重叠了，所以差异不显著"。各自对不对？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：一篇论文写"我们的方法 p = 0.04，显著优于基线"，只报了这一个数。你会追问哪三件事？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>两秤称重误差叠，差值区间跨零别下结论；<br />
+无罪推定先当一样，p 值问的是有多罕见；<br />
+小样本用 Fisher 算，区间重叠不算数；<br />
+差值、区间、p 值，三样一起报。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST06–ST10（必须记住的公式和概念）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Kress-Gazit 等《Robot Learning as an Empirical Science》</td>
+<td>§6.4 L577–L610</td>
+<td>真实的 A/B 评测怎么设计、结论怎么写</td>
+</tr>
+<tr>
+<td>★ NIST e-Handbook §7.3.3</td>
+<td><code>prc33.txt</code> L64–L240</td>
+<td>Fisher 精确检验的原理、例子和 Tocher 修正</td>
+</tr>
+<tr>
+<td>NIST e-Handbook §7.1.3–7.1.3.1</td>
+<td><code>prc13.txt</code>、<code>prc131.txt</code></td>
+<td>检验、临界值、p 值的定义</td>
+</tr>
+<tr>
+<td>Miller《Adding Error Bars to Evals》</td>
+<td>§4.1 L306–L324</td>
+<td>不配对比较的标准误；下一节 §4.2 是配对（第 4 章）</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/reading-gemini-robotics/lessons/01-overview.html">《读懂 Gemini Robotics》第 1 章</a></td>
+<td>读官方数字三问</td>
+<td>拿到官方 A/B 数字时先问什么</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>独立随机量的方差相加</strong>：<span class="arithmatex">\(\mathrm{Var}(X - Y) = \mathrm{Var}(X) + \mathrm{Var}(Y)\)</span>（独立时）。所以差值的 SE 是两份 SE 的平方和开根号（第 8 章讲方差的性质）。</li>
+<li><strong>超几何分布</strong>：Fisher 检验固定行和、列和，在 N 个球（K 个"成功"）里抽 n 个，恰有 k 个成功的概率 <span class="arithmatex">\(\binom{K}{k}\binom{N-K}{n-k}/\binom{N}{n}\)</span>。</li>
+<li><strong>检验与区间的对偶</strong>：p &lt; 0.05 当且仅当 95% 区间不含零假设的值（同一套近似下）。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(SE_{diff} = \sqrt{\hat p_1(1-\hat p_1)/n_1 + \hat p_2(1-\hat p_2)/n_2}\)</span></td>
+<td>差值的标准误</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((\hat p_1 - \hat p_2) \pm 1.96\,SE_{diff}\)</span></td>
+<td>差值的 Wald 95% 区间</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\bar p = (k_1+k_2)/(n_1+n_2)\)</span></td>
+<td>零假设下的合并成功率</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(z = (\hat p_1 - \hat p_2) / \sqrt{\bar p(1-\bar p)(1/n_1+1/n_2)}\)</span></td>
+<td>双比例 z 统计量</td>
+</tr>
+<tr>
+<td>p 值 = P(差值至少这么极端 ∣ H₀)</td>
+<td>p 值的定义</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>Python + NumPy + SciPy。代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch02_two_proportions.py</code>，配套测试 <code>tests/test_ch02.py</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch02_two_proportions.py  
+uv run pytest tests/test_ch02.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步</td>
+<td><span class="arithmatex">\(SE_{diff}\)</span>、Wald、Newcombe</td>
+<td><code>diff_se</code>、<code>diff_wald_ci</code>、<code>newcombe_ci</code></td>
+<td>14/20 vs 13/20：0.148、[−0.240, +0.340]、[−0.226, +0.317]</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td>合并 p 的 z 检验</td>
+<td><code>two_proportion_z</code></td>
+<td>z = 0.338、p = 0.736；40/50 vs 30/50：z = 2.182、p = 0.029</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td>模拟 p 值</td>
+<td><code>simulate_null_p</code></td>
+<td>≈ 0.87；≈ 0.038</td>
+</tr>
+<tr>
+<td>第三步</td>
+<td>Fisher</td>
+<td><code>fisher_p</code></td>
+<td>1.000；0.049</td>
+</tr>
+<tr>
+<td>第四步</td>
+<td>两个 Wilson 区间</td>
+<td><code>wilson_ci</code>（第 1 章）</td>
+<td>[0.670, 0.888]、[0.462, 0.724]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">pooled = (k1 + k2) / (n1 + n2)                                   # 零假设：两组一样，合在一起估成功率
+se0 = math.sqrt(pooled * (1 - pooled) * (1 / n1 + 1 / n2))       # 零假设下差值的标准误
+z = (k1 / n1 - k2 / n2) / se0
+p = 2 * norm.sf(abs(z))                                          # 双侧：两边的尾巴都算
+fisher_exact([[k1, n1 - k1], [k2, n2 - k2]])[1]                  # Fisher：表的每行是 [成, 败]
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li>z 检验的标准误用合并的 <span class="arithmatex">\(\bar p\)</span>，区间的标准误用各自的 <span class="arithmatex">\(\hat p\)</span>，两个数不一样（14/20 vs 13/20 恰好都约 0.148，40/50 vs 30/50 是 0.0917 对 0.0894）。</li>
+<li>模拟 p 值比 z 检验大很多（0.87 对 0.74），因为差值只能取 0.05 的整数倍，"≥ 观测值"把等于的情况也算进去了；n 小时离散性很明显，这正是该用 Fisher 的原因。</li>
+<li><code>fisher_exact</code> 默认双侧；表的写法是 [成, 败]，写成 [成, 总数] 是常见 bug。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 40/50 vs 30/50 改成 80/100 vs 60/100（成功率不变，样本翻倍），看 p 值变成多少。</li>
+<li>把 14/20 vs 13/20 改成 140/200 vs 130/200，看差 5 个点要多少次才显著（第 3 章会算准确数）。</li>
+<li>对照 notebook，用 <code>simulate_null_p</code> 画出零假设下的差值直方图。</li>
+</ol><nav class="pager"><a href="01-success-rate-ci.html">← 第 1 章 · 一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="03-power-sample-size.html">第 3 章 · 要测多少次：功效、最小可检测效应和样本量 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

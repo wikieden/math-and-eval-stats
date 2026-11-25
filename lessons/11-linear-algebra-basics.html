@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 11 章 · 线代一：矩阵乘法的三种看法、秩、特征分解与正定 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html" class="cur"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="11">第 11 章 · 线代一：矩阵乘法的三种看法、秩、特征分解与正定</h1><div class="run"><a class="btn" href="../animations/11-linear-algebra-basics.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch11_linear_algebra_basics.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch11_linear_algebra_basics.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch11_linear_algebra_basics.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：同一个矩阵乘法，为什么有时候看成"点积表"、有时候看成"列的组合"、有时候看成"秩 1 矩阵之和"？矩阵的秩、特征值、正定在机器人和深度学习里各管什么？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/10-information-kl.html">第 10 章 信息论</a> · 下一章：<a href="../lessons/12-svd-least-squares.html">第 12 章 线代二</a><br />
+对应原文：MML <code>materials/text/books/mml-book.txt</code> §2.2 矩阵 L1093 起、§2.6 基与秩 L2403 起、§2.7 线性映射 L2626 起、§4.2 特征值 L5709 起、§4.4 特征分解 L6000 前后（目录 L59）<br />
+本章缩写：rank = 秩（独立方向的个数）；det = determinant（行列式：面积 / 体积的缩放倍数）；λ（lambda）= 特征值；Q、Λ = 特征向量矩阵、特征值对角阵；PD / PSD = Positive Definite / Positive Semi-Definite（正定 / 半正定）；e₁、e₂ = 标准基向量。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：矩阵乘法的三种看法（2026-11-25）</h3>
+<p><strong>类比：同一张账单，可以按"每个人花了多少"看，也可以按"每类东西花了多少"看。</strong> 数字一样，看法不同，各自适合不同的问题。</p>
+<p>A = [[1, 2], [3, 4]]，B = [[5, 6], [7, 8]]，C = AB = [[19, 22], [43, 50]]：</p>
+<table>
+<thead>
+<tr>
+<th>看法</th>
+<th>写法</th>
+<th>例子</th>
+<th>什么时候用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 点积表</td>
+<td><span class="arithmatex">\(C_{ij} = A\)</span> 的第 i 行 · B 的第 j 列</td>
+<td><span class="arithmatex">\(C_{11} = 1\cdot5 + 2\cdot7 = 19\)</span></td>
+<td>注意力分数 <span class="arithmatex">\(QK^\top\)</span>：每对 (query, key) 一个点积</td>
+</tr>
+<tr>
+<td>② 列的组合</td>
+<td>C 的第 j 列 = A 的各列按 <span class="arithmatex">\(B_{:,j}\)</span> 加权求和</td>
+<td>第 1 列 = 5·[1, 3] + 7·[2, 4] = [19, 43]</td>
+<td><span class="arithmatex">\(Ax\)</span> = A 的列按 x 混合；注意力的输出 = V 的行按权重混合</td>
+</tr>
+<tr>
+<td>③ 外积之和</td>
+<td><span class="arithmatex">\(C = \sum_k A_{:,k}\,B_{k,:}\)</span></td>
+<td>[1,3]⊗[5,6] + [2,4]⊗[7,8]</td>
+<td>秩 1 分解、LoRA（第 12 章）、反向传播的 <span class="arithmatex">\(\nabla W = \sum x\,\delta^\top\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>三种算法结果完全一样（代码核对）。</p>
+<p><strong>一句话</strong>：矩阵乘法 = 点积表 = 列的加权组合 = 秩 1 矩阵之和；看问题需要哪种就用哪种。</p>
+<h3 id="2026-11-25_1">第二步：矩阵就是线性映射：看它把基向量送到哪（2026-11-25）</h3>
+<p><strong>类比：知道一台机器怎么处理"红色原料"和"蓝色原料"，就知道它怎么处理任何红蓝混合的原料。</strong></p>
+<p>矩阵 A 的第 j 列 = A 把第 j 个基向量 <span class="arithmatex">\(e_j\)</span> 送到的地方（MML §2.7 L2626 起）。任意向量 <span class="arithmatex">\(x = x_1e_1 + x_2e_2\)</span>，<span class="arithmatex">\(Ax = x_1(Ae_1) + x_2(Ae_2)\)</span>：线性映射完全由它对基向量的作用决定。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>矩阵</th>
+<th>e₁ →</th>
+<th>e₂ →</th>
+<th>行列式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>旋转 90°</td>
+<td>[0, 1]</td>
+<td>[−1, 0]</td>
+<td>1（面积不变）</td>
+</tr>
+<tr>
+<td>A = [[1, 2], [3, 4]]</td>
+<td>[1, 3]</td>
+<td>[2, 4]</td>
+<td>−2（面积放大 2 倍、翻面）</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="矩阵把单位正方形变成平行四边形" src="../figures/11-linear-algebra-basics-map.png" />
+<em>图 11-1 · 左：单位正方形和 e₁、e₂；右：A 作用后变成以 [1, 3]、[2, 4] 为边的平行四边形，面积 |det A| = 2</em></p>
+<p><strong>一句话</strong>：矩阵的列 = 基向量被送到的地方；行列式 = 面积（体积）的缩放倍数，负号表示翻面。</p>
+<h3 id="2026-11-25_2">第三步：秩：有几个独立的方向（2026-11-25）</h3>
+<p><strong>类比：三个人给你指路，两个人说的其实是同一个方向，那你只得到了两个方向的信息。</strong></p>
+<p>秩 = 列（或行）里线性无关的最大个数（MML §2.6 L2403 起）。秩不满时，有一些非零向量被压成 0，构成<strong>零空间</strong>。</p>
+<p><strong>例子</strong>：M3 = [[1, 2, 3], [2, 4, 6], [1, 0, 1]]，第 2 行 = 2 × 第 1 行：</p>
+<ul>
+<li>秩 = 2；</li>
+<li>零空间方向 v = [1, 1, −1]：M3·v = [0, 0, 0]。</li>
+</ul>
+<p><strong>在哪见过</strong>：机械臂雅可比的秩掉下来 = 奇异位形（某个方向的末端速度做不出来，第 13 章）；LoRA 只学低秩的增量（第 12 章）；<span class="arithmatex">\(QK^\top\)</span> 的秩不超过头维度 <span class="arithmatex">\(d_k\)</span>（第 37 章）。</p>
+<p><strong>一句话</strong>：秩 = 独立方向的个数；秩不满就有零空间，某些方向被压没了。</p>
+<h3 id="2026-11-25_3">第四步：特征分解：对称矩阵 = 转过去、拉伸、转回来（2026-11-25）</h3>
+<p><strong>类比：揉面团。</strong> 不管怎么揉，总有几个方向只是被拉长或压扁、方向不变，这些方向就是特征向量，拉伸的倍数就是特征值。</p>
+<div class="arithmatex">\[Av = \lambda v;\qquad \text{对称矩阵：}S = Q\Lambda Q^\top\]</div>
+<p>Q 的列是互相垂直的单位特征向量，Λ 是特征值对角阵（MML §4.2、§4.4）。</p>
+<p><strong>例子</strong>：S = [[2, 1], [1, 2]]：</p>
+<table>
+<thead>
+<tr>
+<th>特征值</th>
+<th>特征向量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>[−0.707, 0.707]（沿 [−1, 1]）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>[0.707, 0.707]（沿 [1, 1]）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处：幂次变简单</strong>：<span class="arithmatex">\(S^{10} = Q\Lambda^{10}Q^\top\)</span>，只要把特征值各自 10 次方：3¹⁰ = 59049、1¹⁰ = 1，得到 [[29525, 29524], [29524, 29525]]，和直接乘 10 次一样。线性系统 <span class="arithmatex">\(x_{k+1} = Sx_k\)</span> 稳不稳定，就看特征值的绝对值是否都小于 1（第 21 章）。</p>
+<p><img alt="对称矩阵把圆变成椭圆，椭圆的轴就是特征向量" src="../figures/11-linear-algebra-basics-eig.png" />
+<em>图 11-2 · 单位圆经 S 映射成椭圆；长轴沿 [1, 1]、长 3，短轴沿 [−1, 1]、长 1</em></p>
+<p><strong>一句话</strong>：对称矩阵 = QΛQᵀ：沿特征向量方向拉伸特征值倍；幂次、稳定性都看特征值。</p>
+<h3 id="2026-11-25_4">第五步：正定与二次型：碗是不是朝上（2026-11-25）</h3>
+<p><strong>类比：碗口朝上能盛水，马鞍形盛不住。</strong> 二次型 <span class="arithmatex">\(x^\top Mx\)</span> 对所有非零 x 都 &gt; 0，就叫正定：函数 <span class="arithmatex">\(\frac12x^\top Mx\)</span> 是一个朝上的碗，只有一个最低点。</p>
+<p>对称矩阵正定 ⇔ 特征值全部 &gt; 0（半正定：≥ 0）。</p>
+<p><strong>例子</strong>（x = [1, −1]）：</p>
+<table>
+<thead>
+<tr>
+<th>矩阵</th>
+<th>特征值</th>
+<th><span class="arithmatex">\(x^\top Mx\)</span></th>
+<th>形状</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S = [[2, 1], [1, 2]]</td>
+<td>1, 3</td>
+<td>2</td>
+<td>碗（正定）</td>
+</tr>
+<tr>
+<td>[[1, 2], [2, 1]]</td>
+<td>−1, 3</td>
+<td>−2</td>
+<td>马鞍（不定）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>在哪见过</strong>：协方差矩阵一定半正定（第 9 章）；损失函数在最小点的 Hessian 半正定（第 14 章）；QP 的 P 矩阵半正定才是凸问题（第 15 章）；LQR 的代价权重 Q、R（第 25 章）。</p>
+<p><strong>场景代码</strong>：判断正定最快的办法是试着做 Cholesky 分解（NumPy 的真实写法）：</p>
+<pre><code class="language-python">import numpy as np
+def is_pd(m):
+    try:
+        np.linalg.cholesky(m)          # 只有对称正定矩阵才能分解成 L Lᵀ
+        return True
+    except np.linalg.LinAlgError:
+        return False
+</code></pre>
+<p><strong>一句话</strong>：正定 ⇔ 特征值全正 ⇔ 二次型是朝上的碗；协方差、凸 QP、LQR 权重都要求它。</p>
+<h3 id="_2">动画演示：拖动矩阵的元素，看单位圆变成什么</h3>
+<p><img alt="线性映射与特征向量" src="../animations/11-linear-algebra-basics.gif" /></p>
+<p>可交互版：<a href="../animations/11-linear-algebra-basics.html">animations/11-linear-algebra-basics.html</a>（四个滑块调矩阵元素）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>灰色单位圆和网格被矩阵映射成椭圆和斜网格；两根彩色箭头是 Ae₁、Ae₂，就是矩阵的两列（第二步）；</li>
+<li>右上角显示行列式和秩；把矩阵调成两列共线，平行四边形压扁成一条线，秩变 1（第三步）；</li>
+<li>对称矩阵时，椭圆的两根轴（虚线）就是特征向量，轴长是特征值的绝对值（第四步）；</li>
+<li>有负特征值时右上角标"不定"（第五步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：A = [[2, 0], [1, 3]]，x = [1, 2]。用"列的组合"的看法写出 Ax，并算出结果。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三、四步）：矩阵 [[4, 2], [2, 1]] 的秩是多少？它的特征值是多少？（提示：先看两列的关系）</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：协方差矩阵 [[1, ρ], [ρ, 1]] 的特征值是多少？ρ 取什么范围时它是正定的？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>乘法三种看：点积表、列的组合、外积相加；<br />
+列是基向量的去处，行列式是面积的倍数；<br />
+秩是独立方向数，秩不满就有零空间；<br />
+对称矩阵转拉转，特征值全正才是朝上的碗。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST49（矩阵乘法的三种看法和各自的用处）、ST50（秩与零空间）、ST51（对称矩阵的特征分解、正定的判据）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ MML</td>
+<td>§2.2 L1093 起；§2.6–2.7 L2403–L3327</td>
+<td>矩阵运算、基与秩、线性映射的严格定义</td>
+</tr>
+<tr>
+<td>★ MML</td>
+<td>§4.1–4.4（目录 L48–L59）</td>
+<td>行列式、特征值、Cholesky、特征分解</td>
+</tr>
+<tr>
+<td>Matrix Cookbook（<code>materials/text/books/matrix-cookbook.txt</code>）</td>
+<td>特征值、正定一节</td>
+<td>常用恒等式速查</td>
+</tr>
+<tr>
+<td>3Blue1Brown《线性代数的本质》（视频，本地未归档）</td>
+<td>第 3–4、13–14 集</td>
+<td>线性映射和特征向量的几何直觉</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>列的组合</strong>：<span class="arithmatex">\((AB)_{:,j} = A\,B_{:,j} = \sum_k B_{kj}A_{:,k}\)</span>，就是"A 作用在 B 的第 j 列上"。</li>
+<li><strong>秩–零化度定理</strong>：n 列的矩阵，rank + dim(零空间) = n。M3 是 3 列、秩 2，零空间是 1 维。</li>
+<li><strong>谱定理</strong>：实对称矩阵一定能正交对角化，特征值都是实数，不同特征值的特征向量互相垂直。</li>
+<li><strong>二次型与特征值</strong>：<span class="arithmatex">\(x^\top Sx = \sum_i\lambda_i(q_i^\top x)^2\)</span>，所以特征值全正时对所有非零 x 都为正。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(C_{ij} = A_{i,:}\cdot B_{:,j}\)</span>；<span class="arithmatex">\(C = \sum_k A_{:,k}B_{k,:}\)</span></td>
+<td>矩阵乘法的点积看法和外积看法</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(Ae_j = A_{:,j}\)</span></td>
+<td>列 = 基向量的像</td>
+</tr>
+<tr>
+<td>rank + nullity = n</td>
+<td>秩–零化度</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S = Q\Lambda Q^\top\)</span>，<span class="arithmatex">\(S^k = Q\Lambda^kQ^\top\)</span></td>
+<td>对称矩阵的特征分解</td>
+</tr>
+<tr>
+<td>正定 ⇔ 所有 <span class="arithmatex">\(\lambda_i &gt; 0\)</span></td>
+<td>正定判据</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch11_linear_algebra.py</code>，配套测试 <code>tests/test_ch11.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch11_linear_algebra.py  
+uv run pytest tests/test_ch11.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 三种看法</td>
+<td>点积 / 列 / 外积</td>
+<td><code>matmul_dot</code>、<code>matmul_columns</code>、<code>matmul_outer</code></td>
+<td>都是 [[19, 22], [43, 50]]</td>
+</tr>
+<tr>
+<td>第二步 线性映射</td>
+<td><span class="arithmatex">\(Ae_j\)</span></td>
+<td><code>rotation(90) @ [1, 0]</code>、<code>np.linalg.det(A)</code></td>
+<td>[0, 1]；−2</td>
+</tr>
+<tr>
+<td>第三步 秩</td>
+<td>rank、零空间</td>
+<td><code>np.linalg.matrix_rank(M3)</code>、<code>null_vector(M3)</code></td>
+<td>2；[1, 1, −1]</td>
+</tr>
+<tr>
+<td>第四步 特征分解</td>
+<td>QΛQᵀ</td>
+<td><code>np.linalg.eigh(S)</code>、<code>power_by_eig(S, 10)</code></td>
+<td>1, 3；[[29525, 29524], …]</td>
+</tr>
+<tr>
+<td>第五步 二次型</td>
+<td>xᵀMx</td>
+<td><code>quadratic_form(m, [1, −1])</code></td>
+<td>2 / −2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">sum(np.outer(a[:, k], b[k]) for k in range(a.shape[1]))   # 外积之和
+v = np.linalg.svd(m)[2][-1]                                # 零空间：最小奇异值的右奇异向量
+lam, q = np.linalg.eigh(s)                                 # 对称矩阵用 eigh：特征值从小到大、实数
+q @ np.diag(lam**k) @ q.T                                  # S^k
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>对称矩阵用 <code>eigh</code> 不用 <code>eig</code></strong>：<code>eigh</code> 保证特征值是实数、特征向量正交，而且按从小到大排；<code>eig</code> 对一般矩阵，可能给出复数和不排序的结果。</li>
+<li><strong>特征向量的符号不唯一</strong>：[−0.707, 0.707] 和 [0.707, −0.707] 都对；比较结果时要允许整体取负。</li>
+<li><strong>秩用 SVD 判</strong>：<code>matrix_rank</code> 数的是"大于一个小门槛的奇异值个数"，浮点误差不会让秩 2 的矩阵被误判成秩 3。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>rotation</code> 的角度改成 45°，算它的特征值（会是复数，为什么？）。</li>
+<li>把 M3 的第 3 行改成 [1, 0, 2]，秩变成多少？零空间还在吗？</li>
+</ol><nav class="pager"><a href="10-information-kl.html">← 第 10 章 · 信息论：熵、交叉熵、KL 和互信息</a><a href="12-svd-least-squares.html">第 12 章 · 线代二：SVD、低秩近似与 LoRA、最小二乘、条件数 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

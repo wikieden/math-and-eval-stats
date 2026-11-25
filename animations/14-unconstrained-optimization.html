@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>无约束优化</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 14 章 · 同一个山谷，几种走法</h1>
+<p class="sub">配套讲义：<a href="../lessons/14-unconstrained-optimization.html">第 14 章 · 无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a>。f(x) = ½(x₁² + 10x₂²)，从 [1, 1] 出发走 40 步。等高线是椭圆；路径一步步画出来。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">方法</label><select id="md"><option value="0">梯度下降 / 动量</option><option value="1">Adam</option></select><label for="lr">学习率</label><input type="range" id="lr" min="0.01" max="0.25" step="0.01" value="0.05"><span id="lrv">0.05</span><label for="bt">动量 β</label><input type="range" id="bt" min="0" max="0.9" step="0.1" value="0"><span id="btv">0</span></div>
+<p class="note">看点：① 学习率拖过 0.2：沿 x₂ 方向越跳越远（2/L = 0.2）；② 加动量：之字变少、更快到中心；③ Adam：前几步每个坐标都走差不多同样大的步子，路径接近 45° 斜线。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','lr','bt'],F=[[0,0.05,0],[0,0.18,0],[0,0.21,0],[0,0.05,0.5],[1,0.05,0]];
+function render(md,lr,bt){let x=[1,1],v=[0,0],m1=[0,0],m2=[0,0];const pts=[x.slice()];
+ for(let t=1;t<=40;t++){const g=[x[0],10*x[1]];if(md==0){v=[bt*v[0]+g[0],bt*v[1]+g[1]];x=[x[0]-lr*v[0],x[1]-lr*v[1]]}
+  else{m1=m1.map((m,i)=>0.9*m+0.1*g[i]);m2=m2.map((m,i)=>0.999*m+0.001*g[i]*g[i]);x=x.map((xi,i)=>xi-lr*(m1[i]/(1-0.9**t))/(Math.sqrt(m2[i]/(1-0.999**t))+1e-8))}pts.push(x.slice())}
+ const nrm=Math.hypot(...x);cap(`${md?'Adam':bt>0?'动量 β = '+bt:'梯度下降'}，lr = ${(+lr).toFixed(2)}：40 步后 ‖x‖ = ${nrm>1e3?'发散':nrm.toExponential(2)}`);
+ frame(40,40,600,300);const m=PM(40,40,600,300,[-1.6,1.6],[-1.2,1.2]);for(const c of [0.02,0.1,0.3,0.6,1.0]){const e=[];for(let i=0;i<=100;i++){const t=2*Math.PI*i/100;e.push(m(Math.sqrt(2*c)*Math.cos(t),Math.sqrt(0.2*c)*Math.sin(t)))}P(e,'var(--line)',1)}
+ P(pts.map(p=>m(Math.max(Math.min(p[0],1.6),-1.6),Math.max(Math.min(p[1],1.2),-1.2))),md?'var(--purple)':'var(--warm)',1.8);const o=m(0,0);C(o[0],o[1],4,'var(--good)',1)}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

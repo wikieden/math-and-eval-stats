@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REINFORCE 与基线</title><link rel="stylesheet" href="anim.css"></head>
+<body><main>
+<h1>第 24 章 · REINFORCE：减一个基线，梯度的均值不变、方差变小</h1>
+<p class="sub">配套讲义：<a href="../lessons/24-policy-gradient.html">第 24 章 · 策略梯度推导：从似然比技巧到 PPO 和 GRPO</a>。两臂老虎机，策略 π(好动作) = sigmoid(θ)。两个学习者用同一串随机数：橙色用 (r)·∇log π，蓝色用 (r − b)·∇log π，b 取当前的期望回报 J(θ)。上图是 π(好动作) 随训练变化，下图是每步梯度估计（散点）和真梯度（线）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 420"></svg></div>
+<div class="stats">
+<div class="stat"><div class="l">训练步</div><div class="v" id="sk">0</div></div>
+<div class="stat"><div class="l">π(好)：不减 / 减基线</div><div class="v" id="spi">—</div></div>
+<div class="stat"><div class="l">梯度估计标准差：不减 / 减</div><div class="v" id="ssd">—</div></div>
+</div>
+<div class="row ctl"><label>学习率 <b id="lv">1.0</b></label><input id="l" type="range" min="0.2" max="5" step="0.1" value="1"></div>
+<div class="row ctl"><label>每步样本数 <b id="nv">10</b></label><input id="n" type="range" min="1" max="50" step="1" value="10"></div>
+<div class="row ctl"><label>好动作成功率 <b id="gv">0.80</b>，差动作 <b id="bv2">0.30</b></label><input id="g" type="range" min="0.3" max="0.95" step="0.05" value="0.8"><input id="b" type="range" min="0.05" max="0.8" step="0.05" value="0.3"></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 重来</button></div>
+<p class="note">看点：起点 θ = 0（两个动作各一半），真梯度 0.125。两组散点的平均都贴着真梯度线，但橙点散得更开：开头几十步（策略还接近一半一半时）标准差约是蓝点的 1.6 倍；后期策略接近确定，两者都变小。把两个成功率拖得接近（如 0.55 和 0.5），信号变弱，橙线抖得更厉害；学习率拖大，橙线容易冲过头。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const X0=50,W=600,MAXK=80;const sig=x=>1/(1+Math.exp(-x));
+const TY=20,TH=160,GY=230,GH=150;
+let lr,N,pg,pb,thA,thB,k,histA,histB,gA,gB,trueG,layer;
+el('line',{x1:X0,y1:TY+TH,x2:X0+W,y2:TY+TH,stroke:'var(--line)'},sv);el('line',{x1:X0,y1:TY,x2:X0,y2:TY+TH,stroke:'var(--line)'},sv);
+[0.5,1].forEach(v=>txt(v.toFixed(1),{x:X0-28,y:TY+TH-(v-0.5)/0.5*TH+4,class:'m'},sv));txt('π(好动作)',{x:X0+6,y:TY+12,class:'m'},sv);
+el('line',{x1:X0,y1:GY+GH,x2:X0+W,y2:GY+GH,stroke:'var(--line)'},sv);txt('每步梯度估计',{x:X0+6,y:GY+12,class:'m'},sv);txt('训练步 →',{x:X0+W-60,y:GY+GH+18,class:'m'},sv);
+function reset(s){seed(s);lr=+$('l').value;N=+$('n').value;pg=+$('g').value;pb=+$('b').value;thA=thB=0;k=0;histA=[0.5];histB=[0.5];gA=[];gB=[];trueG=[];draw()}
+function next(){if(k>=MAXK)return false;
+  const us=[];for(let i=0;i<N;i++)us.push([rnd(),rnd()]);
+  const step=(th,useB)=>{const p=sig(th),J=(1-p)*pb+p*pg;let g=0;for(const[u1,u2]of us){const a=u1<p?1:0;const r=u2<(a?pg:pb)?1:0;g+=(r-(useB?J:0))*(a?1-p:-p)}return g/N};
+  const p0=sig(thB);trueG.push(p0*(1-p0)*(pg-pb));
+  const a=step(thA,false),b=step(thB,true);gA.push(a);gB.push(b);thA+=lr*a;thB+=lr*b;histA.push(sig(thA));histB.push(sig(thB));k++;draw();return k<MAXK}
+function sd(a){if(a.length<2)return NaN;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1))}
+function draw(){if(layer)sv.removeChild(layer);layer=el('g',{},sv);
+  const X=i=>X0+i/MAXK*W,TYv=v=>TY+TH-(Math.max(0.5,Math.min(1,v))-0.5)/0.5*TH;
+  [[histA,'var(--warm)'],[histB,'var(--accent)']].forEach(([h,c])=>el('polyline',{points:h.map((v,i)=>X(i)+','+TYv(v)).join(' '),fill:'none',stroke:c,'stroke-width':2.5},layer));
+  const all=gA.concat(gB,trueG);const R=Math.max(0.3,...all.map(Math.abs));const GYv=v=>GY+GH/2-v/R*GH/2;
+  el('line',{x1:X0,y1:GYv(0),x2:X0+W,y2:GYv(0),stroke:'var(--line)','stroke-dasharray':'3 3'},layer);
+  if(trueG.length)el('polyline',{points:trueG.map((v,i)=>X(i+1)+','+GYv(v)).join(' '),fill:'none',stroke:'var(--text)','stroke-width':1.5},layer);
+  gA.forEach((v,i)=>el('circle',{cx:X(i+1)-2,cy:GYv(v),r:3,fill:'var(--warm)',opacity:0.8},layer));
+  gB.forEach((v,i)=>el('circle',{cx:X(i+1)+2,cy:GYv(v),r:3,fill:'var(--accent)',opacity:0.8},layer));
+  txt('橙 = 不减基线　蓝 = 减基线 b = J(θ)　黑线 = 真梯度（蓝学习者当前位置）',{x:X0,y:GY+GH+36,class:'m'},layer);
+  $('sk').textContent=k;$('spi').textContent=histA[histA.length-1].toFixed(2)+' / '+histB[histB.length-1].toFixed(2);
+  const a=sd(gA),b=sd(gB);$('ssd').textContent=isNaN(a)?'—':a.toFixed(3)+' / '+b.toFixed(3)}
+$('l').oninput=()=>{$('lv').textContent=(+$('l').value).toFixed(1);ANIM.stop();reset(Date.now())};
+$('n').oninput=()=>{$('nv').textContent=$('n').value;ANIM.stop();reset(Date.now())};
+$('g').oninput=()=>{$('gv').textContent=(+$('g').value).toFixed(2);ANIM.stop();reset(Date.now())};
+$('b').oninput=()=>{$('bv2').textContent=(+$('b').value).toFixed(2);ANIM.stop();reset(Date.now())};
+setupPlayer({captureSeed:9,reset,next},150);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

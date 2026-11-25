@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 18 章 · 3D 旋转与刚体变换：动作里的姿态该用什么表示 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html" class="cur"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="18-3d">第 18 章 · 3D 旋转与刚体变换：动作里的姿态该用什么表示</h1><div class="run"><a class="btn" href="../animations/18-euler-gimbal-lock.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch18_rotations.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch18_rotations.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch18_rotations.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：旋转矩阵有哪些性质，为什么乘法顺序不能换？欧拉角的"万向锁"是怎么回事？四元数为什么有 q 和 −q 两个？网络要输出姿态时，为什么推荐 6D 表示？相机、机械臂、世界几个坐标系之间的点怎么换算？<br />
+讲解日期：2026-11-23 · 上一章：<a href="../lessons/17-generative-math.html">第 17 章 生成模型的数学</a> · 下一章：<a href="../lessons/24-policy-gradient.html">第 24 章 策略梯度推导</a><br />
+对应原文：Solà《Quaternion kinematics for the error-state Kalman filter》§1–2 <code>materials/text/papers/quaternion-kinematics-eskf-1711.02508.txt</code>（目录 L12–L54；单位四元数是 SO(3) 的双覆盖 L637–L678）；Zhou 等《On the Continuity of Rotation Representations in Neural Networks》<code>materials/text/papers/rotation-representation-continuity-1812.07035.txt</code> L28–L62（欧拉角、四元数不连续，5D / 6D 连续）；Modern Robotics 第 3 章（复用，<code>robot-system-architecture/materials/books/modern-robotics-lynch-park.pdf</code>）<br />
+本章缩写：SO(3) = Special Orthogonal group in 3D（三维 / 特殊 / 正交群：所有三维旋转矩阵）；SE(3) = Special Euclidean group in 3D（三维 / 特殊 / 欧氏群：旋转 + 平移）；ZYX 欧拉角 = 先绕 z（yaw，偏航）、再绕 y（pitch，俯仰）、再绕 x（roll，横滚）；SLERP = Spherical Linear intERPolation（球面 / 线性 / 插值）；6D 表示 = 用旋转矩阵前两列（6 个数）表示旋转。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-23">第一步：旋转矩阵：三根正交的单位轴（2026-11-23）</h3>
+<p><strong>类比：一个物体身上画着三根互相垂直的箭头（红 x、绿 y、蓝 z）。</strong> 旋转矩阵的三列，就是这三根箭头在世界坐标系里的方向。</p>
+<div class="arithmatex">\[R = \begin{pmatrix} | &amp; | &amp; | \\ \hat x_b &amp; \hat y_b &amp; \hat z_b \\ | &amp; | &amp; | \end{pmatrix}, \qquad R^\top R = I, \qquad \det R = +1\]</div>
+<ul>
+<li><span class="arithmatex">\(R^\top R = I\)</span>：三列互相垂直且长度为 1；所以 <span class="arithmatex">\(R^{-1} = R^\top\)</span>，求逆只要转置。</li>
+<li><span class="arithmatex">\(\det R = +1\)</span>：右手系（−1 是镜像，不是旋转）。</li>
+<li>所有这样的矩阵组成 SO(3)。9 个数、6 个约束，只有 3 个自由度。</li>
+</ul>
+<p><strong>例子</strong>：绕 z 轴转 90°，<span class="arithmatex">\(R_z(90°)\,(1,0,0)^\top = (0,1,0)^\top\)</span>：x 轴转到了 y 轴。</p>
+<p><strong>顺序不能换</strong>：<span class="arithmatex">\(R_z(90°)R_x(90°) \ne R_x(90°)R_z(90°)\)</span>。拿手机试：先绕竖轴转 90° 再绕横轴转 90°，和反过来，手机最后朝向不同。</p>
+<p><strong>一句话</strong>：旋转矩阵的列是物体的三根轴；正交、行列式为 1、求逆即转置、乘法不交换。</p>
+<h3 id="2026-11-23_1">第二步：欧拉角与万向锁（2026-11-23）</h3>
+<p><strong>类比：云台的三个电机。</strong> 外圈管偏航、中圈管俯仰、内圈管横滚。中圈转到 90° 时，外圈和内圈的转轴重合了，两个电机转的是同一个方向，丢了一个自由度。</p>
+<p>ZYX 欧拉角：<span class="arithmatex">\(R = R_z(\text{yaw})\,R_y(\text{pitch})\,R_x(\text{roll})\)</span>。</p>
+<p><strong>例子（万向锁）</strong>：pitch = 90° 时，</p>
+<table>
+<thead>
+<tr>
+<th>yaw</th>
+<th>pitch</th>
+<th>roll</th>
+<th>得到的姿态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30°</td>
+<td>90°</td>
+<td>10°</td>
+<td>R₁</td>
+</tr>
+<tr>
+<td>50°</td>
+<td>90°</td>
+<td>30°</td>
+<td>R₂ = R₁</td>
+</tr>
+</tbody>
+</table>
+<p>yaw 和 roll 同时加 20°，姿态不变：只有 yaw − roll 起作用。这时从姿态反算欧拉角有无穷多解，在 90° 附近反算会剧烈跳变。</p>
+<p>欧拉角适合给人看（"抬头 10°"），不适合做插值、优化，也不适合当网络输出。</p>
+<p><strong>一句话</strong>：欧拉角三个数很直观，但中间那个角到 ±90° 时会锁死一个自由度。</p>
+<h3 id="rodrigues-2026-11-23">第三步：轴角与 Rodrigues 公式（2026-11-23）</h3>
+<p><strong>欧拉旋转定理</strong>：任何旋转都是"绕某根轴 <span class="arithmatex">\(\mathbf{u}\)</span> 转角度 θ"。轴角向量 <span class="arithmatex">\(\boldsymbol\phi = \theta\mathbf{u}\)</span>（3 个数）。</p>
+<div class="arithmatex">\[R = I + \sin\theta\,[\mathbf{u}]_\times + (1-\cos\theta)\,[\mathbf{u}]_\times^2, \qquad [\mathbf{u}]_\times = \begin{pmatrix}0 &amp; -u_z &amp; u_y\\ u_z &amp; 0 &amp; -u_x\\ -u_y &amp; u_x &amp; 0\end{pmatrix}\]</div>
+<ul>
+<li><span class="arithmatex">\([\mathbf{u}]_\times\)</span>：读作"u 的叉乘矩阵"，<span class="arithmatex">\([\mathbf{u}]_\times\mathbf{v} = \mathbf{u}\times\mathbf{v}\)</span>。</li>
+<li>这就是指数映射 <span class="arithmatex">\(R = \exp([\boldsymbol\phi]_\times)\)</span> 的闭式解（第 19 章李群）。</li>
+</ul>
+<p><strong>例子</strong>：<span class="arithmatex">\(\mathbf{u} = (0,0,1)\)</span>、θ = 90°，Rodrigues 公式给出的矩阵和 <span class="arithmatex">\(R_z(90°)\)</span> 一样。</p>
+<p><strong>一句话</strong>：任何旋转都是绕一根轴转一个角；轴角 → 矩阵用 Rodrigues 公式。</p>
+<h3 id="4-q-q-2026-11-23">第四步：四元数：4 个数、没有万向锁、q 和 −q 是同一个旋转（2026-11-23）</h3>
+<div class="arithmatex">\[\mathbf{q} = \left(\cos\tfrac{\theta}{2},\; \sin\tfrac{\theta}{2}\,\mathbf{u}\right) = (w, x, y, z), \qquad \|\mathbf{q}\| = 1\]</div>
+<ul>
+<li>用的是<strong>半角</strong> θ/2。</li>
+<li>旋转一个向量：<span class="arithmatex">\(\mathbf{v}' = \mathbf{q}\otimes(0,\mathbf{v})\otimes\mathbf{q}^*\)</span>，<span class="arithmatex">\(\mathbf{q}^* = (w, -x, -y, -z)\)</span> 是共轭。</li>
+<li>组合旋转：<span class="arithmatex">\(\mathbf{q}_a\otimes\mathbf{q}_b\)</span> 表示先转 b 再转 a，对应 <span class="arithmatex">\(R_aR_b\)</span>。</li>
+<li><strong>双覆盖</strong>：<span class="arithmatex">\(\mathbf{q}\)</span> 和 <span class="arithmatex">\(-\mathbf{q}\)</span> 表示同一个旋转（θ 和 θ + 360° 的半角差 180°，cos、sin 都变号）。Solà 称单位四元数群是 SO(3) 的 double cover（L637）。</li>
+</ul>
+<p><strong>例子</strong>：绕 z 转 90°：<span class="arithmatex">\(\mathbf{q} = (0.7071, 0, 0, 0.7071)\)</span>，把 (1, 0, 0) 转到 (0, 1, 0)；<span class="arithmatex">\(-\mathbf{q}\)</span> 对应的矩阵和 <span class="arithmatex">\(\mathbf{q}\)</span> 完全一样。</p>
+<p><strong>约定陷阱</strong>：四元数有两种顺序（w 在前 / w 在后）和两种乘法（Hamilton / JPL）。Solà 第 3 章专门讲这件事（"Quaternion conventions. My choice."）。不同库混用是机器人代码里最常见的 bug 之一：<code>scipy</code> 的 <code>as_quat()</code> 是 (x, y, z, w)，Eigen 构造函数是 (w, x, y, z)。</p>
+<p><img alt="四元数的双覆盖" src="../figures/18-rotations-quaternion-double-cover.png" /></p>
+<p><em>图 18-1 · 绕 z 轴一直转下去。矩阵元素每 360° 重复一次；四元数要 720° 才重复，转满一圈时得到的是 −q₀，和 q₀ 表示同一个姿态。</em></p>
+<p><strong>一句话</strong>：四元数 = 半角的轴角；无万向锁、插值平滑；q 与 −q 同一个旋转，用之前先确认顺序约定。</p>
+<h3 id="6d-2026-11-23">第五步：网络输出旋转：为什么用 6D 表示（2026-11-23）</h3>
+<p><strong>问题</strong>：网络的输出是连续函数。如果目标表示在某些地方"跳变"，网络就很难拟合。</p>
+<table>
+<thead>
+<tr>
+<th>表示</th>
+<th>数</th>
+<th>当网络输出的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>欧拉角</td>
+<td>3</td>
+<td>有万向锁、在 ±180° 处跳变</td>
+</tr>
+<tr>
+<td>轴角</td>
+<td>3</td>
+<td>θ = 180° 附近跳变（<span class="arithmatex">\(\mathbf{u}\)</span> 和 <span class="arithmatex">\(-\mathbf{u}\)</span>）</td>
+</tr>
+<tr>
+<td>四元数</td>
+<td>4</td>
+<td>q 和 −q 双覆盖；强制 w ≥ 0 又会在 w = 0 处跳变</td>
+</tr>
+<tr>
+<td>旋转矩阵（9 个数）</td>
+<td>9</td>
+<td>网络输出不一定正交</td>
+</tr>
+<tr>
+<td><strong>6D</strong>：矩阵前两列 + Gram-Schmidt</td>
+<td>6</td>
+<td><strong>连续</strong>，且一定能还原成合法旋转</td>
+</tr>
+</tbody>
+</table>
+<p>Zhou 等证明：3D 旋转在 4 维及以下的实数空间里的表示都不连续，5D、6D 有连续表示（L28–L44）。</p>
+<p>Gram-Schmidt 还原：</p>
+<div class="arithmatex">\[\mathbf{b}_1 = \frac{\mathbf{a}_1}{\|\mathbf{a}_1\|}, \quad \mathbf{b}_2 = \frac{\mathbf{a}_2 - (\mathbf{b}_1\cdot\mathbf{a}_2)\mathbf{b}_1}{\|\cdot\|}, \quad \mathbf{b}_3 = \mathbf{b}_1\times\mathbf{b}_2, \quad R = [\mathbf{b}_1\;\mathbf{b}_2\;\mathbf{b}_3]\]</div>
+<p><strong>例子</strong>：网络随便输出 <span class="arithmatex">\(\mathbf{a}_1 = (1, 0.2, 0)\)</span>、<span class="arithmatex">\(\mathbf{a}_2 = (0.3, 1, 0.1)\)</span>，还原后 <span class="arithmatex">\(R^\top R = I\)</span>、<span class="arithmatex">\(\det R = 1\)</span>。</p>
+<p>在 VLA 里：末端姿态动作常用 6D 表示（或相对旋转的轴角，因为相对旋转很小、远离 180°）。</p>
+<p><img alt="各种旋转表示在 180° 处的跳变" src="../figures/18-rotations-representation-jump.png" /></p>
+<p><em>图 18-2 · 真实姿态连续转一圈。欧拉角和轴角在 180° 从 +π 跳到 −π；四元数强制 w ≥ 0 后 z 从 +1 跳到 −1；6D 表示的每个分量都是连续的正余弦。</em></p>
+<p><strong>一句话</strong>：要网络输出姿态，用 6D（两列 + Gram-Schmidt）；四元数和欧拉角都有跳变。</p>
+<h3 id="se3-44-2026-11-23">第六步：SE(3)：旋转加平移，用 4×4 矩阵一起管（2026-11-23）</h3>
+<p><strong>类比：一张"如何从相机坐标走到世界坐标"的说明书</strong>：先转个方向，再挪个位置。</p>
+<div class="arithmatex">\[T = \begin{pmatrix} R &amp; \mathbf{t} \\ \mathbf{0}^\top &amp; 1\end{pmatrix}, \qquad \begin{pmatrix}\mathbf{p}_w\\1\end{pmatrix} = T_{wc}\begin{pmatrix}\mathbf{p}_c\\1\end{pmatrix}, \qquad T^{-1} = \begin{pmatrix}R^\top &amp; -R^\top\mathbf{t}\\ \mathbf{0}^\top &amp; 1\end{pmatrix}\]</div>
+<ul>
+<li><span class="arithmatex">\(T_{wc}\)</span>：读作"从 c（相机）到 w（世界）"，把相机系下的点变到世界系。</li>
+<li>齐次坐标：点后面补 1，平移也能写成矩阵乘法；方向向量补 0（不受平移影响）。</li>
+<li>链式：<span class="arithmatex">\(T_{wb} = T_{wc}T_{cb}\)</span>，下标"中间消掉"。</li>
+</ul>
+<p><strong>例子</strong>：相机在世界系里绕 z 转 90°、位于 (1, 2, 0)。相机系下的点 (1, 0, 0)：</p>
+<div class="arithmatex">\[\mathbf{p}_w = R_z(90°)(1,0,0)^\top + (1,2,0)^\top = (0,1,0) + (1,2,0) = (1, 3, 0)\]</div>
+<p>再用 <span class="arithmatex">\(T^{-1}\)</span> 变回去，得到 (1, 0, 0)。</p>
+<p><strong>场景代码</strong>：机器人项目里用 <code>scipy.spatial.transform.Rotation</code> 做表示之间的转换，注意四元数顺序：</p>
+<pre><code class="language-python">import numpy as np
+from scipy.spatial.transform import Rotation as R
+
+r = R.from_euler(&quot;ZYX&quot;, [90, 0, 0], degrees=True)    # 第二步：大写 ZYX = 内旋（绕自身轴），yaw-pitch-roll
+q_xyzw = r.as_quat()                                 # 第四步：scipy 的顺序是 (x, y, z, w) = [0, 0, 0.7071, 0.7071]
+rotvec = r.as_rotvec()                               # 第三步：轴角向量 θu = [0, 0, 1.5708]
+six_d = r.as_matrix()[:, :2].reshape(-1)             # 第五步：6D 表示 = 前两列
+
+T_wc = np.eye(4)                                     # 第六步：相机在世界系的位姿
+T_wc[:3, :3], T_wc[:3, 3] = r.as_matrix(), [1, 2, 0]
+p_w = T_wc @ np.array([1, 0, 0, 1])                  # 相机系的点 → 世界系 (1, 3, 0)
+</code></pre>
+<p><strong>补基础</strong>：<a href="https://wikieden.github.io/robot-architecture/lessons/02-kinematics.html">《机器人软硬件架构》第 2 章 运动学</a> 用 SE(3) 讲了正运动学和坐标系树（tf2）。</p>
+<p><img alt="相机系到世界系的变换" src="../figures/18-rotations-se3-frames.png" /></p>
+<p><em>图 18-3 · 俯视例子。先把相机系里的点 (1, 0, 0) 按相机朝向转成 (0, 1)（橙），再加上相机位置 t = (1, 2)（灰），得到世界系里的 (1, 3, 0)。</em></p>
+<p><strong>一句话</strong>：位姿 = 4×4 齐次矩阵；下标写清"从哪到哪"，链式相乘时中间下标消掉。</p>
+<h3 id="_2">动画演示：转动一个坐标系，看欧拉角锁死</h3>
+<p><img alt="欧拉角与万向锁" src="../animations/18-euler-gimbal-lock.gif" /></p>
+<p>可交互版：<a href="../animations/18-euler-gimbal-lock.html">animations/18-euler-gimbal-lock.html</a>（滑块：yaw、pitch、roll）</p>
+<p><strong>怎么看</strong>：
+1. 中间是一个带红 / 绿 / 蓝三根轴的方块（第一步：三根轴就是 R 的三列），下面实时显示 R 和四元数。
+2. 动画先把 pitch 从 0° 推到 90°，然后同时转 yaw 和 roll（第二步）。
+3. pitch = 90° 时，转 yaw 和转 roll 让方块绕<strong>同一根轴</strong>转：yaw 和 roll 一起加同样的角度，方块完全不动。
+4. 看四元数一栏：整个过程中它连续变化，没有锁死（第四步）。</p>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：写出绕 x 轴转 90° 的旋转矩阵，验证它把 (0, 1, 0) 转到哪里；它的逆矩阵是什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第四步）：绕 x 轴转 180° 的四元数是什么？它的负四元数表示什么旋转？如果一个数据集里同一姿态有时存成 q、有时存成 −q，直接用均方误差训练网络回归四元数会有什么问题？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第六步）：机械臂基座在世界系里的位姿是"不转、位于 (0, 0, 1)"，末端在基座系里的位姿是"绕 z 转 90°、位于 (0.5, 0, 0)"。求末端在世界系的位置；末端系里的点 (0.1, 0, 0) 在世界系里在哪？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>三列就是三根轴，转置求逆不交换；<br />
+中间转到九十度，偏航横滚锁一起；<br />
+四元半角无万向，q 和负 q 同一转；<br />
+网络输出用 6D，位姿四乘四串起。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST23–ST26（必须记住的公式和概念）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Solà《Quaternion kinematics for the ESKF》</td>
+<td>§1–2（目录 L12–L54）、§2.7 SLERP、§3 约定</td>
+<td>四元数性质、与 SO(3) 的关系、插值、约定陷阱</td>
+</tr>
+<tr>
+<td>★ Zhou 等 2019</td>
+<td>L28–L62、§3–4</td>
+<td>为什么网络输出要用 6D</td>
+</tr>
+<tr>
+<td>Modern Robotics 第 3 章</td>
+<td>刚体运动、指数坐标</td>
+<td>SE(3)、旋量、Rodrigues 的推导</td>
+</tr>
+<tr>
+<td>Barfoot《State Estimation for Robotics》2e</td>
+<td>三维几何章</td>
+<td>旋转、位姿的扰动和不确定性</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/robot-architecture/lessons/02-kinematics.html">《机器人软硬件架构》第 2 章</a></td>
+<td>全章</td>
+<td>运动学与坐标系树</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>SO(3) 是群</strong>：两个旋转的乘积还是旋转，有单位元和逆元，但不交换；第 19 章讲它的"切空间"。</li>
+<li><strong>四元数乘法</strong>：<span class="arithmatex">\((w_1, \mathbf{v}_1)\otimes(w_2,\mathbf{v}_2) = (w_1w_2 - \mathbf{v}_1\cdot\mathbf{v}_2,\; w_1\mathbf{v}_2 + w_2\mathbf{v}_1 + \mathbf{v}_1\times\mathbf{v}_2)\)</span>。</li>
+<li><strong>两个旋转的距离</strong>：<span class="arithmatex">\(\theta = \arccos\big((\mathrm{tr}(R_1^\top R_2) - 1)/2\big)\)</span>，就是相对旋转的转角；用四元数是 <span class="arithmatex">\(2\arccos|\mathbf{q}_1\cdot\mathbf{q}_2|\)</span>（绝对值处理双覆盖）。</li>
+<li><strong>拓扑原因</strong>：SO(3) 同胚于实射影空间 RP³，不能连续地嵌入 ℝ⁴ 及以下，这是 Zhou 等结论的根源。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(R^\top R = I,\ \det R = 1\)</span></td>
+<td>旋转矩阵</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(R = R_z(\psi)R_y(\theta)R_x(\phi)\)</span></td>
+<td>ZYX 欧拉角</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(R = I + \sin\theta[\mathbf{u}]_\times + (1-\cos\theta)[\mathbf{u}]_\times^2\)</span></td>
+<td>Rodrigues 公式</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{q} = (\cos\frac\theta2, \sin\frac\theta2\mathbf{u})\)</span></td>
+<td>轴角 → 四元数</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{v}' = \mathbf{q}\otimes(0,\mathbf{v})\otimes\mathbf{q}^*\)</span></td>
+<td>四元数旋转向量</td>
+</tr>
+<tr>
+<td>6D：<span class="arithmatex">\(R = [\mathbf{b}_1, \mathbf{b}_2, \mathbf{b}_1\times\mathbf{b}_2]\)</span></td>
+<td>网络输出旋转</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(T^{-1} = [[R^\top, -R^\top\mathbf{t}], [0, 1]]\)</span></td>
+<td>位姿求逆</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>Python + NumPy。代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch18_rotations.py</code>，配套测试 <code>tests/test_ch18.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch18_rotations.py  
+uv run pytest tests/test_ch18.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步</td>
+<td>旋转矩阵性质、不交换</td>
+<td><code>rot_z</code>、<code>rot_x</code></td>
+<td>(1,0,0) → (0,1,0)；RᵀR = I；Rz·Rx ≠ Rx·Rz</td>
+</tr>
+<tr>
+<td>第二步</td>
+<td>万向锁</td>
+<td><code>euler_zyx(30°, 90°, 10°)</code> vs <code>(50°, 90°, 30°)</code></td>
+<td>相同</td>
+</tr>
+<tr>
+<td>第三步</td>
+<td>Rodrigues</td>
+<td><code>rodrigues([0,0,1], 90°)</code></td>
+<td>等于 rot_z(90°)</td>
+</tr>
+<tr>
+<td>第四步</td>
+<td>四元数</td>
+<td><code>quat_from_axis_angle</code>、<code>quat_rotate</code>、<code>quat_mul</code></td>
+<td>(0.7071, 0, 0, 0.7071)；q 与 −q 同矩阵；q_z⊗q_x ↔ Rz·Rx</td>
+</tr>
+<tr>
+<td>第五步</td>
+<td>6D</td>
+<td><code>matrix_from_6d</code></td>
+<td>RᵀR = I，det = 1</td>
+</tr>
+<tr>
+<td>第六步</td>
+<td>SE(3)</td>
+<td><code>se3</code>、<code>se3_inv</code></td>
+<td>(1, 0, 0) → (1, 3, 0) → (1, 0, 0)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">K = skew(u)
+R = np.eye(3) + math.sin(angle) * K + (1 - math.cos(angle)) * K @ K   # Rodrigues
+q = np.concatenate([[math.cos(angle / 2)], math.sin(angle / 2) * u])  # 半角！
+b2 = a2 - np.dot(b1, a2) * b1                                         # Gram-Schmidt：去掉 b1 方向的分量
+b2 /= np.linalg.norm(b2)
+T_inv = se3(R.T, -R.T @ t)                                            # 位姿求逆：不要用 np.linalg.inv
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li>本模块四元数是 (w, x, y, z)，scipy 是 (x, y, z, w)。对接时要换位，测试里用旋转矩阵比较，就能绕开顺序和正负号问题。</li>
+<li><code>rot_y</code> 的矩阵里 sin 的正负号和 <code>rot_x</code>、<code>rot_z</code> 相反位置（左下是 −s），这是右手系绕 y 轴的标准形式，手写时最容易抄错。</li>
+<li>位姿求逆用 <span class="arithmatex">\([R^\top, -R^\top t]\)</span>，比 <code>np.linalg.inv</code> 快，而且结果一定还是合法的 SE(3)；数值求逆会累积误差让 R 不再正交。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把万向锁例子的 pitch 改成 89°，看两个姿态还相同吗、差多少。</li>
+<li>用 <code>quat_mul</code> 验证 <span class="arithmatex">\(\mathbf{q}\otimes\mathbf{q}^* = (1, 0, 0, 0)\)</span>。</li>
+<li>对照 notebook，随机生成 1000 组 6D 输出，检查还原后都满足 RᵀR = I。</li>
+</ol><nav class="pager"><a href="17-generative-math.html">← 第 17 章 · 生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="24-policy-gradient.html">第 24 章 · 策略梯度推导：从似然比技巧到 PPO 和 GRPO →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>
