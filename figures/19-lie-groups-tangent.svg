@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="340" viewBox="0 0 860 340">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">Exp 与 Log：在切平面上加，在流形上落脚</text>
+<text x="16.0" y="330.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">曲线示意旋转流形（真实的 SO(3) 是 3 维的）。在 R 处贴一条切线（切空间）；切向量 δ 沿切线走，Exp 把它“卷”回流形上的 R·Exp(δ)；Log 反过来。</text>
+<polyline points="646.5,235.0 639.7,223.8 632.3,213.1 624.3,202.7 615.8,192.7 606.8,183.2 597.3,174.2 587.3,165.7 576.9,157.7 566.2,150.3 555.0,143.5 543.5,137.2 531.7,131.6 519.6,126.6 507.3,122.2 494.7,118.5 482.0,115.5 469.1,113.1 456.1,111.4 443.1,110.3 430.0,110.0 416.9,110.3 403.9,111.4 390.9,113.1 378.0,115.5 365.3,118.5 352.7,122.2 340.4,126.6 328.3,131.6 316.5,137.2 305.0,143.5 293.8,150.3 283.1,157.7 272.7,165.7 262.7,174.2 253.2,183.2 244.2,192.7 235.7,202.7 227.7,213.1 220.3,223.8 213.5,235.0" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="184.7" y1="183.2" x2="560.6" y2="46.4" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="5 4"/>
+<line x1="344.5" y1="125.1" x2="494.8" y2="70.4" stroke="#ea580c" stroke-width="2.4"/>
+<polygon points="494.8,70.4 488.8,77.0 485.9,69.1" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="391.8" y="71.2" width="55.8" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="419.7" y="83.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="normal">切向量 δ</text>
+<line x1="494.8" y1="70.4" x2="501.7" y2="120.5" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="4 3"/>
+<polygon points="501.7,120.5 496.4,113.2 504.8,112.1" fill="#16a34a" stroke="#16a34a" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="495.5" y="84.9" width="85.5" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="538.3" y="96.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#16a34a" text-anchor="middle" font-weight="normal">Exp：卷回流形</text>
+<circle cx="344.5" cy="125.1" r="6" fill="#1f2937" stroke="#1f2937" stroke-width="1.4"/>
+<circle cx="501.7" cy="120.5" r="6" fill="#16a34a" stroke="#16a34a" stroke-width="1.4"/>
+<text x="334.5" y="111.1" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1f2937" text-anchor="middle" font-weight="bold">R</text>
+<text x="511.7" y="144.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#16a34a" text-anchor="middle" font-weight="normal">R·Exp(δ)</text>
+<text x="40.0" y="205.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">切空间（向量空间，可以加减）</text>
+<text x="641.5" y="219.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#2563eb" text-anchor="start" font-weight="normal">旋转流形 SO(3)（弯的，不能直接加）</text>
+</svg>

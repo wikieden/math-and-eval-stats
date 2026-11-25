@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 21 章 · 动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html" class="cur"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="21-lqr-bellman">第 21 章 · 动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</h1><div class="run"><a class="btn" href="../animations/21-dynamics-control.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch21_dynamics_control.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch21_dynamics_control.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch21_dynamics_control.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：倒立摆为什么"站不住"，数学上看哪一个数？连续时间的模型怎么变成控制器每 10 毫秒算一次的离散模型？LQR 的反馈增益从哪来？强化学习的 Bellman 方程和这些有什么关系？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/20-state-estimation.html">第 20 章 状态估计</a> · 下一章：<a href="../lessons/22-numerics.html">第 22 章 数值计算</a><br />
+对应原文：Särkkä <code>materials/text/books/sarkka-bayesian-filtering-smoothing-2e.txt</code> 第 4 章"连续时间模型的离散化"（目录 L74–L77）；LQR 的推导见<a href="https://wikieden.github.io/robot-motion-rl/lessons/12-lqr.html">《机器人运控与强化学习》第 12 章</a>和本书第 25 章；Bellman 方程见<a href="https://wikieden.github.io/rl-from-scratch/lessons/08-bellman.html">《从零学强化学习》第 8 章</a>和本书<a href="../lessons/23-mdp-bellman.html">第 23 章</a><br />
+本章缩写：ODE = Ordinary Differential Equation（常微分方程）；A、B = 连续时间的状态矩阵、输入矩阵；A_d、B_d = 离散化后的；ZOH = Zero-Order Hold（零阶 / 保持：一个周期内控制量不变）；e^{At} = 矩阵指数；LQR = Linear Quadratic Regulator（线性 / 二次 / 调节器）；Q、R（本章）= 状态代价、控制代价的权重矩阵；K = 反馈增益；P = Riccati 方程的解；MDP = Markov Decision Process（马尔可夫决策过程）；γ = 折扣因子。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="x-ax2026-11-25">第一步：线性化：在平衡点附近，非线性系统像 ẋ = Ax（2026-11-25）</h3>
+<p><strong>类比：地球是圆的，但你家门口那条街看起来是平的。</strong></p>
+<p>单摆：<span class="arithmatex">\(\ddot\theta = -\frac gl\sin\theta\)</span>，状态 <span class="arithmatex">\(x = [\theta, \dot\theta]\)</span>。在平衡点 θ₀ 附近，sin θ ≈ sin θ₀ + cos θ₀·(θ − θ₀)：</p>
+<div class="arithmatex">\[A = \begin{bmatrix}0 &amp; 1\\ -\frac gl\cos\theta_0 &amp; 0\end{bmatrix}\]</div>
+<p><strong>例子</strong>（g/l = 9.81）：</p>
+<table>
+<thead>
+<tr>
+<th>平衡点</th>
+<th>A</th>
+<th>特征值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下垂 θ = 0</td>
+<td>[[0, 1], [−9.81, 0]]</td>
+<td>±3.132i</td>
+<td>纯虚数：来回摆，不发散也不衰减</td>
+</tr>
+<tr>
+<td>倒立 θ = π</td>
+<td>[[0, 1], [9.81, 0]]</td>
+<td>3.132、−3.132</td>
+<td>有一个正实部：稍一偏就倒，按 e^{3.13t} 发散</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：在平衡点把非线性系统线性化成 ẋ = Ax；A 的特征值决定附近的行为。</p>
+<h3 id="2026-11-25">第二步：稳定性看特征值（2026-11-25）</h3>
+<p><strong>类比：碗底的球（稳）和山顶的球（不稳）。</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>稳定条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>连续时间 ẋ = Ax</td>
+<td>所有特征值实部 &lt; 0</td>
+</tr>
+<tr>
+<td>离散时间 x_{k+1} = A_d x_k</td>
+<td>所有特征值的模 &lt; 1</td>
+</tr>
+</tbody>
+</table>
+<p>原因：解是 <span class="arithmatex">\(e^{\lambda t}\)</span> 或 <span class="arithmatex">\(\lambda^k\)</span> 的组合，实部 &gt; 0 或模 &gt; 1 的分量会指数增长。</p>
+<p><strong>例子</strong>：倒立摆离散化（dt = 0.1）以后，特征值的模是 1.368 和 0.731：有一个 &gt; 1，不稳定（e^{3.132×0.1} = 1.368）。</p>
+<p><strong>一句话</strong>：连续时间看实部 &lt; 0，离散时间看模 &lt; 1；倒立摆有一个特征值越界，必须靠控制拉回来。</p>
+<h3 id="zoh-dt-2026-11-25">第三步：ZOH 离散化：控制器只能每 dt 改一次指令（2026-11-25）</h3>
+<p><strong>类比：开车时每 0.1 秒才能调一次方向盘，中间保持不动。</strong></p>
+<p>控制量在 [k·dt, (k+1)·dt) 里不变（零阶保持），积分 ẋ = Ax + Bu 一个周期，精确得到：</p>
+<div class="arithmatex">\[x_{k+1} = A_dx_k + B_du_k,\quad A_d = e^{A\,dt},\quad B_d = \int_0^{dt}e^{As}ds\cdot B\]</div>
+<p>（Särkkä 第 4 章）</p>
+<p><strong>例子</strong>：双积分器（推一个小车，ẍ = u），状态 [位置, 速度]，dt = 0.1：</p>
+<div class="arithmatex">\[A_d = \begin{bmatrix}1 &amp; 0.1\\0 &amp; 1\end{bmatrix},\quad B_d = \begin{bmatrix}0.005\\0.1\end{bmatrix} = \begin{bmatrix}dt^2/2\\dt\end{bmatrix}\]</div>
+<p>就是中学物理的"位移 = v·t + ½a·t²"。对比欧拉法 <span class="arithmatex">\(A_d \approx I + A\,dt\)</span>、<span class="arithmatex">\(B_d \approx B\,dt\)</span> = [0, 0.1]：漏掉了 dt²/2 那一项。</p>
+<p><strong>一句话</strong>：ZOH 离散化 A_d = e^{A dt}、B_d = ∫e^{As}ds·B 是精确的；欧拉法 I + A·dt 只是一阶近似。</p>
+<h3 id="lqr2026-11-25">第四步：LQR：在代价最小的意义下最好的线性反馈（2026-11-25）</h3>
+<p><strong>类比：又想快点到位（状态代价 Q），又不想油门踩太猛（控制代价 R），在两者之间找最划算的方向盘打法。</strong></p>
+<div class="arithmatex">\[\min\sum_k x_k^\top Qx_k + u_k^\top Ru_k\ \Rightarrow\ u_k = -Kx_k,\quad K = (R + B_d^\top PB_d)^{-1}B_d^\top PA_d\]</div>
+<p>P 是离散代数 Riccati 方程的解（推导在第 25 章；直觉：P 是"从状态 x 出发、以后都最优控制，总代价 xᵀPx"）。</p>
+<p><strong>例子</strong>（双积分器，Q = I）：</p>
+<table>
+<thead>
+<tr>
+<th>R</th>
+<th>K</th>
+<th>闭环特征值的模</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>[0.917, 1.636]</td>
+<td>0.917、0.917（稳）</td>
+</tr>
+<tr>
+<td>0.01（控制便宜）</td>
+<td>[5.894, 6.821]</td>
+<td>0.904、0.384（更小：收敛更快、出力更猛）</td>
+</tr>
+</tbody>
+</table>
+<p>R 调小 → 增益变大 → 收敛快但需要大力矩；R 调大 → 温和。</p>
+<p><img alt="LQR 闭环：状态回到原点" src="../figures/21-dynamics-control-lqr.png" />
+<em>图 21-1 · 双积分器从位置 1 出发，R = 1（蓝）和 R = 0.01（橙）两种 LQR 的位置和控制量；R 小的收敛快、控制峰值大（第一步 −5.9）</em></p>
+<p><strong>场景代码</strong>：用 scipy 求 LQR（就是本章代码的写法）：</p>
+<pre><code class="language-python">from scipy.linalg import solve_discrete_are
+P = solve_discrete_are(Ad, Bd, Q, R)                       # 离散代数 Riccati 方程
+K = np.linalg.solve(R + Bd.T @ P @ Bd, Bd.T @ P @ Ad)      # u = −Kx
+</code></pre>
+<p><strong>一句话</strong>：LQR 用二次代价换出线性反馈 u = −Kx；K 由 Riccati 方程的解 P 给出，R 越小越激进。</p>
+<h3 id="bellman-2026-11-25">第五步：Bellman 方程是一个不动点方程（2026-11-25）</h3>
+<p><strong>类比：LQR 的"从这里出发以后的总代价 xᵀPx"和强化学习的值函数 V(s) 是同一个概念。</strong></p>
+<p>固定策略下，值函数满足</p>
+<div class="arithmatex">\[V = r + \gamma PV\]</div>
+<p>（P 这里是状态转移矩阵）这是一个不动点方程：V 是映射 <span class="arithmatex">\(T(V) = r + \gamma PV\)</span> 的不动点。可以直接解线性方程 <span class="arithmatex">\(V = (I - \gamma P)^{-1}r\)</span>，也可以反复套 T 直到不动。</p>
+<p><strong>例子</strong>（编的 2 状态 MDP：转移 [[0.8, 0.2], [0.3, 0.7]]、奖励 [1, 0]、γ = 0.9）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>V</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>解线性方程</td>
+<td>[6.7273, 4.9091]</td>
+</tr>
+<tr>
+<td>反复套 V ← r + γPV，149 次误差 &lt; 10⁻⁶</td>
+<td>[6.7273, 4.9091]</td>
+</tr>
+</tbody>
+</table>
+<p>为什么反复套一定收敛、要套多少次，见<a href="../lessons/23-mdp-bellman.html">第 23 章 压缩映射</a>。</p>
+<p><img alt="LQR 的 Riccati 和 RL 的 Bellman：同一个&quot;往回推总代价&quot;的思路" src="../figures/21-dynamics-control-bellman.png" />
+<em>图 21-2 · 左：LQR，代价是二次型 xᵀPx；右：表格型 MDP，值函数是一张表；两者都满足"现在的值 = 这一步的代价 + 下一步的值"</em></p>
+<p><strong>一句话</strong>：Bellman 方程 V = r + γPV 是不动点方程；LQR 的 xᵀPx 就是连续状态、二次代价下的值函数。</p>
+<h3 id="lqr">动画演示：倒立摆的线性化和 LQR 闭环</h3>
+<p><img alt="动力系统与控制" src="../animations/21-dynamics-control.gif" /></p>
+<p>可交互版：<a href="../animations/21-dynamics-control.html">animations/21-dynamics-control.html</a>（滑块调控制代价 R；勾选"关闭控制"）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>左边是双积分器小车的位置随时间变化，从 1 出发；右边是相平面（位置、速度）上的轨迹（第三、四步）；</li>
+<li>关闭控制：小车停在 1 不动（双积分器没有控制就不会自己回来）；</li>
+<li>R 从 1 拖到 0.01：轨迹更快回到原点，下方的控制量峰值更大（第四步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一、二步）：阻尼单摆 <span class="arithmatex">\(\ddot\theta = -9.81\sin\theta - 0.5\dot\theta\)</span>，在下垂点线性化，写出 A，特征值的实部是多少？稳不稳？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：一阶系统 ẋ = −2x + u，dt = 0.1。写出 ZOH 离散化的 A_d、B_d（保留 4 位），和欧拉法的结果比较。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：单状态 MDP，每步奖励 1、永远留在原地、γ = 0.95。V 是多少？从 V₀ = 0 开始反复套 V ← 1 + γV，第 3 次是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>门口街道看着平，平衡点处线性化，特征值定命运；<br />
+连续看实部、离散看模，倒立摆有一个越界；<br />
+零阶保持积一周期，A_d 是矩阵指数；<br />
+LQR 用二次代价换线性反馈，R 小就激进；Bellman 是不动点，xᵀPx 就是值函数。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST76（线性化与稳定性判据：连续看实部、离散看模）、ST77（ZOH 离散化公式）、ST78（LQR 的形式、R 的作用、和 Bellman 的关系）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ <a href="https://wikieden.github.io/robot-motion-rl/lessons/12-lqr.html">《机器人运控与强化学习》第 12 章 LQR</a></td>
+<td>全章</td>
+<td>LQR 在机器人上的用法</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/rl-from-scratch/lessons/08-bellman.html">《从零学强化学习》第 8 章 Bellman</a></td>
+<td>全章</td>
+<td>Bellman 方程从零讲起</td>
+</tr>
+<tr>
+<td>Särkkä</td>
+<td>第 4 章（目录 L74–L77）</td>
+<td>连续时间模型的离散化，包括带噪声的情况</td>
+</tr>
+<tr>
+<td>Underactuated Robotics LQR 章（<code>robot-motion-rl/materials/text/underactuated-lqr.txt</code>）</td>
+<td>全章</td>
+<td>倒立摆、可控性、Riccati 推导（第 25 章展开）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>线性化</strong>：<span class="arithmatex">\(\dot x = f(x, u)\)</span> 在 (x₀, u₀) 处 <span class="arithmatex">\(A = \partial f/\partial x\)</span>、<span class="arithmatex">\(B = \partial f/\partial u\)</span>（第 13 章的雅可比）。</li>
+<li><strong>矩阵指数</strong>：<span class="arithmatex">\(e^{At} = \sum_k (At)^k/k!\)</span>；A 可对角化时 <span class="arithmatex">\(e^{At} = Ve^{\Lambda t}V^{-1}\)</span>，所以特征值 λ 对应 <span class="arithmatex">\(e^{\lambda t}\)</span>。双积分器的 A 是幂零矩阵（A² = 0），<span class="arithmatex">\(e^{A\,dt} = I + A\,dt\)</span> 精确成立。</li>
+<li><strong>ZOH 的一次性算法</strong>：构造 <span class="arithmatex">\(\begin{bmatrix}A &amp; B\\0 &amp; 0\end{bmatrix}\)</span> 的矩阵指数，左上块是 A_d、右上块是 B_d。</li>
+<li><strong>Bellman 与 Riccati</strong>：二次代价、线性动力学下，值函数一定是二次型 <span class="arithmatex">\(V(x) = x^\top Px\)</span>，代进 Bellman 方程 <span class="arithmatex">\(V(x) = \min_u[x^\top Qx + u^\top Ru + V(Ax + Bu)]\)</span>，就得到 Riccati 方程。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(A = \partial f/\partial x\vert_{x_0}\)</span></td>
+<td>线性化</td>
+</tr>
+<tr>
+<td>连续 Re λ &lt; 0；离散 |λ| &lt; 1</td>
+<td>稳定判据</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(A_d = e^{A\,dt}\)</span>，<span class="arithmatex">\(B_d = \int_0^{dt}e^{As}ds\,B\)</span></td>
+<td>ZOH 离散化</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(u = -Kx\)</span>，<span class="arithmatex">\(K = (R + B^\top PB)^{-1}B^\top PA\)</span></td>
+<td>离散 LQR</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(V = r + \gamma PV\)</span>，<span class="arithmatex">\(V = (I - \gamma P)^{-1}r\)</span></td>
+<td>Bellman 期望方程</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch21_dynamics_control.py</code>，配套测试 <code>tests/test_ch21.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch21_dynamics_control.py  
+uv run pytest tests/test_ch21.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 线性化</td>
+<td>A(θ₀)</td>
+<td><code>pendulum_A(np.pi)</code></td>
+<td>特征值 ±3.132</td>
+</tr>
+<tr>
+<td>第二步 离散稳定性</td>
+<td>|λ|</td>
+<td><code>zoh(pendulum_A(np.pi), B, 0.1)</code></td>
+<td>1.368、0.731</td>
+</tr>
+<tr>
+<td>第三步 ZOH</td>
+<td>矩阵指数</td>
+<td><code>zoh(a, b, 0.1)</code></td>
+<td>A_d = [[1, 0.1], [0, 1]]，B_d = [0.005, 0.1]</td>
+</tr>
+<tr>
+<td>第四步 LQR</td>
+<td>Riccati</td>
+<td><code>lqr_gain(ad, bd, I, [[1]])</code></td>
+<td>K = [0.917, 1.636]</td>
+</tr>
+<tr>
+<td>第五步 Bellman</td>
+<td>不动点</td>
+<td><code>bellman_policy_value()</code></td>
+<td>[6.7273, 4.9091]，149 次</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">big = np.zeros((n + m, n + m)); big[:n, :n], big[:n, n:] = a, b
+e = expm(big * dt)                       # 一次矩阵指数
+ad, bd = e[:n, :n], e[:n, n:]            # 左上 A_d，右上 B_d
+p = solve_discrete_are(ad, bd, q, r)     # Riccati
+v = r + gamma * p @ v                    # Bellman 迭代
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>扩展矩阵的技巧</strong>：直接算 ∫e^{As}ds 需要 A 可逆；把 A、B 拼成一个大矩阵再取指数，对奇异的 A（比如双积分器）也成立。</li>
+<li><strong><code>solve_discrete_are</code> 的参数顺序</strong>：(A, B, Q, R)，和连续时间的 <code>solve_continuous_are</code> 同样的顺序；混用离散 / 连续版本是常见错误。</li>
+<li><strong>特征值打印成复数</strong>：<code>np.linalg.eigvals</code> 对实矩阵也可能返回复数（共轭对），比较稳定性时要取实部或模。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 LQR 的 Q 改成 diag(10, 1)（更在意位置误差），K 怎么变？</li>
+<li>在 <code>bellman_policy_value</code> 里把 γ 改成 0.99，迭代次数变成多少？</li>
+</ol><nav class="pager"><a href="20-state-estimation.html">← 第 20 章 · 状态估计：预测一步、用测量修正一步</a><a href="22-numerics.html">第 22 章 · 数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

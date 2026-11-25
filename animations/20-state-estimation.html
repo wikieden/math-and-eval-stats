@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>状态估计</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 20 章 · Kalman 的预测和更新；粒子滤波的加权和重采样</h1>
+<p class="sub">配套讲义：<a href="../lessons/20-state-estimation.html">第 20 章 · 状态估计：预测一步、用测量修正一步</a>。一维位置，先验 N(0, 1)，测量依次是 1.2、0.8、1.1、0.9、1.0。Kalman：每次测量前“预测”（加过程噪声 Q），测量后“更新”（乘上测量似然 N(z; x, R)）。粒子滤波：60 个粒子来自先验，测量 z = 1.2。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">Kalman</option><option value="1">粒子滤波</option></select><label for="k">步骤</label><input type="range" id="k" min="0" max="10" step="1" value="0"><span id="kv">0</span><label for="r">测量噪声 R</label><input type="range" id="r" min="0.05" max="1" step="0.05" value="0.25"><span id="rv">0.25</span><label for="q">过程噪声 Q</label><input type="range" id="q" min="0" max="0.3" step="0.05" value="0"><span id="qv">0</span></div>
+<p class="note">看点：① 奇数步是预测：钟形变宽（Q > 0 时）；偶数步是更新：和绿色的测量钟形相乘，变窄、往测量挪；② R 调大：每次更新挪得少；③ 粒子滤波：第 1 步按似然加权（点的大小），第 2 步重采样，点挤到测量附近。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const PHI=z=>0.5*(1+erf(z/Math.SQRT2));
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}
+const npdf=(x,m,s)=>Math.exp(-0.5*((x-m)/s)**2)/(s*2.5066283);
+const IDS=['md','k','r','q'],F=[[0,0,0.25,0],[0,1,0.25,0],[0,2,0.25,0],[0,3,0.25,0],[0,4,0.25,0],[0,6,0.25,0],[0,10,0.25,0],[0,10,1,0.1],[1,0,0.25,0],[1,1,0.25,0],[1,2,0.25,0]];
+const Z=[1.2,0.8,1.1,0.9,1.0];
+function bell(M,m,v,col,w,dash){const p=[];for(let i=0;i<=200;i++){const x=-2.5+5*i/200;p.push(M(x,Math.min(npdf(x,m,Math.sqrt(v)),2.4)))}P(p,col,w,dash)}
+function render(md,k,r,q){frame(40,50,600,250);const M=PM(40,50,600,250,[-2.5,2.5],[0,2.4]);const t0=M(1,0);L(t0[0],50,t0[0],300,'var(--muted)',1,'3 4');T('真位置 1.0',t0[0]+4,64,'start','s');
+ if(md==0){let m=0,p=1,mp=0,pp=1,ph='先验';const n=Math.ceil(k/2);for(let i=1;i<=n;i++){mp=m;pp=p+q;if(2*i-1==k){ph='预测';break}const K=pp/(pp+r);m=mp+K*(Z[i-1]-mp);p=(1-K)*pp;ph='更新'}
+  if(k==0){bell(M,0,1,'var(--accent)',2.5);cap('先验 N(0, 1)')}
+  else if(ph=='预测'){bell(M,m,p,'var(--muted)',1.5,'4 3');bell(M,mp,pp,'var(--warm)',2.5);bell(M,Z[n-1],r,'var(--good)',1.5,'4 3');const z=M(Z[n-1],0);C(z[0],z[1],6,'var(--good)',1);cap(`第 ${n} 次预测：N(${mp.toFixed(3)}, ${pp.toFixed(3)})；下一次测量 z = ${Z[n-1]}（绿）`)}
+  else{const K=pp/(pp+r);bell(M,mp,pp,'var(--warm)',1.5,'4 3');bell(M,Z[n-1],r,'var(--good)',1.5,'4 3');bell(M,m,p,'var(--accent)',2.5);const z=M(Z[n-1],0);C(z[0],z[1],6,'var(--good)',1);cap(`第 ${n} 次更新：K = ${K.toFixed(3)}，m = ${m.toFixed(4)}，P = ${p.toFixed(4)}`)}
+  T('橙：预测　绿：测量似然　蓝：更新后',40,330,'start','s')}
+ else{const st=Math.min(k,2),pts=memo('pf',()=>{seed(3);const a=[];for(let i=0;i<60;i++)a.push(gauss());return a});const w=pts.map(x=>Math.exp(-0.5*(1.2-x)**2/r)),sw=w.reduce((a,b)=>a+b,0),wn=w.map(x=>x/sw);
+  const ess=1/wn.reduce((a,b)=>a+b*b,0),mean=pts.reduce((a,x,i)=>a+x*wn[i],0);bell(M,0,1,'var(--muted)',1.5,'4 3');bell(M,1.2,r,'var(--good)',1.5,'4 3');
+  if(st<2){pts.forEach((x,i)=>{const q=M(x,0.15+0.25*(i%5));C(q[0],q[1],st==0?4:Math.max(1.5,Math.sqrt(wn[i]*60)*5),'var(--accent)',.7)});cap(st==0?'60 个粒子来自先验 N(0, 1)':`按似然加权：加权均值 ${mean.toFixed(3)}，有效样本数 ${ess.toFixed(1)} / 60`)}
+  else{seed(11);const c=[];let acc=0;const cdf=wn.map(x=>acc+=x);for(let i=0;i<60;i++){const u=rnd();c.push(pts[cdf.findIndex(v=>v>=u)]??pts[59])}c.forEach((x,i)=>{const q=M(x+0.03*(i%7-3),0.15+0.25*(i%5));C(q[0],q[1],4,'var(--accent)',.7)});cap(`重采样：权重大的粒子被复制，均值 ${(c.reduce((a,b)=>a+b,0)/60).toFixed(3)}`)}}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 20 章 · 状态估计：预测一步、用测量修正一步 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html" class="cur"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="20">第 20 章 · 状态估计：预测一步、用测量修正一步</h1><div class="run"><a class="btn" href="../animations/20-state-estimation.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch20_state_estimation.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch20_state_estimation.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch20_state_estimation.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：机器人怎么把"自己估计的运动"和"传感器的测量"合起来，算出自己在哪？Kalman 增益在权衡什么？测量是非线性的怎么办？粒子滤波、因子图又在什么时候用？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/19-lie-groups.html">第 19 章 李群入门</a> · 下一章：<a href="../lessons/21-dynamics-control.html">第 21 章 动力系统与控制的数学</a><br />
+对应原文：Särkkä《Bayesian Filtering and Smoothing》<code>materials/text/books/sarkka-bayesian-filtering-smoothing-2e.txt</code> §6.2–6.3 贝叶斯滤波方程与 Kalman 滤波 L5768–L5932、第 7 章 EKF、§11.2 重要性采样 L12852 起；Solà ESKF <code>materials/text/papers/quaternion-kinematics-eskf-1711.02508.txt</code> 后半；Solà micro Lie theory §V（L1052 起，在流形上做估计）<br />
+本章缩写：KF = Kalman Filter（卡尔曼 / 滤波）；EKF = Extended Kalman Filter（扩展卡尔曼滤波：把非线性函数在当前估计处线性化）；ESKF = Error-State Kalman Filter（误差状态卡尔曼滤波）；UKF = Unscented Kalman Filter（无迹卡尔曼滤波：用几个精心挑选的点代替线性化）；m、P = 均值、方差（协方差）；Q、R = 过程噪声、测量噪声的方差；K = Kalman 增益；H = 测量函数的雅可比；ESS = Effective Sample Size（有效样本数）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：贝叶斯滤波：预测 + 更新两步（2026-11-25）</h3>
+<p><strong>类比：蒙眼走路，数着步子估计自己走到哪（预测），偶尔摸到墙确认一下（更新）。</strong> 数步子会越来越不准，摸墙能把误差拉回来。</p>
+<div class="arithmatex">\[\text{预测：}p(x_k\mid z_{1:k-1}) = \int p(x_k\mid x_{k-1})\,p(x_{k-1}\mid z_{1:k-1})\,dx_{k-1}\]</div>
+<div class="arithmatex">\[\text{更新：}p(x_k\mid z_{1:k}) \propto p(z_k\mid x_k)\,p(x_k\mid z_{1:k-1})\]</div>
+<p>（Särkkä §6.2）预测把不确定性往外扩，更新用贝叶斯公式（第 8 章）把它收回来。线性高斯时，两步都有闭式：就是 Kalman 滤波。</p>
+<p><strong>一句话</strong>：滤波 = 预测（按运动模型往前推，不确定性变大）+ 更新（按测量用贝叶斯修正，不确定性变小）。</p>
+<h3 id="kalman-2026-11-25">第二步：Kalman 滤波：一个数字例子（2026-11-25）</h3>
+<p><strong>类比：两个人报你的位置，一个说得准、一个说得糙，你取一个加权平均，权重按各自的可信度给。</strong></p>
+<p>一维，位置不动（Q = 0），测量噪声方差 R = 0.25：</p>
+<div class="arithmatex">\[K = \frac{P^-}{P^- + R},\quad m = m^- + K(z - m^-),\quad P = (1 - K)P^-\]</div>
+<p>K 就是"信测量多少"：先验方差大、测量准，K 接近 1；先验已经很准，K 接近 0。</p>
+<p><strong>例子</strong>（先验 N(0, 1)，测量 1.2、0.8、1.1、0.9、1.0，真位置 1.0）：</p>
+<table>
+<thead>
+<tr>
+<th>第几次</th>
+<th>z</th>
+<th>K</th>
+<th>估计 m</th>
+<th>方差 P</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1.2</td>
+<td>0.800</td>
+<td>0.9600</td>
+<td>0.2000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.8</td>
+<td>0.444</td>
+<td>0.8889</td>
+<td>0.1111</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1.1</td>
+<td>0.308</td>
+<td>0.9538</td>
+<td>0.0769</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.9</td>
+<td>0.235</td>
+<td>0.9412</td>
+<td>0.0588</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1.0</td>
+<td>0.190</td>
+<td>0.9524</td>
+<td>0.0476</td>
+</tr>
+</tbody>
+</table>
+<p>5 次测量的平均是 1.0；Kalman 给出 0.952，因为先验 N(0, 1) 也算一份证据，把估计往 0 拉了一点。方差从 1 降到 0.048。</p>
+<p><strong>过程噪声 Q</strong>：Q = 0 时 K 一路变小（第 n 次 K = 4/(4n + 1)），越来越相信旧估计；真实系统里状态会变，Q &gt; 0 让 K 收敛到一个稳态：Q = 0.01 → 0.181，Q = 0.1 → 0.463。</p>
+<p><img alt="Kalman 滤波：估计和方差随测量收敛" src="../figures/20-state-estimation-kf.png" />
+<em>图 20-1 · 橙点是测量，蓝线是估计 m，阴影是 ±2√P；方差每次测量后变小</em></p>
+<p><strong>一句话</strong>：Kalman 增益 K = P⁻/(P⁻ + R) 是"信测量的比例"；估计 = 预测 + K × 新息；Q 决定 K 的稳态。</p>
+<h3 id="ekf2026-11-25">第三步：EKF：测量是非线性的，就在当前估计处线性化（2026-11-25）</h3>
+<p><strong>类比：用一小段直尺贴着曲线量长度。</strong></p>
+<p>测量 z = h(x) + 噪声，h 非线性（测距、相机投影）。EKF 在当前估计 m 处求 h 的雅可比 H，把 Kalman 公式里的"H"换成它（Särkkä 第 7 章）：</p>
+<div class="arithmatex">\[K = \frac{P H^\top}{HPH^\top + R},\quad m \leftarrow m + K\big(z - h(m)\big)\]</div>
+<p><strong>例子</strong>：测量 h(x) = √(x² + 1)（到一个离线 1 米的信标的距离），先验 m = 1.0、P = 0.5，R = 0.01，测到 z = 1.6：</p>
+<table>
+<thead>
+<tr>
+<th>算什么</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>h(m) = √2</td>
+<td>1.4142</td>
+</tr>
+<tr>
+<td>H = m/√(m² + 1)</td>
+<td>0.7071</td>
+</tr>
+<tr>
+<td>更新后 m</td>
+<td>1.2526</td>
+</tr>
+<tr>
+<td>更新后 P</td>
+<td>0.0192</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ESKF</strong>：机器人姿态在 SO(3) 上，不能直接加（第 19 章）。ESKF 把"误差"δ 当成状态（在切空间里，是普通向量），用 KF 估计 δ，再用 R ⊕ δ 注入回名义状态。VIO、无人机的姿态估计大多是这么做的（Solà ESKF 后半）。</p>
+<p><strong>UKF 一句话</strong>：不线性化，而是挑 2n + 1 个点（sigma 点）推过非线性函数，再用它们的均值、方差近似；非线性强时比 EKF 准，代价是多算几次 h。</p>
+<p><strong>一句话</strong>：EKF 在当前估计处用雅可比 H 线性化测量；ESKF 在切空间里估误差再 ⊕ 回去；UKF 用 sigma 点代替线性化。</p>
+<h3 id="2026-11-25_1">第四步：粒子滤波：用一群样本表示分布（2026-11-25）</h3>
+<p><strong>类比：派 1000 个人分头猜你在哪，每来一次测量，猜得离谱的人被淘汰，猜得好的人分身。</strong></p>
+<p>分布不是高斯（多峰：比如"可能在走廊的两头之一"）时，用 N 个带权重的粒子表示它：</p>
+<ol>
+<li>每个粒子按运动模型往前走一步；</li>
+<li>按测量的似然给权重 <span class="arithmatex">\(w_i \propto p(z\mid x_i)\)</span>（第 16 章的重要性采样，Särkkä §11.2）；</li>
+<li>有效样本数 <span class="arithmatex">\(\text{ESS} = 1/\sum w_i^2\)</span> 太小时，按权重重采样。</li>
+</ol>
+<p><strong>例子</strong>（先验 N(0, 1)，测量 z = 1.0，R = 0.25，1000 个粒子）：加权均值 0.792（精确后验均值 0.8），有效样本数 403 / 1000，重采样后均值 0.780。</p>
+<p><strong>一句话</strong>：粒子滤波 = 一群样本 + 似然权重 + 重采样；能表示多峰，代价是要很多粒子。</p>
+<h3 id="2026-11-25_2">第五步：因子图：把所有测量一起拿来，解一个最小二乘（2026-11-25）</h3>
+<p><strong>类比：拼一张地图，不是边走边改，而是把所有观测摊在桌上，一起找最一致的拼法。</strong></p>
+<p>滤波只用"到现在为止"的数据、一步一步往前推；SLAM 和离线标定常常把所有位姿和所有测量一起放进一个优化：每个测量是一个"因子"（约束），在高斯噪声下最大后验 = 加权非线性最小二乘（第 12、14 章，用高斯-牛顿 / LM 解）。</p>
+<p><strong>例子</strong>（一维位姿链 x₀ = 0 固定，里程计说每步 +1.0、+1.1、+0.9，回环检测说 x₃ − x₀ = 2.7）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>x₁</th>
+<th>x₂</th>
+<th>x₃</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只用里程计</td>
+<td>1.000</td>
+<td>2.100</td>
+<td>3.000</td>
+</tr>
+<tr>
+<td>加上回环（等权最小二乘）</td>
+<td>0.925</td>
+<td>1.950</td>
+<td>2.775</td>
+</tr>
+</tbody>
+</table>
+<p>4 条约束互相矛盾（里程计加起来 3.0，回环说 2.7），最小二乘让每条各让 0.075：里程计每步少走一点，回环也松一点。</p>
+<p><img alt="位姿链与回环：误差被摊到每一条边上" src="../figures/20-state-estimation-graph.png" />
+<em>图 20-2 · 上：只用里程计的位姿；下：加了回环以后，每个位姿都往回挪了一点</em></p>
+<p><strong>场景代码</strong>：GTSAM（真实库的写法；本书环境没装 gtsam，没跑过）：</p>
+<pre><code class="language-python">import gtsam
+graph = gtsam.NonlinearFactorGraph()
+noise = gtsam.noiseModel.Isotropic.Sigma(1, 0.1)
+graph.add(gtsam.PriorFactorDouble(0, 0.0, noise))                 # x0 = 0
+for i, d in enumerate([1.0, 1.1, 0.9]):
+    graph.add(gtsam.BetweenFactorDouble(i, i + 1, d, noise))       # 里程计因子
+graph.add(gtsam.BetweenFactorDouble(0, 3, 2.7, noise))             # 回环因子
+</code></pre>
+<p><strong>一句话</strong>：因子图把所有测量当约束，最大后验 = 非线性最小二乘；回环让累积误差摊回每一步。</p>
+<h3 id="kalman">动画演示：Kalman 滤波的预测和更新</h3>
+<p><img alt="状态估计" src="../animations/20-state-estimation.gif" /></p>
+<p>可交互版：<a href="../animations/20-state-estimation.html">animations/20-state-estimation.html</a>（滑块调测量噪声 R 和过程噪声 Q；下拉切换"Kalman / 粒子滤波"）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>Kalman：每一帧先"预测"（钟形变宽），再"更新"（和测量的钟形相乘，变窄、往测量挪）（第二步）；</li>
+<li>R 调大（测量不准）：每次更新挪得少；Q 调大：预测时变宽得多，更依赖测量；</li>
+<li>粒子滤波：粒子点的大小是权重，重采样以后点集中到测量附近（第四步）。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步）：先验 m = 2、P = 4，测量 z = 3、R = 1。算 K、更新后的 m 和 P。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：测量 h(x) = x²，先验 m = 2、P = 0.1、R = 0.01，测到 z = 4.4。算 H 和更新后的 m。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四、五步）：（a）粒子权重是 [0.7, 0.1, 0.1, 0.1]，有效样本数是多少？（b）一维位姿链只有里程计、没有任何回环或绝对测量，因子图的解会和直接累加里程计不同吗？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>数步子预测、摸墙更新，不确定一扩一收；<br />
+K 是信测量的比例，先验越糙、测量越准，K 越大；<br />
+非线性就在当前点拉直线，姿态误差在切空间里估；<br />
+多峰用粒子，全局用因子图，回环把误差摊回每一步。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST72（贝叶斯滤波的预测、更新两步）、ST73（Kalman 增益与更新公式）、ST74（EKF / ESKF / UKF 各做什么）、ST75（粒子滤波与因子图各适合什么）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Särkkä</td>
+<td>§6.2–6.3 L5768–L5932</td>
+<td>贝叶斯滤波方程、Kalman 滤波的推导</td>
+</tr>
+<tr>
+<td>★ Särkkä</td>
+<td>第 7 章（EKF）、第 11 章（粒子滤波）</td>
+<td>非线性滤波两条路</td>
+</tr>
+<tr>
+<td>★ Solà《Quaternion kinematics for the ESKF》</td>
+<td>后半</td>
+<td>ESKF 的完整推导，IMU 积分</td>
+</tr>
+<tr>
+<td>Solà micro Lie theory</td>
+<td>§V L1052 起</td>
+<td>在流形上做滤波和优化</td>
+</tr>
+<tr>
+<td>Barfoot</td>
+<td>批量估计一章</td>
+<td>因子图 / 批量最小二乘的系统讲法</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>Kalman 更新就是高斯相乘</strong>：先验 N(m⁻, P⁻) 乘似然 N(z; x, R)，结果还是高斯，均值 <span class="arithmatex">\((Rm^- + P^-z)/(P^- + R)\)</span>，即 <span class="arithmatex">\(m^- + K(z - m^-)\)</span>（第 9 章高斯乘积）。</li>
+<li><strong>Kalman 是线性高斯下的最优估计</strong>：均方误差最小，也是最大后验。</li>
+<li><strong>有效样本数</strong>：权重全相等时 ESS = N，全集中在一个粒子时 ESS = 1；常用 ESS &lt; N/2 触发重采样。</li>
+<li><strong>因子图 = 最大后验</strong>：<span class="arithmatex">\(\max\prod_i\exp(-\frac12\|r_i\|^2_{\Sigma_i})\)</span> ⇔ <span class="arithmatex">\(\min\sum_i\|r_i\|^2_{\Sigma_i}\)</span>；用高斯-牛顿 / LM 解，Hessian 稀疏（第 55 章）。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(m^- = Fm\)</span>，<span class="arithmatex">\(P^- = FPF^\top + Q\)</span></td>
+<td>KF 预测</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(K = P^-H^\top(HP^-H^\top + R)^{-1}\)</span></td>
+<td>Kalman 增益</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m = m^- + K(z - Hm^-)\)</span>，<span class="arithmatex">\(P = (I - KH)P^-\)</span></td>
+<td>KF 更新</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(w_i \propto p(z\mid x_i)\)</span>，<span class="arithmatex">\(\text{ESS} = 1/\sum w_i^2\)</span></td>
+<td>粒子滤波</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\min\sum\|r_i\|^2_{\Sigma_i}\)</span></td>
+<td>因子图</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch20_state_estimation.py</code>，配套测试 <code>tests/test_ch20.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch20_state_estimation.py  
+uv run pytest tests/test_ch20.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第二步 KF</td>
+<td>预测 + 更新</td>
+<td><code>run_kf()</code></td>
+<td>K = 0.8, 0.444, …；m = 0.9524</td>
+</tr>
+<tr>
+<td>第二步 稳态</td>
+<td>Q &gt; 0</td>
+<td><code>steady_gain(0.01)</code></td>
+<td>0.181</td>
+</tr>
+<tr>
+<td>第三步 EKF</td>
+<td>线性化</td>
+<td><code>ekf_update(1.0, 0.5, 1.6)</code></td>
+<td>H = 0.7071，m = 1.2526</td>
+</tr>
+<tr>
+<td>第四步 粒子</td>
+<td>加权 + 重采样</td>
+<td><code>particle_filter(1.0)</code></td>
+<td>0.792，ESS 403</td>
+</tr>
+<tr>
+<td>第五步 因子图</td>
+<td>最小二乘</td>
+<td><code>pose_graph()</code></td>
+<td>[0.925, 1.95, 2.775]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">pp = p + q                          # 预测：方差加过程噪声
+k = pp / (pp + r)                   # Kalman 增益
+m = m + k * (z - m); p = (1 - k) * pp
+w = np.exp(-0.5 * (z - x) ** 2 / r); w /= w.sum()      # 粒子权重
+xr = x[rng.choice(n, n, p=w)]                           # 按权重重采样
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>一维时矩阵都退化成数</strong>：F = 1、H = 1，公式里的转置和求逆都消失了；多维时照样套矩阵公式。</li>
+<li><strong>P = (1 − KH)P⁻ 在数值上可能失去对称、正定</strong>：工程上常用 Joseph 形式 <span class="arithmatex">\((I - KH)P(I - KH)^\top + KRK^\top\)</span>，这里一维没有这个问题。</li>
+<li><strong>重采样用 <code>rng.choice(n, n, p=w)</code></strong>：最简单的多项式重采样；实际系统常用系统重采样（systematic resampling），方差更小。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把先验从 N(0, 1) 改成 N(0, 100)（几乎没有先验），5 次测量后的估计是多少？和测量平均比？</li>
+<li>把粒子数从 1000 改成 50，重复几次，加权均值抖动多大？</li>
+</ol><nav class="pager"><a href="19-lie-groups.html">← 第 19 章 · 李群入门：在旋转上做加法、求导和插值</a><a href="21-dynamics-control.html">第 21 章 · 动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

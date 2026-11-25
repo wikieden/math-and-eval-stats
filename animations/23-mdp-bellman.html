@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MDP 与 Bellman</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 23 章 · 值迭代把奖励一格格往回传</h1>
+<p class="sub">配套讲义：<a href="../lessons/23-mdp-bellman.html">第 23 章 · MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a>。3 个状态的链：0 → 1 → 2；在 0、1 上“走”往前一格扣 1 分，“停”原地 0 分；到 2 以后每步 +1、永远留在 2。从 V₀ = 0 开始反复套 V ← max_a[R + γPV]。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="k">迭代次数 k</label><input type="range" id="k" min="0" max="60" step="1" value="0"><span id="kv">0</span><label for="g">折扣 γ</label><input type="range" id="g" min="0.5" max="0.99" step="0.01" value="0.9"><span id="gv">0.9</span></div>
+<p class="note">看点：① 前几帧 V(2) 先涨，V(1)、V(0) 要等 V(2) 涨够了才觉得“走”划算，奖励一格格往回传；② 下方是 ‖V_{k+1} − V_k‖∞ 的对数，一条斜率 log γ 的直线；③ γ 调到 0.99：直线平很多，60 次还远没收敛（要上千次）。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['k','g'],F=[[0,0.9],[1,0.9],[2,0.9],[3,0.9],[5,0.9],[10,0.9],[20,0.9],[40,0.9],[60,0.9],[60,0.99]];
+function vi(g,K){let V=[0,0,0];const hist=[V],gaps=[];for(let i=0;i<K;i++){const q0=[[V[0],-1+g*V[1]],[V[1]*g,-1+g*V[2]],[1+g*V[2],1+g*V[2]]];const N=[Math.max(g*V[0],-1+g*V[1]),Math.max(g*V[1],-1+g*V[2]),1+g*V[2]];gaps.push(Math.max(...N.map((x,j)=>Math.abs(x-V[j]))));V=N;hist.push(V)}return[hist,gaps]}
+function render(k,g){const [h,gaps]=vi(+g,60),V=h[k],vmax=1/(1-g),pol=[0,1].map(s=>(-1+g*V[s+1]>g*V[s])?'走':'停');
+ cap(`k = ${k}，γ = ${(+g).toFixed(2)}：V = [${V.map(x=>x.toFixed(2)).join(', ')}]，V*(2) = ${vmax.toFixed(1)}`);
+ [0,1,2].forEach(s=>{const x=80+s*200,frac=Math.max(0,Math.min(1,V[s]/vmax));R(x,60,120,90,'var(--accent)',0.1+0.75*frac);T(`状态 ${s}`,x+60,80,'middle','s');T(V[s].toFixed(2),x+60,118,'middle','num');T(s<2?`贪心：${pol[s]}`:'每步 +1',x+60,140,'middle','s');if(s<2)AR(x+124,105,x+194,105,'var(--muted)',1.6)});
+ frame(60,190,560,140);const M=PM(60,190,560,140,[0,60],[-8,0.5]);T('log₁₀ ‖V_{k+1} − V_k‖∞',64,206,'start','s');const pts=gaps.slice(0,Math.max(k,1)).map((x,i)=>M(i+1,Math.max(Math.log10(Math.max(x,1e-12)),-8)));P(pts,'var(--warm)',2.5);
+ if(k>0){const q=pts[pts.length-1];C(q[0],q[1],5,'var(--bad)',1)}[0,-2,-4,-6,-8].forEach(y=>{const q=M(0,y);T(String(y),q[0]-6,q[1]+4,'end','s')})}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

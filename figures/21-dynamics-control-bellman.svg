@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">Riccati 与 Bellman：现在的值 = 这一步的代价 + 下一步的值</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">LQR 的“值”是二次型 xᵀPx（连续状态、线性动力学）；表格 MDP 的值是一张表 V(s)。都从“往后看”的递推里求出来，都是某个映射的不动点。</text>
+<rect x="40.0" y="70.0" width="360.0" height="150.0" rx="8" fill="#eef4ff" stroke="#2563eb" stroke-width="1.4" opacity="1"/>
+<text x="220.0" y="98.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="14" fill="#2563eb" text-anchor="middle" font-weight="bold">LQR（连续状态）</text>
+<text x="220.0" y="135.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">xᵀPx = min_u [xᵀQx + uᵀRu</text>
+<text x="220.0" y="151.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">        + (Ax + Bu)ᵀP(Ax + Bu)]</text>
+<text x="220.0" y="168.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">→ Riccati 方程 → u = −Kx</text>
+<rect x="460.0" y="70.0" width="360.0" height="150.0" rx="8" fill="#effcf3" stroke="#16a34a" stroke-width="1.4" opacity="1"/>
+<text x="640.0" y="98.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="14" fill="#16a34a" text-anchor="middle" font-weight="bold">表格 MDP（离散状态）</text>
+<text x="640.0" y="135.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">V(s) = max_a [r(s, a)</text>
+<text x="640.0" y="151.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">        + γ Σ P(s′|s, a) V(s′)]</text>
+<text x="640.0" y="168.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="normal">→ 值迭代 / 策略迭代（第 23 章）</text>
+<line x1="400.0" y1="145.0" x2="460.0" y2="145.0" stroke="#6b7280" stroke-width="1.6"/>
+<polygon points="460.0,145.0 452.1,149.2 452.1,140.8" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<polygon points="400.0,145.0 407.9,140.8 407.9,149.2" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+</svg>

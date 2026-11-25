@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">压缩映射：每套一次 T，任意两个值函数的距离至少缩 γ 倍</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">‖TV − TU‖∞ ≤ γ‖V − U‖∞。从任何 V₀、U₀ 出发，距离 γ, γ², γ³… 地缩到 0，所以不动点 V* 唯一，值迭代从哪出发都收敛。</text>
+<circle cx="430.0" cy="170.0" r="100.0" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<circle cx="430.0" cy="170.0" r="75.0" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<circle cx="430.0" cy="170.0" r="56.25" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<circle cx="430.0" cy="170.0" r="42.1875" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<circle cx="430.0" cy="170.0" r="31.640625" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<circle cx="430.0" cy="170.0" r="23.73046875" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<line x1="336.0" y1="204.2" x2="387.0" y2="231.4" stroke="#ea580c" stroke-width="1.6"/>
+<polygon points="387.0,231.4 378.0,231.4 382.0,224.0" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="387.0" y1="231.4" x2="430.0" y2="226.2" stroke="#ea580c" stroke-width="1.6"/>
+<polygon points="430.0,226.2 422.6,231.4 421.6,223.0" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="430.0" y1="226.2" x2="454.2" y2="204.6" stroke="#ea580c" stroke-width="1.6"/>
+<polygon points="454.2,204.6 451.1,213.0 445.5,206.7" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="454.2" y1="204.6" x2="459.7" y2="180.8" stroke="#ea580c" stroke-width="1.6"/>
+<polygon points="459.7,180.8 462.0,189.5 453.8,187.6" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<line x1="459.7" y1="180.8" x2="452.9" y2="163.9" stroke="#ea580c" stroke-width="1.6"/>
+<polygon points="452.9,163.9 459.8,169.7 452.0,172.8" fill="#ea580c" stroke="#ea580c" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<circle cx="430.0" cy="170.0" r="5" fill="#dc2626" stroke="#dc2626" stroke-width="1.4"/>
+<text x="442.0" y="174.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#dc2626" text-anchor="start" font-weight="bold">V*</text>
+<text x="326.0" y="208.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1f2937" text-anchor="end" font-weight="normal">V₀</text>
+<text x="640.0" y="150.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#2563eb" text-anchor="start" font-weight="normal">半径 = ‖Vₖ − V*‖∞</text>
+<text x="640.0" y="175.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#2563eb" text-anchor="start" font-weight="normal">每圈缩成上一圈的 γ 倍</text>
+</svg>

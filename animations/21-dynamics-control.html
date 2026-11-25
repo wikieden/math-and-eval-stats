@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>动力系统与控制</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 21 章 · 双积分器的 LQR 闭环</h1>
+<p class="sub">配套讲义：<a href="../lessons/21-dynamics-control.html">第 21 章 · 动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a>。小车 ẍ = u，从位置 1、速度 0 出发，dt = 0.1，Q = I。LQR 反馈 u = −Kx，K 由离散 Riccati 方程迭代求出。左上：位置；左下：控制量；右边：相平面（位置, 速度）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="lr">log₁₀ R</label><input type="range" id="lr" min="-2" max="0" step="0.5" value="0"><span id="lrv">0</span><label for="t">时间 t</label><input type="range" id="t" min="0" max="8" step="0.5" value="0"><span id="tv">0</span><label><input type="checkbox" id="off"> 关闭控制</label></div>
+<p class="note">看点：① 关闭控制：没有力，小车停在 1 不动；② R = 1：温和地回到原点，控制量不到 1；③ R = 0.01（log₁₀ R = −2）：增益大，第一步控制量约 −5.9，位置回落快得多，相平面轨迹直扑原点。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['lr','t','off'],F=[[0,0,1],[0,4,1],[0,0,0],[0,2,0],[0,4,0],[0,8,0],[-2,0,0],[-2,2,0],[-2,4,0],[-2,8,0]];
+const dt=0.1,A=[[1,dt],[0,1]],B=[dt*dt/2,dt];
+function gain(R){let P=[[1,0],[0,1]];for(let it=0;it<3000;it++){const BP=[B[0]*P[0][0]+B[1]*P[1][0],B[0]*P[0][1]+B[1]*P[1][1]],s=R+BP[0]*B[0]+BP[1]*B[1],BPA=[BP[0]*A[0][0]+BP[1]*A[1][0],BP[0]*A[0][1]+BP[1]*A[1][1]];
+ const AP=[[A[0][0]*P[0][0]+A[1][0]*P[1][0],A[0][0]*P[0][1]+A[1][0]*P[1][1]],[A[0][1]*P[0][0]+A[1][1]*P[1][0],A[0][1]*P[0][1]+A[1][1]*P[1][1]]],APA=[[AP[0][0]*A[0][0]+AP[0][1]*A[1][0],AP[0][0]*A[0][1]+AP[0][1]*A[1][1]],[AP[1][0]*A[0][0]+AP[1][1]*A[1][0],AP[1][0]*A[0][1]+AP[1][1]*A[1][1]]];
+ P=[[1+APA[0][0]-BPA[0]*BPA[0]/s,APA[0][1]-BPA[0]*BPA[1]/s],[APA[1][0]-BPA[1]*BPA[0]/s,1+APA[1][1]-BPA[1]*BPA[1]/s]]}
+ const BP=[B[0]*P[0][0]+B[1]*P[1][0],B[0]*P[0][1]+B[1]*P[1][1]],s=R+BP[0]*B[0]+BP[1]*B[1];return[(BP[0]*A[0][0]+BP[1]*A[1][0])/s,(BP[0]*A[0][1]+BP[1]*A[1][1])/s]}
+function render(lr,t,off){const R=10**lr,K=off?[0,0]:memo('K'+lr,()=>gain(R));let x=[1,0];const tr=[];for(let i=0;i<=80;i++){const u=-(K[0]*x[0]+K[1]*x[1]);tr.push([i*dt,x[0],x[1],u]);x=[x[0]+dt*x[1]+B[0]*u,x[1]+B[1]*u]}
+ const n=Math.round(t/dt),cur=tr[n];cap(off?`关闭控制：t = ${(+t).toFixed(1)}，位置 ${cur[1].toFixed(3)}`:`R = ${R.toFixed(2)}：K = [${K[0].toFixed(3)}, ${K[1].toFixed(3)}]，t = ${(+t).toFixed(1)} 时位置 ${cur[1].toFixed(3)}、u = ${cur[3].toFixed(3)}`);
+ frame(40,50,300,150);const M1=PM(40,50,300,150,[0,8],[-0.3,1.1]);frame(40,230,300,100);const M2=PM(40,230,300,100,[0,8],[-6.5,1]);frame(390,50,260,280);const M3=PM(390,50,260,280,[-0.4,1.1],[-1.6,0.5]);
+ T('位置',44,66,'start','s');T('控制量 u',44,246,'start','s');T('相平面：横轴位置、纵轴速度',394,66,'start','s');
+ const z1=M1(0,0),z2=M2(0,0),o=M3(0,0);L(40,z1[1],340,z1[1],'var(--line)',1);L(40,z2[1],340,z2[1],'var(--line)',1);L(390,o[1],650,o[1],'var(--line)',1);L(o[0],50,o[0],330,'var(--line)',1);
+ const sub=tr.slice(0,n+1);P(sub.map(p=>M1(p[0],p[1])),'var(--accent)',2.5);P(sub.map(p=>M2(p[0],Math.max(p[3],-6.5))),'var(--warm)',2.5);P(sub.map(p=>M3(p[1],Math.max(p[2],-1.6))),'var(--accent)',2.5);
+ const q=M3(cur[1],Math.max(cur[2],-1.6));C(q[0],q[1],6,'var(--bad)',1);C(o[0],o[1],4,'var(--good)',1);T('原点',o[0]+6,o[1]-6,'start','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

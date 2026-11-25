@@ -607,8 +607,180 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <p>全对或全错时 std = 0，优势全为 0，这组不贡献梯度（实现里加 1e-8 防除零）。</p>
 <p>口诀：GRPO 组内比短长。</p>
 </details>
+<h2 id="_11">李群、状态估计与控制</h2>
+<h3 id="st69-exp-log-rexp">ST69 · 旋转的切空间是什么？Exp / Log 各做什么？为什么姿态更新写成 R·Exp(δ)？</h3>
+<p>来源：<a href="lessons/19-lie-groups.html">第 19 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>切空间是三维向量 φ = 轴 × 角（轴角向量），可以随便加减。Exp 用 Rodrigues 公式把 φ “卷”成旋转矩阵，Log 反过来：θ = arccos((tr R − 1)/2)。例：Exp([0, 0, π/2]) = 绕 z 转 90°。</p>
+<p>旋转不对易：a = 绕 z 90°、b = 绕 x 90° 时，Exp(a)Exp(b) 和 Exp(a + b) 最大差 0.803，真正的组合是绕 [1, 1, 1] 转 120°。所以不能把姿态相加或按元素平均；在当前姿态上加小修正要写 R ⊕ δ = R·Exp(δ)（δ 在 R 自己的切空间里）。</p>
+<p>口诀：切空间里加减，Exp 卷回群上。</p>
+</details>
+<h3 id="st70-j_r-0">ST70 · 右雅可比 J_r 解决什么问题？φ → 0 时是什么？</h3>
+<p>来源：<a href="lessons/19-lie-groups.html">第 19 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>切向量 φ 加一个小 δ，结果是 Exp(φ + δ) ≈ Exp(φ)·Exp(J_r(φ)δ)：切空间里的增量要乘 J_r 才换算成当前姿态局部坐标里的小旋转。</p>
+<p><span class="arithmatex">\(J_r(\phi) = I - \frac{1-\cos\theta}{\theta^2}[\phi]_\times + \frac{\theta-\sin\theta}{\theta^3}[\phi]_\times^2\)</span>；φ = 0 时 J_r = I。</p>
+<p>用在 IMU 预积分、BA 对姿态求雅可比、姿态误差反馈。SE(3) 的平移部分同理要乘 V(φ)：ρ = [1, 0, 0]、φ = 绕 z 90° 时平移是 [2/π, 2/π, 0]。</p>
+<p>口诀：切空间的小增量，过 J_r 才落到群上。</p>
+</details>
+<h3 id="st71-slerp">ST71 · SLERP 的公式是什么？为什么不能直接平均两个旋转矩阵？</h3>
+<p>来源：<a href="lessons/19-lie-groups.html">第 19 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(R(s) = R_0\,\text{Exp}(s\cdot\text{Log}(R_0^\top R_1))\)</span>：先求相对旋转的切向量，再按比例走，沿流形匀速转。</p>
+<p>直接平均 ½(I + 绕 z 90°) 的行列式只有 0.5，轴变短、不正交，已经不是旋转矩阵。</p>
+<p>口诀：大圆航线走 SLERP，按元素平均会缩水。</p>
+</details>
+<h3 id="st72">ST72 · 贝叶斯滤波的两步是什么？各让不确定性怎么变？</h3>
+<p>来源：<a href="lessons/20-state-estimation.html">第 20 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>预测：<span class="arithmatex">\(p(x_k\mid z_{1:k-1}) = \int p(x_k\mid x_{k-1})p(x_{k-1}\mid z_{1:k-1})dx_{k-1}\)</span>，按运动模型往前推，不确定性变大。</p>
+<p>更新：<span class="arithmatex">\(p(x_k\mid z_{1:k}) \propto p(z_k\mid x_k)p(x_k\mid z_{1:k-1})\)</span>，用测量按贝叶斯修正，不确定性变小。线性高斯时两步都有闭式，就是 Kalman 滤波。</p>
+<p>口诀：数步子会变糊，摸墙能拉回来。</p>
+</details>
+<h3 id="st73-kalman-q">ST73 · 一维 Kalman 的增益和更新公式？过程噪声 Q 起什么作用？</h3>
+<p>来源：<a href="lessons/20-state-estimation.html">第 20 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>预测 P⁻ = P + Q；K = P⁻/(P⁻ + R)；m ← m + K(z − m)；P ← (1 − K)P⁻。K 是“信测量的比例”。</p>
+<p>例（先验 N(0, 1)、R = 0.25、测量 1.2）：K = 0.8，m = 0.96，P = 0.2；5 次测量后 m = 0.952（先验把估计往 0 拉了一点），P = 0.048。</p>
+<p>Q = 0 时 K 一路变小，越来越不信新测量；Q &gt; 0 让 K 收敛到稳态（Q = 0.01 → 0.181，Q = 0.1 → 0.463），状态会变时才跟得上。</p>
+<p>口诀：增益是信测量的比例，Q 定稳态。</p>
+</details>
+<h3 id="st74-ekfeskfukf">ST74 · EKF、ESKF、UKF 分别怎么处理非线性？</h3>
+<p>来源：<a href="lessons/20-state-estimation.html">第 20 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>EKF：在当前估计 m 处求测量函数的雅可比 H，代进 Kalman 公式，K = PHᵀ/(HPHᵀ + R)，m ← m + K(z − h(m))。</p>
+<p>ESKF：姿态在 SO(3) 上不能直接加，于是把切空间里的误差 δ 当状态，用 KF 估 δ，再 R ⊕ δ 注入回名义状态（VIO、无人机常用）。</p>
+<p>UKF：不线性化，挑 2n + 1 个 sigma 点推过非线性函数，用它们的均值、方差近似；非线性强时比 EKF 准。</p>
+<p>口诀：EKF 贴直尺，ESKF 在切空间估误差，UKF 撒 sigma 点。</p>
+</details>
+<h3 id="st75">ST75 · 粒子滤波的三步是什么？有效样本数怎么算？因子图和滤波有什么不同？</h3>
+<p>来源：<a href="lessons/20-state-estimation.html">第 20 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>粒子滤波：① 每个粒子按运动模型走一步；② 按似然加权 <span class="arithmatex">\(w_i \propto p(z\mid x_i)\)</span>；③ <span class="arithmatex">\(\text{ESS} = 1/\sum w_i^2\)</span> 太小时按权重重采样。能表示多峰分布，代价是粒子要多。</p>
+<p>因子图：不一步步往前推，而是把所有位姿和测量一起放进优化，高斯噪声下最大后验 = 加权非线性最小二乘（高斯-牛顿 / LM）。回环让累积误差摊回每一条边。</p>
+<p>口诀：粒子靠淘汰和分身；因子图把所有观测摊在桌上一起拼。</p>
+</details>
+<h3 id="st76">ST76 · 怎么判断线性系统稳不稳？连续时间和离散时间的条件有什么不同？</h3>
+<p>来源：<a href="lessons/21-dynamics-control.html">第 21 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>在平衡点把非线性系统线性化成 ẋ = Ax，看 A 的特征值：连续时间所有特征值实部 &lt; 0 才稳；离散时间 x_{k+1} = A_d x_k 所有特征值的模 &lt; 1 才稳（解是 e^{λt} 或 λᵏ 的组合）。</p>
+<p>例：单摆下垂点特征值 ±3.132i（来回摆）；倒立点 3.132、−3.132（不稳），dt = 0.1 离散化后模 1.368、0.731。</p>
+<p>口诀：连续看实部，离散看模长。</p>
+</details>
+<h3 id="st77-zoh">ST77 · ZOH 离散化的公式是什么？和欧拉法差在哪？</h3>
+<p>来源：<a href="lessons/21-dynamics-control.html">第 21 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>控制量在一个周期里保持不变（零阶保持），精确积分：<span class="arithmatex">\(A_d = e^{A\,dt}\)</span>，<span class="arithmatex">\(B_d = \int_0^{dt}e^{As}ds\cdot B\)</span>。</p>
+<p>双积分器、dt = 0.1：A_d = [[1, 0.1], [0, 1]]，B_d = [0.005, 0.1] = [dt²/2, dt]。欧拉法 I + A·dt、B·dt 给出 B_d = [0, 0.1]，漏掉了 dt²/2 那一项。</p>
+<p>口诀：ZOH 精确，欧拉只是一阶近似。</p>
+</details>
+<h3 id="st78-lqr-r-bellman">ST78 · LQR 的目标、解法和 R 的作用？它和 Bellman 方程什么关系？</h3>
+<p>来源：<a href="lessons/21-dynamics-control.html">第 21 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>最小化 Σ xᵀQx + uᵀRu，最优控制是线性反馈 u = −Kx，<span class="arithmatex">\(K = (R + B_d^\top PB_d)^{-1}B_d^\top PA_d\)</span>，P 是离散代数 Riccati 方程的解。</p>
+<p>R 越小控制越便宜、越激进：双积分器 Q = I 时，R = 1 → K = [0.917, 1.636]；R = 0.01 → K = [5.894, 6.821]，收敛快、第一步出力 −5.9。</p>
+<p>xᵀPx 就是“从 x 出发以后都最优的总代价”，即连续状态、二次代价下的值函数；Riccati 递推和 Bellman 方程是同一个“现在的值 = 这一步的代价 + 下一步的值”。</p>
+<p>口诀：Q 管偏差 R 管力，P 是二次型的值函数。</p>
+</details>
+<h2 id="mdp">数值计算与 MDP</h2>
+<h3 id="st79-ode">ST79 · ODE 积分器的“阶”是什么意思？和扩散采样的步数有什么关系？</h3>
+<p>来源：<a href="lessons/22-numerics.html">第 22 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>p 阶方法的全局误差 ∝ hᵖ（h = 步长），步数翻倍误差除以 2ᵖ：Euler 1 阶、Heun 2 阶、RK4 4 阶。x′ = cos(t)x 积到 1，10 步误差：3.15e-2 / 4.01e-3 / 9.67e-7。</p>
+<p>扩散 / flow 的采样就是解 ODE，每“看一次斜率”就是调一次网络（NFE）。比较采样器要按调用次数比：RK4 每步调 4 次，5 步 RK4（1.55e-5）对 20 步 Euler（1.56e-2）。</p>
+<p>口诀：翻倍步数误差除二的 p 次方，按网络调用次数比。</p>
+</details>
+<h3 id="st80-softmax-logsumexp">ST80 · softmax / logsumexp 的稳定写法是什么？为什么结果不变？</h3>
+<p>来源：<a href="lessons/22-numerics.html">第 22 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\text{softmax}(z)_i = e^{z_i - \max z}/\sum_j e^{z_j - \max z}\)</span>，<span class="arithmatex">\(\log\sum e^z = \max z + \log\sum e^{z - \max z}\)</span>。分子分母同乘 e^{−max} 约掉，结果不变；最大的指数变成 e⁰ = 1，不会上溢。</p>
+<p>例：softmax([1000, 1001, 1002]) 直接算是 nan，稳定写法 [0.090, 0.245, 0.665]；logsumexp = 1002.4076。PyTorch 用 F.log_softmax，不要写 log(softmax)。</p>
+<p>口诀：先减最大值，结果不变不上溢。</p>
+</details>
+<h3 id="st81-fp16bf16fp32">ST81 · fp16、bf16、fp32 各有几位指数和尾数？混合精度的原则是什么？</h3>
+<p>来源：<a href="lessons/22-numerics.html">第 22 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>指数</th>
+<th>尾数</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fp16</td>
+<td>5</td>
+<td>10</td>
+<td>最大 65504，范围小，要 loss scaling</td>
+</tr>
+<tr>
+<td>bf16</td>
+<td>8</td>
+<td>7</td>
+<td>范围和 fp32 一样，精度更低</td>
+</tr>
+<tr>
+<td>fp32</td>
+<td>8</td>
+<td>23</td>
+<td>约 7 位有效数字</td>
+</tr>
+</tbody>
+</table>
+<p>大数加一个小于“最后一位一半”的小数会被吞掉：0.0001 加一万次，fp32 得 1.000054，fp16 卡在 0.25，bf16 卡在 0.03125。</p>
+<p>原则：矩阵乘用 bf16 / fp16，累加器、优化器状态、主权重留在 fp32。</p>
+<p>口诀：半精度加小数会被吞，累加留 fp32。</p>
+</details>
+<h3 id="st82">ST82 · 什么是相减相消？什么是病态问题？各怎么办？</h3>
+<p>来源：<a href="lessons/22-numerics.html">第 22 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>相减相消：两个几乎相等的数相减，相同的有效数字抵消，只剩舍入误差。x = 1e-8 时 1 − cos x 直接算是 0，改写成 2sin²(x/2) 得 5e-17。办法：换成不做相减的等价写法（log1p、expm1）。</p>
+<p>病态问题：问题本身对输入敏感，看条件数 κ；和算法无关。Hilbert 矩阵 12×12 的 κ ≈ 1.6e16，接近 1/机器精度，float64 解出来没有正确的位。办法只能改问题（正则化、重新参数化、提高精度）。</p>
+<p>口诀：相近数别相减；病态问题算法救不了。</p>
+</details>
+<h3 id="st83-bellman">ST83 · Bellman 期望方程是什么？固定策略的值函数怎么直接解？</h3>
+<p>来源：<a href="lessons/23-mdp-bellman.html">第 23 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(V^\pi = r_\pi + \gamma P_\pi V^\pi\)</span>，是线性方程组，解是 <span class="arithmatex">\(V^\pi = (I - \gamma P_\pi)^{-1}r_\pi\)</span>（γ &lt; 1 时 I − γP 可逆，等于 ΣγᵏPᵏ）。</p>
+<p>例（3 状态链、γ = 0.9，到 2 后每步 +1）：一直停 V = [0, 0, 10]；一直走 V = [6.2, 8, 10]（V(2) = 1/(1 − γ)，V(1) = −1 + 0.9 × 10）。</p>
+<p>口诀：存折价值 = 本月利息 + 打折的下月。</p>
+</details>
+<h3 id="st84-v">ST84 · 为什么值迭代一定收敛到唯一的 V*？</h3>
+<p>来源：<a href="lessons/23-mdp-bellman.html">第 23 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Bellman 最优算子 <span class="arithmatex">\((TV)(s) = \max_a[R(s, a) + \gamma\sum_{s'}P(s'\mid s, a)V(s')]\)</span> 在无穷范数下是 γ-压缩：<span class="arithmatex">\(\|TV - TU\|_\infty \le \gamma\|V - U\|_\infty\)</span>（max 的差不超过里面差的最大值）。</p>
+<p>由压缩映射定理（Banach 不动点）：不动点唯一，从任何 V₀ 出发 <span class="arithmatex">\(\|V_k - V^*\|_\infty \le \gamma^k\|V_0 - V^*\|_\infty\)</span>。本章例子里相邻两次的差正好 1, 0.9, 0.81, …；随机 1000 对 V、U 的最大比值 0.9000。</p>
+<p>口诀：算子是 γ 压缩，不动点唯一，从哪出发都收敛。</p>
+</details>
+<h3 id="st85-1">ST85 · 值迭代要多少次？γ 越接近 1 为什么越慢？策略迭代为什么几步就停？</h3>
+<p>来源：<a href="lessons/23-mdp-bellman.html">第 23 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>误差每次至少乘 γ：<span class="arithmatex">\(k \ge \log(\epsilon/\epsilon_0)/\log\gamma \approx \log(\epsilon_0/\epsilon)/(1 - \gamma)\)</span>。初始误差 10 降到 1e-6：γ = 0.9 要 153 次，γ = 0.99 要 1604 次。有效时域 1/(1 − γ) 越长，奖励要往回传的步数越多，每轮只传一步。</p>
+<p>策略迭代：精确评估（解线性方程）+ 贪心改进，策略个数有限且每轮不变差，有限步停下（本章 3 轮）；每轮贵、轮数少。值迭代每轮便宜、轮数多。</p>
+<p>口诀：次数约 log 除 1 减 γ；策略迭代评估加贪心，几轮就停。</p>
+</details>
 <hr />
-<h2 id="_11">已掌握</h2>
+<h2 id="_12">已掌握</h2>
 <p>（暂无）</p>
 </main>
 <footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a></footer>

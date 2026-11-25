@@ -2,7 +2,7 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 19 章 · 19 个动画（GIF + 可交互页面）· 47 张静态图 · 68 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 66 章大纲 · 已写 24 章 · 24 个动画（GIF + 可交互页面）· 57 张静态图 · 85 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
 > 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
 
 ## 这本书讲什么
@@ -57,11 +57,11 @@
 | 16 | [蒙特卡洛与采样](https://wikieden.github.io/math-and-eval-stats/lessons/16-monte-carlo-sampling.html) | MC 误差 ∝ 1/√N；重要性采样（PPO 比率、off-policy）；基线降方差；CEM、MPPI 加权 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/16-monte-carlo-sampling.gif) | ST63–ST65 | ✅ 讲解（练习待作答） |
 | 17 | [生成模型的数学](https://wikieden.github.io/math-and-eval-stats/lessons/17-generative-math.html) | 潜变量与 ELBO、重参数化、score、SDE / ODE 视角、连续性方程、flow matching 目标 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/17-generative-math.gif) | ST66–ST68 | ✅ 讲解（练习待作答） |
 | 18 | [3D 旋转与刚体变换](https://wikieden.github.io/math-and-eval-stats/lessons/18-rotations-rigid-transforms.html) | 旋转矩阵四性质；万向锁；Rodrigues；四元数半角与双覆盖；网络输出用 6D；SE(3) 求逆 | [欧拉角与万向锁](https://wikieden.github.io/math-and-eval-stats/animations/18-euler-gimbal-lock.gif) | ST23–ST26 | ✅ 讲解（练习待作答） |
-| 19 | 李群入门 | SO(3) / SE(3) 的 exp / log、切空间扰动、左右雅可比、SLERP 与旋转平均 | — | — | ⬜ |
-| 20 | 状态估计 | 预测 + 更新两步；Kalman 增益；EKF / ESKF；UKF 与粒子滤波各适合什么；因子图 = 非线性最小二乘 | — | — | ⬜ |
-| 21 | 动力系统与控制的数学 | 状态空间、线性化、ZOH 离散化、特征值判稳定、Riccati 与 LQR、Bellman 是不动点方程 | — | — | ⬜ |
-| 22 | 数值计算 | Euler / Heun / RK4 与扩散采样步数；logsumexp；float16 / bfloat16；病态问题 | — | — | ⬜ |
-| 23 | MDP 与 Bellman 的完整推导 | 值函数、Bellman 期望 / 最优方程、压缩映射与值迭代收敛 | — | — | ⬜ |
+| 19 | [李群入门](https://wikieden.github.io/math-and-eval-stats/lessons/19-lie-groups.html) | SO(3) / SE(3) 的 exp / log、切空间扰动、左右雅可比、SLERP 与旋转平均 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/19-lie-groups.gif) | ST69–ST71 | ✅ 讲解（练习待作答） |
+| 20 | [状态估计](https://wikieden.github.io/math-and-eval-stats/lessons/20-state-estimation.html) | 预测 + 更新两步；Kalman 增益；EKF / ESKF；UKF 与粒子滤波各适合什么；因子图 = 非线性最小二乘 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/20-state-estimation.gif) | ST72–ST75 | ✅ 讲解（练习待作答） |
+| 21 | [动力系统与控制的数学](https://wikieden.github.io/math-and-eval-stats/lessons/21-dynamics-control.html) | 状态空间、线性化、ZOH 离散化、特征值判稳定、Riccati 与 LQR、Bellman 是不动点方程 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/21-dynamics-control.gif) | ST76–ST78 | ✅ 讲解（练习待作答） |
+| 22 | [数值计算](https://wikieden.github.io/math-and-eval-stats/lessons/22-numerics.html) | Euler / Heun / RK4 与扩散采样步数；logsumexp；float16 / bfloat16；病态问题 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/22-numerics.gif) | ST79–ST82 | ✅ 讲解（练习待作答） |
+| 23 | [MDP 与 Bellman 的完整推导](https://wikieden.github.io/math-and-eval-stats/lessons/23-mdp-bellman.html) | 值函数、Bellman 期望 / 最优方程、压缩映射与值迭代收敛 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/23-mdp-bellman.gif) | ST83–ST85 | ✅ 讲解（练习待作答） |
 | 24 | [策略梯度推导](https://wikieden.github.io/math-and-eval-stats/lessons/24-policy-gradient.html) | 似然比搬梯度；环境项消失；基线不偏降方差；PPO 只截得利侧；GRPO 组内归一化 | [REINFORCE 与基线](https://wikieden.github.io/math-and-eval-stats/animations/24-reinforce-baseline.gif) | ST27–ST30 | ✅ 讲解（练习待作答） |
 | 25 | LQR 与 Riccati | 动态规划推 Riccati、有限 / 无限时域、可控性 | — | — | ⬜ |
 | 26 | 轨迹优化与 MPC | 线性化后写成 QP（稠密 / 稀疏形式）、iLQR 的二阶展开与回传、MPPI 的路径积分推导 | — | — | ⬜ |

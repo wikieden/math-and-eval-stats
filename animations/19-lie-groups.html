@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>李群入门</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 19 章 · 旋转的组合不对易；SLERP 在流形上匀速走</h1>
+<p class="sub">配套讲义：<a href="../lessons/19-lie-groups.html">第 19 章 · 李群入门：在旋转上做加法、求导和插值</a>。坐标系的红、绿、蓝箭头是旋转矩阵 R 的三列（物体自己的 x、y、z 轴）。组合：左边先绕 z 转 90° 再绕（转过后的）x 转 90°，右边顺序相反。插值：R₀ = I，R₁ = 绕 z 转 90°。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">组合不对易</option><option value="1">SLERP vs 线性插值</option></select><label for="s">进度 s</label><input type="range" id="s" min="0" max="1" step="0.05" value="0"><span id="sv">0</span></div>
+<p class="note">看点：① 组合：两边转的都是“90° 绕 z、90° 绕 x”，只换了顺序，最后的朝向不一样；② SLERP：坐标轴长度不变、互相垂直，匀速转过去；③ 线性插值：s = 0.5 时轴变短、行列式只有 0.5，已经不是旋转矩阵。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+function rot(ax,a){const c=Math.cos(a),s=Math.sin(a),[x,y,z]=ax,C1=1-c;return[[c+x*x*C1,x*y*C1-z*s,x*z*C1+y*s],[y*x*C1+z*s,c+y*y*C1,y*z*C1-x*s],[z*x*C1-y*s,z*y*C1+x*s,c+z*z*C1]]}
+const mm=(A,B)=>A.map((r,i)=>B[0].map((_,j)=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+const det3=M=>M[0][0]*(M[1][1]*M[2][2]-M[1][2]*M[2][1])-M[0][1]*(M[1][0]*M[2][2]-M[1][2]*M[2][0])+M[0][2]*(M[1][0]*M[2][1]-M[1][1]*M[2][0]);
+const prj=(cx,cy,v,sc)=>[cx+sc*(v[0]-v[1])*0.87,cy+sc*(-v[2]+(v[0]+v[1])*0.5)];
+function axes3(M,cx,cy,sc,lab){const o=[cx,cy];[[0,0,0]].forEach(()=>{});const cols=['var(--bad)','var(--good)','var(--accent)'],nm=['x','y','z'];
+ [0,1,2].forEach(j=>{const v=[M[0][j],M[1][j],M[2][j]],q=prj(cx,cy,v,sc);AR(o[0],o[1],q[0],q[1],cols[j],2.6);T(nm[j],q[0]+5,q[1]-4,'start','s')});C(cx,cy,3,'var(--text)',1);if(lab)T(lab,cx,cy+sc+40,'middle','s')}
+const IDS=['md','s'],F=[[0,0],[0,0.25],[0,0.5],[0,0.75],[0,1],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1]];
+const Z=[0,0,1],X=[1,0,0],H=Math.PI/2;
+function render(md,s){if(md==0){const a=H*Math.min(2*s,1),b=H*Math.max(2*s-1,0);const L1=mm(rot(Z,a),rot(X,b)),R1=mm(rot(X,a),rot(Z,b));
+ cap(s<0.5?`第一次转：左边绕 z、右边绕 x，已转 ${(a*180/Math.PI).toFixed(0)}°`:`第二次转：左边绕 x、右边绕 z，已转 ${(b*180/Math.PI).toFixed(0)}°`);
+ axes3(L1,180,190,90,'Exp(φ_z)·Exp(φ_x)');axes3(R1,500,190,90,'Exp(φ_x)·Exp(φ_z)');if(s>=1)T('朝向不同：旋转的组合不对易',340,345,'middle','s')}
+ else{const S1=rot(Z,H*s),R1=rot(Z,H),Lp=[0,1,2].map(i=>[0,1,2].map(j=>(1-s)*(i==j)+s*R1[i][j]));const n0=Math.hypot(Lp[0][0],Lp[1][0],Lp[2][0]);
+ cap(`s = ${(+s).toFixed(2)}：SLERP 转角 ${(90*s).toFixed(0)}°、det = 1；线性插值 det = ${det3(Lp).toFixed(3)}，x 轴长度 ${n0.toFixed(3)}`);
+ axes3(S1,180,190,90,'SLERP：R₀·Exp(s·Log(R₀ᵀR₁))');axes3(Lp,500,190,90,'线性插值：(1 − s)R₀ + sR₁')}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>
