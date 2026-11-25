@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 50 章 · 解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html" class="cur"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="50-top-k-top-pbeam-search">第 50 章 · 解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</h1><div class="run"><a class="btn" href="../animations/50-decoding.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch50_decoding.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch50_decoding.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch50_decoding.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：模型给出下一个 token 的概率以后，怎么挑？温度、top-k、top-p 各在改什么？为什么每步选最大不等于整句最好？投机解码用小模型打草稿、大模型验收，为什么输出分布和只用大模型一模一样？一次打几个草稿最划算？怎么保证输出一定是合法的 JSON？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/49-quantization.html">第 49 章 量化的数学</a> · 下一章：<a href="../lessons/51-post-training.html">第 51 章 后训练的数学</a><br />
+对应原文：Fast Inference via Speculative Decoding（Leviathan 2022）<code>llm-full-stack/materials/text/papers/speculative-decoding-leviathan-2211.17192.txt</code>（接受率 β = 1 − D_LK(p, q)，定理 3.5 L195–L204；接受后重采的正确性与期望 token 数 §3）；Accelerating LLM Decoding with Speculative Sampling（Chen 2023）<code>llm-full-stack/materials/text/papers/speculative-sampling-chen-2302.01318.txt</code>；Medusa <code>llm-full-stack/materials/text/papers/medusa-2401.10774.txt</code>；EAGLE-3 <code>llm-full-stack/materials/text/papers/eagle3-2503.01840.txt</code><br />
+本章缩写：T = temperature（温度）；top-k = 只保留概率最大的 k 个；top-p（nucleus）= 只保留累计概率达到 p 的最小集合；beam = 束搜索保留的候选数；p = 目标（大）模型的分布；q = 草稿（小）模型的分布；α = 接受率；γ = 一次提议的草稿 token 数。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：温度：把分布变尖或变平（2026-11-25）</h3>
+<div class="arithmatex">\[p_i(T) = \frac{e^{z_i/T}}{\sum_je^{z_j/T}}\]</div>
+<p>T &lt; 1 更尖（更确定），T &gt; 1 更平（更多样），T → 0 就是贪心（argmax）。</p>
+<p><strong>例子</strong>（6 个 token 的 logits [2, 1.5, 1, 0, −1, −2]）：</p>
+<table>
+<thead>
+<tr>
+<th>T</th>
+<th>分布</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.5</td>
+<td>[0.656, 0.241, 0.089, 0.012, 0.002, 0.000]</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>[0.459, 0.278, 0.169, 0.062, 0.023, 0.008]</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>[0.321, 0.250, 0.195, 0.118, 0.072, 0.043]</td>
+</tr>
+</tbody>
+</table>
+<p>温度和第 37 章注意力的 √d、第 34 章的“熵”是同一回事：除以 T 就是把 logits 缩放。</p>
+<p><strong>一句话</strong>：温度把 logits 除以 T：小于 1 变尖、大于 1 变平、趋于 0 就是贪心。</p>
+<h3 id="top-k-top-p2026-11-25">第二步：top-k 与 top-p：截掉长尾（2026-11-25）</h3>
+<p>一个词表有十几万个 token，长尾里每个概率都很小，但加起来不小；随便采到一个就可能出离谱的词。</p>
+<ul>
+<li><strong>top-k</strong>：只留最大的 k 个，重新归一化；</li>
+<li><strong>top-p</strong>（nucleus）：按概率从大到小累加，留下累计刚到 p 的最小集合，重新归一化。</li>
+</ul>
+<p><strong>例子</strong>（T = 1 的分布）：</p>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>top-k = 2</td>
+<td>[0.622, 0.378, 0, 0, 0, 0]</td>
+</tr>
+<tr>
+<td>top-p = 0.8</td>
+<td>[0.506, 0.307, 0.186, 0, 0, 0]</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="top-k 与 top-p 保留的集合" src="../figures/50-decoding-topp.png" />
+<em>图 50-1 · 同一个分布：灰框是原概率；蓝色是 top-p = 0.8 保留并重新归一化后的概率（3 个），橙虚线是 top-k = 2 的边界</em></p>
+<p>top-p 的好处是自适应：模型很确定时（一个 token 占 0.95）只留 1 个，不确定时留很多；top-k 不管分布形状总是 k 个。实践中常组合：温度 → top-k → top-p，再加 min-p（低于最大概率某个比例的都截掉）。</p>
+<p><strong>一句话</strong>：top-k 留固定个数，top-p 留累计概率够 p 的最小集合（随分布自适应）；都要重新归一化。</p>
+<h3 id="beam-search2026-11-25">第三步：贪心不一定得到概率最大的整句：beam search（2026-11-25）</h3>
+<p><strong>例子</strong>（两步的小树：第一步 A 0.6 / B 0.4；A 之后 x 0.4、y 0.3、z 0.3；B 之后 x 0.9、y 0.1）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>结果</th>
+<th>整句概率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>贪心（每步选最大）</td>
+<td>A → x</td>
+<td>0.6 × 0.4 = 0.24</td>
+</tr>
+<tr>
+<td>beam 宽 2（保留两个前缀）</td>
+<td>B → x</td>
+<td>0.4 × 0.9 = 0.36</td>
+</tr>
+</tbody>
+</table>
+<p>第一步选 A 看起来最好，但 A 之后的分布很分散；B 之后几乎确定。beam search 保留 b 个最好的前缀，每步扩展再留 b 个。</p>
+<p>beam search 适合有标准答案的任务（翻译、语音识别）；开放式生成时概率最大的句子往往重复、乏味，所以聊天模型用采样。</p>
+<p><strong>一句话</strong>：每步最大 ≠ 整句最大；beam search 保留多个前缀按整句概率比，适合有标准答案的任务。</p>
+<h3 id="2026-11-25_1">第四步：投机解码：草稿 + 验收，输出分布不变（2026-11-25）</h3>
+<p>decode 是带宽受限的（第 47 章）：大模型一次前向处理 1 个 token 和处理 5 个 token 几乎一样慢。于是让小模型 q 先连续猜 γ 个，大模型一次前向并行验收：</p>
+<ol>
+<li>草稿 x ~ q，以概率 min(1, p(x)/q(x)) 接受；</li>
+<li>拒绝时从 norm(max(0, p − q)) 重采一个，后面的草稿作废。</li>
+</ol>
+<p><strong>为什么分布不变</strong>：输出 x 的概率 = q(x)·min(1, p(x)/q(x)) + (1 − α)·norm(max(0, p − q))(x) = min(p, q)(x) + max(0, p − q)(x) = p(x)，其中 α = Σmin(p, q) 是接受率（Leviathan 定理 3.5，L195–L204）。</p>
+<p><strong>例子</strong>（p 是上面 T = 1 的分布，q 是另一个分布）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>分布</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>目标 p</td>
+<td>[0.4592, 0.2785, 0.1689, 0.0621, 0.0229, 0.0084]</td>
+</tr>
+<tr>
+<td>草稿 q</td>
+<td>[0.2938, 0.4844, 0.1081, 0.0656, 0.0241, 0.0241]</td>
+</tr>
+<tr>
+<td>接受—重采后</td>
+<td>[0.4592, 0.2785, 0.1689, 0.0621, 0.0229, 0.0084]（和 p 最大差 5.6 × 10⁻¹⁷）</td>
+</tr>
+</tbody>
+</table>
+<p>接受率 α = 0.7738。每个草稿独立以概率 α 被接受时，一次大模型前向期望产出</p>
+<div class="arithmatex">\[\frac{1 - \alpha^{\gamma+1}}{1 - \alpha}\ \text{个 token}\]</div>
+<table>
+<thead>
+<tr>
+<th>γ</th>
+<th>1</th>
+<th>4</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>期望 token 数</td>
+<td>1.77</td>
+<td>3.19</td>
+<td>3.98</td>
+</tr>
+</tbody>
+</table>
+<p>γ 越大收益递减（后面的草稿很可能已经被前面的拒绝作废），而草稿模型的开销线性增长，所以 γ 一般取 3–8。Medusa 在大模型上加几个预测后续 token 的头代替小模型，EAGLE 用大模型的特征训一个轻量草稿头。</p>
+<p><img alt="投机解码：接受部分与重采部分" src="../figures/50-decoding-speculative.png" />
+<em>图 50-2 · 每个 token 的 p（灰框）和 q（蓝柱）；min(p, q)（深蓝）是接受得到的部分，max(0, p − q)（橙）是拒绝后重采补上的部分，两者叠起来正好等于 p</em></p>
+<p><strong>一句话</strong>：投机解码按 min(1, p/q) 接受、按 (p − q)⁺ 重采，输出分布精确等于 p；每次大模型前向期望得到 (1 − α^{γ+1})/(1 − α) 个 token。</p>
+<h3 id="token-2026-11-25">第五步：约束解码：不合法的 token 直接置零（2026-11-25）</h3>
+<p>要输出合法的 JSON、只从给定选项里选，就在每一步把不允许的 token 的 logit 设成 −∞（概率置 0），再归一化。允许哪些 token 由一个状态机或文法决定（比如 JSON 里刚写完 <code>"key"</code> 后只允许 <code>:</code>）。</p>
+<p><strong>例子</strong>（只允许 token 2、3、4）：[0, 0, 0.665, 0.245, 0.090, 0]。</p>
+<p>注意：这改变了分布（只在合法集合里按原比例重新归一化），可能让模型被迫走进它本来不会去的路径，质量会受影响；好的做法是让提示词本身也引导模型往合法格式走。</p>
+<p><strong>场景代码</strong>：Hugging Face 的采样参数（真实参数名；本书环境没装 transformers，没跑过）：</p>
+<pre><code class="language-python">out = model.generate(**inputs, do_sample=True, temperature=0.7, top_k=50, top_p=0.9,
+                     assistant_model=draft_model)          # 传入草稿模型就启用投机解码
+</code></pre>
+<p><strong>一句话</strong>：约束解码每步把非法 token 置零再归一化，保证格式合法，但会改变分布。</p>
+<h3 id="_2">动画演示：投机解码的接受与重采</h3>
+<p><img alt="解码与采样" src="../animations/50-decoding.gif" /></p>
+<p>可交互版：<a href="../animations/50-decoding.html">animations/50-decoding.html</a>（下拉切换“温度 / top-p / 投机解码”；滑块调参数）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>温度：6 根柱子随 T 变尖或变平（第一步）；</li>
+<li>top-p：从最高的柱子开始累加，阴影部分是保留的集合，其余变灰（第二步）；</li>
+<li>投机解码：滑块调草稿分布和目标分布的差距，深蓝是接受部分、橙色是重采部分，叠起来始终等于灰框 p；右上角是 α 和 γ = 4 时的期望 token 数（第四步）。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步）：分布 [0.5, 0.2, 0.15, 0.1, 0.05]，top-p = 0.7 保留哪几个？归一化后是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第四步）：p = [0.6, 0.4]、q = [0.3, 0.7]，接受率 α 是多少？草稿是第 2 个 token 时被接受的概率是多少？被拒后重采的分布是什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：α = 0.6，γ = 3 时每次大模型前向期望得到几个 token？γ 从 3 加到 6 能多得多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>温度除 logits，小尖大平零贪心；<br />
+top-k 留个数，top-p 留够概率、随分布伸缩；<br />
+每步最大不等于整句最大，beam 保留多个前缀；<br />
+投机解码 min(1, p/q) 接受、(p−q)⁺ 重采，分布不变；<br />
+期望 token 数 (1 − α^{γ+1})/(1 − α)；约束解码非法置零。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST164（温度、top-k、top-p；贪心 vs beam）、ST165（投机解码为什么不改变分布）、ST166（接受率与期望 token 数；约束解码）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Leviathan 2022</td>
+<td>§3（定理 3.5 L195–L204、期望 token 数）</td>
+<td>投机解码的正确性与加速分析</td>
+</tr>
+<tr>
+<td>★ Chen 2023</td>
+<td>算法 2</td>
+<td>同一方法的另一种推导</td>
+</tr>
+<tr>
+<td>Medusa（Cai 2024）</td>
+<td>§2</td>
+<td>多头草稿与树形验收</td>
+</tr>
+<tr>
+<td>EAGLE-3（Li 2025）</td>
+<td>§3</td>
+<td>特征级草稿模型</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/48-speculative.html">《从约束推导 AI Infra》第 48 章 投机解码</a></td>
+<td>全章</td>
+<td>系统视角</td>
+</tr>
+<tr>
+<td><a href="../lessons/16-monte-carlo-sampling.html">第 16 章 蒙特卡洛与采样</a></td>
+<td>全章</td>
+<td>拒绝采样、重要性采样</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>拒绝采样的正确性</strong>：P(输出 x) = q(x)min(1, p/q) + P(拒绝)·r(x)；取 r = (p − q)⁺/(1 − α) 时恰好等于 p(x)。</li>
+<li><strong>α = Σmin(p, q) = 1 − TV(p, q)</strong>：两个分布越接近（总变差距离越小），接受率越高。</li>
+<li><strong>期望 token 数</strong>：接受的草稿数服从截断几何分布，加上最后大模型自己采的 1 个，期望 Σ_{i=0}^{γ}α^i。</li>
+<li><strong>top-p 的集合</strong>：按概率降序取前缀，满足 Σ ≥ p 的最短前缀。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(p_i(T) = e^{z_i/T}/\sum e^{z_j/T}\)</span></td>
+<td>温度</td>
+</tr>
+<tr>
+<td>接受概率 min(1, p(x)/q(x))</td>
+<td>投机解码验收</td>
+</tr>
+<tr>
+<td>重采分布 <span class="arithmatex">\((p - q)^+/\sum(p - q)^+\)</span></td>
+<td>拒绝后</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\alpha = \sum\min(p, q)\)</span></td>
+<td>接受率</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((1 - \alpha^{\gamma+1})/(1 - \alpha)\)</span></td>
+<td>每次前向的期望 token 数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch50_decoding.py</code>，配套测试 <code>tests/test_ch50.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch50_decoding.py  
+uv run pytest tests/test_ch50.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 温度</td>
+<td>z/T</td>
+<td><code>softmax(LOGITS / t)</code></td>
+<td>T = 0.5：0.656 …</td>
+</tr>
+<tr>
+<td>第二步 top-k / top-p</td>
+<td>截断</td>
+<td><code>top_k(p, 2)</code>、<code>top_p(p, 0.8)</code></td>
+<td>留 2 个 / 3 个</td>
+</tr>
+<tr>
+<td>第三步 beam</td>
+<td>整句概率</td>
+<td><code>greedy_vs_best()</code></td>
+<td>0.24 vs 0.36</td>
+</tr>
+<tr>
+<td>第四步 投机解码</td>
+<td>解析输出分布</td>
+<td><code>speculative_output(p, q)</code></td>
+<td>等于 p，α = 0.7738</td>
+</tr>
+<tr>
+<td>第四步 期望 token</td>
+<td>几何级数</td>
+<td><code>expected_tokens(alpha, 4)</code></td>
+<td>3.19</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">keep = order[: int(np.searchsorted(np.cumsum(p[order]), thr) + 1)]   # top-p：最短前缀
+acc = np.minimum(p, q); resid = np.maximum(p - q, 0)                 # 接受部分、重采部分
+return acc + (1 - alpha) * resid / resid.sum(), float(alpha)         # 输出分布 = p
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>投机解码的分布是解析算的</strong>：直接按公式把接受部分和重采部分加起来，没有做采样；用 10 万次采样实测输出分布不变，留给自己做（里程碑 ME-M30）。</li>
+<li><strong>期望 token 数假设每个草稿独立以 α 接受</strong>：实际接受率和位置、上下文有关，前面的草稿通常更容易被接受。</li>
+<li><strong>top-p 用 <code>searchsorted</code></strong>：找累计和第一次 ≥ p 的位置，再 +1 得到保留的个数。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 q 改得离 p 更远（比如均匀分布），α 和 γ = 4 的期望 token 数变成多少？</li>
+<li>给 <code>greedy_vs_best</code> 的树再加一层，构造一个 beam 宽 2 也找不到最优整句的例子。</li>
+</ol><nav class="pager"><a href="49-quantization.html">← 第 49 章 · 量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="51-post-training.html">第 51 章 · 后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scaling law</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 41 章 · 拟合区间与外推</h1>
+<p class="sub">配套讲义：<a href="../lessons/41-scaling-law.html">第 41 章 · Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a>。真实规律 L = 2 + 30·C^{−0.1}（灰线）。从 10¹⁵ 到拟合上限之间取 8 个点（加 1% 噪声），假设一个不可约 loss E，拟合 log(L − E) = log a − b·log C，再外推到 10²²。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="e">假设的不可约 loss E</label><input type="range" id="e" min="0" max="2.3" step="0.1" value="2"><span id="ev">2</span><label for="cm">拟合上限 log₁₀ C</label><input type="range" id="cm" min="16" max="21" step="0.5" value="18"><span id="cmv">18</span></div>
+<p class="note">看点：① 左边：E 取 2.0 时点排成直线，取 0 或 2.3 时明显弯；② 右边：E 取对时外推（蓝）贴着灰线；E 取错时越往右偏得越远；③ 把拟合上限往右拉，外推距离变短，误差变小。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['e','cm'],F=[[2,18],[0,18],[1,18],[2.3,18],[2,20],[0,20]];
+const tl=c=>2+30*Math.pow(10,-0.1*c);
+function render(e,cm){seed(1);const lc=[],LL=[];for(let i=0;i<8;i++){const c=15+(cm-15)*i/7;lc.push(c);LL.push(tl(c)*(1+0.01*gauss()))}
+ const y=LL.map(v=>Math.log10(Math.max(v-e,1e-6)));const n=8,mx=lc.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;let sxy=0,sxx=0;for(let i=0;i<n;i++){sxy+=(lc[i]-mx)*(y[i]-my);sxx+=(lc[i]-mx)**2}const sl=sxy/sxx,ic=my-sl*mx;
+ const pred=c=>e+Math.pow(10,ic+sl*c);cap(`E = ${(+e).toFixed(1)}：拟合指数 b = ${(-sl).toFixed(4)}（真值 0.1）；外推到 10²²：${pred(22).toFixed(4)}（真值 ${tl(22).toFixed(4)}）`);
+ frame(40,50,280,260);const ylo=Math.min(...y)-0.05,yhi=Math.max(...y)+0.05;const M=PM(40,50,280,260,[15,cm],[ylo,yhi]);lc.forEach((c,i)=>{const q=M(c,y[i]);C(q[0],q[1],5,'var(--warm)',1)});P([M(15,ic+sl*15),M(cm,ic+sl*cm)],'var(--accent)',1.5,'5 4');T('log₁₀(L − E) 对 log₁₀ C',44,66,'start','s');
+ frame(360,50,280,260);const M2=PM(360,50,280,260,[15,22],[1.8,3.0]);const g=[],f=[];for(let i=0;i<=70;i++){const c=15+i/10;g.push(M2(c,tl(c)));f.push(CL(M2,360,50,280,260)(c,pred(c)))}P(g,'var(--muted)',3);P(f,'var(--accent)',2);
+ lc.forEach((c,i)=>{const q=M2(c,LL[i]);C(q[0],q[1],3.5,'var(--text)',1)});const yb=M2(15,2)[1];L(360,yb,640,yb,'var(--bad)',1,'4 3');T('外推（横轴 15→22）',364,66,'start','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

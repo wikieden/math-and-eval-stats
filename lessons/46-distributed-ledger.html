@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 46 章 · 分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html" class="cur"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="46-zero-all-reduce">第 46 章 · 分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</h1><div class="run"><a class="btn" href="../animations/46-distributed-ledger.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch46_distributed_ledger.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch46_distributed_ledger.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch46_distributed_ledger.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：训练一个 7B 模型，显存都花在哪？为什么说“每个参数 16 字节”？ZeRO 的三个阶段各省了什么？激活显存为什么随序列长度平方涨？数据并行同步梯度要传多少数据？流水线并行的“气泡”有多大？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/45-moe-math.html">第 45 章 MoE 的数学</a> · 下一章：<a href="../lessons/47-inference-cost.html">第 47 章 推理成本模型</a><br />
+对应原文：ZeRO <code>math-and-eval-stats/materials/text/papers/zero-1910.02054.txt</code>（混合精度 Adam 2Ψ + 2Ψ + KΨ = 16Ψ，K = 12，L311；7.5B、64 卡的例子 L108、L433）；Ultra-Scale Playbook <code>distributed-pretraining/materials/papers/ultrascale-playbook.pdf</code>（DP / TP / PP 通信量与气泡）；激活显存公式取自 Korthikanti 2022《Reducing Activation Recomputation in Large Transformer Models》式 (2)（本地未归档）<br />
+本章缩写：Ψ = 参数个数；DP = Data Parallelism（数据并行）；TP = Tensor Parallelism（张量并行）；PP = Pipeline Parallelism（流水线并行）；ZeRO = Zero Redundancy Optimizer（零冗余优化器）；N_d = 数据并行的卡数；s、b、h、a = 序列长度、micro-batch 大小、隐藏维度、头数；m = 微批数；p = 流水线级数。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="16-2026-11-25">第一步：模型状态：每个参数 16 字节（2026-11-25）</h3>
+<p><strong>类比：一本书要存三份：一份给人读的平装本（bf16 参数），一份修改记录（梯度），一份带详细批注的精装母本（fp32 主权重 + Adam 的 m、v）。</strong></p>
+<p>混合精度 Adam（ZeRO L311）：</p>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>精度</th>
+<th>字节 / 参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数</td>
+<td>bf16 / fp16</td>
+<td>2</td>
+</tr>
+<tr>
+<td>梯度</td>
+<td>bf16 / fp16</td>
+<td>2</td>
+</tr>
+<tr>
+<td>fp32 主权重</td>
+<td>fp32</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Adam 一阶矩 m</td>
+<td>fp32</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Adam 二阶矩 v</td>
+<td>fp32</td>
+<td>4</td>
+</tr>
+<tr>
+<td>合计</td>
+<td></td>
+<td><strong>16</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>：7.5B 参数 → 120 GB，还没算激活。一张 80 GB 的卡连模型状态都放不下，必须分片。</p>
+<p><strong>一句话</strong>：混合精度 Adam 每个参数 16 字节（2 参数 + 2 梯度 + 12 优化器状态），优化器状态占大头。</p>
+<h3 id="zero2026-11-25">第二步：ZeRO：把冗余的副本切开（2026-11-25）</h3>
+<p>数据并行时每张卡都存一整份模型状态，N_d 张卡就有 N_d 份完全相同的副本。ZeRO 把它们切成 N_d 份，每张卡只存自己那份：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>切分</th>
+<th>每卡</th>
+<th>7.5B、64 卡</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DP</td>
+<td>不切</td>
+<td>16Ψ</td>
+<td>120.0 GB</td>
+</tr>
+<tr>
+<td>ZeRO-1</td>
+<td>优化器状态</td>
+<td>4Ψ + 12Ψ/N_d</td>
+<td>31.4 GB</td>
+</tr>
+<tr>
+<td>ZeRO-2</td>
+<td>+ 梯度</td>
+<td>2Ψ + 14Ψ/N_d</td>
+<td>16.6 GB</td>
+</tr>
+<tr>
+<td>ZeRO-3（FSDP）</td>
+<td>+ 参数</td>
+<td>16Ψ/N_d</td>
+<td>1.9 GB</td>
+</tr>
+</tbody>
+</table>
+<p>（数字和 ZeRO 论文 L108、L433 一致）ZeRO-1、2 的通信量和普通数据并行一样（all-reduce 拆成 reduce-scatter + all-gather）；ZeRO-3 每层前向、反向都要先 all-gather 参数，通信量约为 1.5 倍。</p>
+<p><img alt="ZeRO 各阶段每卡显存" src="../figures/46-distributed-ledger-zero.png" />
+<em>图 46-1 · 7.5B 模型、64 卡：参数（蓝）、梯度（橙）、优化器状态（灰）在四种做法下每卡占的显存</em></p>
+<p><strong>一句话</strong>：ZeRO-1/2/3 依次切开优化器状态、梯度、参数；ZeRO-3 每卡只剩 16Ψ/N_d，代价是多一些参数通信。</p>
+<h3 id="2026-11-25">第三步：激活显存：随序列长度平方增长的那一项（2026-11-25）</h3>
+<p>反向传播要用到前向的中间结果。一层 Transformer（不重算、不做序列并行）的激活约</p>
+<div class="arithmatex">\[s\cdot b\cdot h\cdot\Big(34 + \frac{5as}{h}\Big)\ \text{字节}\]</div>
+<p>前一项是线性层、LayerNorm、dropout 等，随 s 线性；后一项是注意力的分数和概率矩阵（a 个头 × s × s），随 s 平方。张量并行 t 路时大部分除以 t：s·b·h·(10 + 24/t + 5as/(ht))。</p>
+<p><strong>例子</strong>（b = 1、h = 4096、32 个头，一层）：</p>
+<table>
+<thead>
+<tr>
+<th>s</th>
+<th>不切</th>
+<th>TP = 8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2048</td>
+<td>0.96 GB</td>
+<td>0.19 GB</td>
+</tr>
+<tr>
+<td>8192</td>
+<td>11.88 GB</td>
+<td>1.78 GB</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="一层激活显存随序列长度" src="../figures/46-distributed-ledger-activation.png" />
+<em>图 46-2 · 横轴序列长度，纵轴一层激活（GB）；灰色是线性项 34·sbh，橙色是注意力矩阵项 5as²b，长序列时橙色占绝大部分</em></p>
+<p>序列长 4 倍，激活涨 12 倍：注意力矩阵那一项占了大头。FlashAttention 不存注意力矩阵（第 48 章），这一项就没了；再加上选择性重算，长序列才放得下。</p>
+<p><strong>一句话</strong>：一层激活 ≈ sbh(34 + 5as/h) 字节，注意力矩阵那项随 s² 涨；FlashAttention、重算、张量 / 序列并行都是在砍它。</p>
+<h3 id="ring-all-reduce2026-11-25">第四步：通信：ring all-reduce（2026-11-25）</h3>
+<p>数据并行每步要把所有卡的梯度求和（all-reduce）。ring 算法：先 reduce-scatter 再 all-gather，每张卡发送</p>
+<div class="arithmatex">\[2\cdot\frac{N - 1}{N}\cdot M\ \text{字节}\]</div>
+<p>几乎和卡数无关（N 大时趋于 2M）。</p>
+<p><strong>例子</strong>（7B 模型、bf16 梯度 14 GB）：</p>
+<table>
+<thead>
+<tr>
+<th>卡数</th>
+<th>2</th>
+<th>8</th>
+<th>64</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每卡发送</td>
+<td>14.0 GB</td>
+<td>24.5 GB</td>
+<td>27.6 GB</td>
+</tr>
+</tbody>
+</table>
+<p>每卡 400 GB/s 的 NVLink 上约 0.07 秒；跨节点 50 GB/s 的网卡上约 0.55 秒：所以要和反向计算重叠（DDP 的 bucket）。张量并行每层前向、反向各要 2 次 all-reduce（激活大小），只能放在 NVLink 范围内。</p>
+<p><strong>一句话</strong>：ring all-reduce 每卡发送约 2M，几乎不随卡数增长；关键是带宽和能不能和计算重叠。</p>
+<h3 id="2026-11-25_1">第五步：流水线气泡（2026-11-25）</h3>
+<p><strong>类比：工厂流水线刚开工时，后面的工位要等前面的半成品，最后收工时前面的工位先闲下来。</strong></p>
+<p>p 级流水线、一个 batch 切成 m 个微批（GPipe / 1F1B）：</p>
+<div class="arithmatex">\[\text{气泡比例} = \frac{p - 1}{m + p - 1}\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>p</th>
+<th>m</th>
+<th>气泡</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>42.9%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>16</td>
+<td>15.8%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>64</td>
+<td>9.9%</td>
+</tr>
+</tbody>
+</table>
+<p>微批越多气泡越小，但每个微批变小会降低矩阵乘效率、1F1B 的激活显存也和 p 有关；交错流水线（每卡多个虚拟级）、零气泡调度（拆开反向的两部分）进一步压缩气泡。</p>
+<p><strong>场景代码</strong>：PyTorch FSDP2 就是 ZeRO-3（真实 API；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">from torch.distributed.fsdp import fully_shard
+for block in model.layers:
+    fully_shard(block)            # 每个 block 的参数、梯度、优化器状态按卡切分，用到时 all-gather
+fully_shard(model)
+</code></pre>
+<p><strong>一句话</strong>：流水线气泡 = (p − 1)/(m + p − 1)，靠多切微批、交错和零气泡调度压下来。</p>
+<h3 id="_2">动画演示：流水线调度与气泡</h3>
+<p><img alt="分布式训练账本" src="../animations/46-distributed-ledger.gif" /></p>
+<p>可交互版：<a href="../animations/46-distributed-ledger.html">animations/46-distributed-ledger.html</a>（滑块调流水线级数 p 和微批数 m）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>每一行是一个流水线级（一张卡），横轴是时间；蓝色格子是前向、橙色是反向，灰色是空闲（气泡）（第五步）；</li>
+<li>右上角是气泡比例 (p − 1)/(m + p − 1)；m 调大，灰色占比变小；p 调大，开头结尾的阶梯变长。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一、二步）：70B 参数的模型，混合精度 Adam，模型状态一共多少 GB？用 ZeRO-3 切到 256 张卡，每卡多少 GB？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：s = 4096、b = 2、h = 8192、64 个头，一层的激活显存是多少 GB（不切）？注意力矩阵那一项占多少比例？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：p = 16 级流水线，要让气泡低于 10%，至少要多少个微批？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>每个参数十六字节：二参二梯十二优化器；<br />
+ZeRO 一二三，依次切优化器、梯度、参数；<br />
+激活 sbh 乘 (34 + 5as/h)，长序列靠 Flash 和重算；<br />
+ring all-reduce 每卡约 2M；<br />
+气泡 (p−1)/(m+p−1)，微批多才小。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST151（混合精度 Adam 的 16 字节与 ZeRO 三阶段）、ST152（激活显存公式与 s² 项）、ST153（ring all-reduce 通信量与流水线气泡）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ ZeRO（Rajbhandari 2020）</td>
+<td>§3（L311）、§5（L433 起）</td>
+<td>模型状态的构成与三阶段分片</td>
+</tr>
+<tr>
+<td>★ Ultra-Scale Playbook（Hugging Face）</td>
+<td>DP、ZeRO、TP、PP 各章</td>
+<td>通信量公式、气泡、实际配置</td>
+</tr>
+<tr>
+<td>Korthikanti 2022（本地未归档）</td>
+<td>§4（式 (2)）</td>
+<td>激活显存公式、选择性重算</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/32-dp-tp-sp.html">《从约束推导 AI Infra》第 32 章 DP / TP / SP</a>、<a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/57-state-sharding.html">第 57 章 状态分片</a>、<a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/58-pipeline-overlap.html">第 58 章 流水线重叠</a></td>
+<td>全章</td>
+<td>系统视角</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/pytorch-inside-out/lessons/19-fsdp2.html">《PyTorch 从里到外》第 19 章 FSDP2</a></td>
+<td>全章</td>
+<td>ZeRO-3 的 PyTorch 实现</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>16Ψ</strong>：2（bf16 参数）+ 2（bf16 梯度）+ 4（fp32 主权重）+ 4（m）+ 4（v）。</li>
+<li><strong>ring all-reduce</strong>：N − 1 轮 reduce-scatter、N − 1 轮 all-gather，每轮发 M/N，共 2(N − 1)M/N，带宽最优。</li>
+<li><strong>气泡</strong>：前 p − 1 个时间片后面的级在等、最后 p − 1 个时间片前面的级在等；总时间 m + p − 1 个时间片里只有 m 个是满的。</li>
+<li><strong>激活的 s² 项</strong>：注意力分数 QKᵀ 和 softmax 输出各 a·s²·b 个元素（2 字节），加上 dropout mask（1 字节），合计 5as²b。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>16Ψ 字节</td>
+<td>混合精度 Adam 的模型状态</td>
+</tr>
+<tr>
+<td>4Ψ + 12Ψ/N_d、2Ψ + 14Ψ/N_d、16Ψ/N_d</td>
+<td>ZeRO-1/2/3 每卡</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(sbh(34 + 5as/h)\)</span></td>
+<td>一层激活</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(2(N - 1)M/N\)</span></td>
+<td>ring all-reduce 每卡发送量</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((p - 1)/(m + p - 1)\)</span></td>
+<td>流水线气泡</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch46_distributed_ledger.py</code>，配套测试 <code>tests/test_ch46.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch46_distributed_ledger.py  
+uv run pytest tests/test_ch46.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 16 字节</td>
+<td>16Ψ</td>
+<td><code>model_states(7.5e9, 1, 0)</code></td>
+<td>120 GB</td>
+</tr>
+<tr>
+<td>第二步 ZeRO</td>
+<td>三阶段</td>
+<td><code>model_states(7.5e9, 64, st)</code></td>
+<td>31.4、16.6、1.9 GB</td>
+</tr>
+<tr>
+<td>第三步 激活</td>
+<td>sbh(34 + 5as/h)</td>
+<td><code>activation_bytes(8192, 1, 4096, 32)</code></td>
+<td>11.88 GB</td>
+</tr>
+<tr>
+<td>第四步 all-reduce</td>
+<td>2(N−1)M/N</td>
+<td><code>ring_allreduce_bytes(14e9, 64)</code></td>
+<td>27.56 GB</td>
+</tr>
+<tr>
+<td>第五步 气泡</td>
+<td>(p−1)/(m+p−1)</td>
+<td><code>bubble(4, 16)</code></td>
+<td>15.8%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">p, g, o = 2 * psi, 2 * psi, 12 * psi            # 参数、梯度、优化器状态
+return s * b * h * (34 + 5 * a * s / h)         # 一层激活
+return (p - 1) / (m + p - 1)                    # 流水线气泡
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>GB 用的是 10⁹</strong>：为了和 ZeRO 论文的数字对上；显存条通常按 GiB（2³⁰）标，差 7%。</li>
+<li><strong>激活公式不含 embedding 和输出层</strong>：只是一层 Transformer block；完整模型要乘层数再加上首尾两层。</li>
+<li><strong>没有做成计算器</strong>：把参数、ZeRO 阶段、TP / PP 组合起来算每卡显存和通信量，并和 Playbook 的表对数，留给自己做（里程碑 ME-M28）。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>如果优化器换成 Lion（没有二阶矩 v），每个参数是多少字节？ZeRO-1 在 64 卡上每卡多少？</li>
+<li>把 <code>activation_bytes</code> 里注意力那一项去掉（相当于用了 FlashAttention），s = 8192 时还剩多少？</li>
+</ol><nav class="pager"><a href="45-moe-math.html">← 第 45 章 · MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="47-inference-cost.html">第 47 章 · 推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

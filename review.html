@@ -1219,6 +1219,315 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <p>记法：结果要和被求导的变量同形状，转置谁、放哪边由形状唯一决定；广播过的维度求和。用有限差分检查时误差约 1e-10。</p>
 <p>口诀：VJP 的形状和变量一样：g 乘 Wᵀ、xᵀ 乘 g、偏置求和。</p>
 </details>
+<h2 id="llm">LLM 训练与推理的数学</h2>
+<h3 id="st136-l-e-acb-loss">ST136 · 幂律 L = E + aC^{−b} 怎么拟合？为什么不能忘了不可约 loss？外推误差从哪来？</h3>
+<p>来源：<a href="lessons/41-scaling-law.html">第 41 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>先减去不可约项 E，log(L − E) 对 log C 才是直线，斜率 −b；实际 E 也要一起拟合。忘了减 E 时曲线在 log-log 上是弯的，硬拟直线会严重低估指数（例：真值 0.1 拟成 0.024），外推时甚至预测出低于 E 的 loss。</p>
+<p>外推放大的是指数误差：log L 的误差 ≈ Δb × 外推的数量级。1% 噪声让指数差 7%，外推 4 个数量级后误差约 0.02。</p>
+<p>口诀：幂律先减底，外推放大指数误差。</p>
+</details>
+<h3 id="st137-kaplan-chinchilla">ST137 · Kaplan 和 Chinchilla 对“固定算力下模型该多大”的结论有什么不同？为什么？</h3>
+<p>来源：<a href="lessons/41-scaling-law.html">第 41 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Kaplan 2020：N_opt ∝ C^0.73，算力主要给模型变大。Chinchilla：拟合 L = E + A/N^α + B/D^β（α = 0.34、β = 0.28），在 6ND = C 下求最小，N_opt ∝ C^{β/(α+β)} ≈ C^0.45、D_opt ∝ C^0.55，参数和数据大致同比增长，约 20 token/参数。</p>
+<p>差异主要因为 Kaplan 对所有模型用同一个学习率调度长度，小模型没训到位。同算力下 Chinchilla（70B、1.4T）的 loss 比 Gopher（280B、300B）低。</p>
+<p>口诀：Chinchilla 参数数据同步长，约二十 token 一个参数。</p>
+</details>
+<h3 id="st138-flops-20-token">ST138 · 训练 FLOPs 怎么估？为什么现在的小模型常常远超 20 token/参数？</h3>
+<p>来源：<a href="lessons/41-scaling-law.html">第 41 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>C ≈ 6ND：前向每参数每 token 2 FLOPs，反向 4 FLOPs。例：1B 参数训 20B token 是 1.2 × 10²⁰ FLOPs。</p>
+<p>scaling law 回答的是“固定训练算力下 loss 最低”；模型上线后推理成本按参数量算、要付很多次，所以常常故意过训练一个更小的模型（D/N 几百到上千），训练贵一点、推理便宜很多。</p>
+<p>口诀：训练算力六 N D；推理多就故意过训练。</p>
+</details>
+<h3 id="st139">ST139 · 标准参数化下，为什么在小宽度上调好的学习率换到大宽度就不好用？</h3>
+<p>来源：<a href="lessons/42-mup.html">第 42 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>初始化 1/√fan_in 让前向激活 O(1)：n 个独立随机项相加只长 √n。但训练更新不一样：Adam 一步 ≈ 每个权重 ±lr，且梯度 g xᵀ 是秩 1 的，每行都和 x 同号，n 个同号项相加长 n。所以同一个 lr 下，一步对激活的影响随宽度线性增长（例：宽 64 → 4096，0.048 → 3.28），大模型必须用更小的 lr。</p>
+<p>口诀：随机项抵消长根号 n，同号更新长 n。</p>
+</details>
+<h3 id="st140-p-transfer">ST140 · μP 改了哪些地方？μTransfer 怎么做？</h3>
+<p>来源：<a href="lessons/42-mup.html">第 42 章</a> 第二至四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>μP（以 Adam 为例）：隐藏层学习率按 1/n 缩放（一步影响和宽度无关），输出层初始化用 1/n 而不是 1/√n（宽模型的 logits 从 0 附近起步，保持特征学习而不是退化到核区）。</p>
+<p>μTransfer：大小模型都用 μP；在窄的小模型上扫学习率、初始化尺度等宽度相关的超参；原样用到大模型。论文从 40M 的代理模型迁移，超过了已发表的 6.7B GPT-3。深度、batch、步数、正则化不一定能迁移。</p>
+<p>口诀：μP 隐藏层 lr 除 n、输出层 1/n 初始化，小模型调好原样搬。</p>
+</details>
+<h3 id="st141-adam">ST141 · 为什么说 Adam 是对角预条件？它解决了什么、没解决什么？</h3>
+<p>来源：<a href="lessons/43-modern-optimizers.html">第 43 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Adam 的更新 −lr·m̂/√v̂：每个坐标除以自己梯度的均方根，相当于用 diag(√v)⁻¹ 预条件梯度，每个方向按自己的尺度走。例：f = ½(100x² + y²)，梯度下降的 lr 被陡方向卡住，60 步 y 只到 0.316；Adam 两个坐标一样快，60 步都到 0.021。</p>
+<p>对角预条件处理不了坐标之间的耦合（等高线是斜的椭圆时），那需要全矩阵或 Kronecker 结构的预条件（Shampoo）。</p>
+<p>口诀：Adam 是对角预条件，各坐标按自己的尺度走。</p>
+</details>
+<h3 id="st142-shampoo-muon">ST142 · Shampoo 和 Muon 各怎么处理矩阵参数的梯度？</h3>
+<p>来源：<a href="lessons/43-modern-optimizers.html">第 43 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>Shampoo：累积 L = ΣGGᵀ、R = ΣGᵀG，更新方向 L^{−1/4}GR^{−1/4}；只有一步时正好是 UVᵀ（G 的奇异值全变成 1）。SOAP 在 L、R 的特征基里跑 Adam。</p>
+<p>Muon：直接把动量矩阵近似正交化，不算矩阵根，用 5 步 Newton-Schulz：X ← aX + (bXXᵀ + c(XXᵀ)²)X，(a, b, c) = (3.4445, −4.775, 2.0315)，只用矩阵乘；把奇异值推到 0.7–1.2 附近（不追求精确 1）。只用于隐藏层矩阵，嵌入、输出层、偏置仍用 AdamW。</p>
+<p>口诀：Shampoo 单步就是 UVᵀ；Muon 五步 NS 只用矩阵乘把奇异值推到一。</p>
+</details>
+<h3 id="st143-lion-adam">ST143 · Lion 的更新规则是什么？和 Adam 比有什么不同？</h3>
+<p>来源：<a href="lessons/43-modern-optimizers.html">第 43 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>u = sign(β₁m + (1 − β₁)g)，m ← β₂m + (1 − β₂)g，θ ← θ − lr(u + λθ)。每个坐标的步长都是 lr，梯度大小不影响步长（例：梯度 [0.003, −2, 50] → [1, −1, 1]）。</p>
+<p>省掉二阶矩 v（优化器状态少一半）；更新范数固定，所以 lr 通常比 Adam 小 3–10 倍、权重衰减相应调大。</p>
+<p>口诀：Lion 只看符号，lr 要小。</p>
+</details>
+<h3 id="st144-wsd">ST144 · WSD 调度有什么好处？梯度噪声尺度 / 临界批量是什么？</h3>
+<p>来源：<a href="lessons/43-modern-optimizers.html">第 43 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>WSD：线性预热 → 常数 → 最后约 10% 的步数降到 0。常数段的任何检查点都能接一段衰减变成完整模型，不必事先定死总步数；续训也方便。</p>
+<p>梯度噪声尺度 B_simple = tr(Σ)/|G|²（Σ 是单样本梯度协方差）：batch ≪ B 时翻倍 batch ≈ 步数减半；batch ≫ B 时收益递减、浪费算力。训练后期 |G| 变小、B 变大，所以常把 batch 加大。</p>
+<p>口诀：WSD 常数段随时接衰减，batch 别超过噪声尺度。</p>
+</details>
+<h3 id="st145-logits-z-loss-qk-norm">ST145 · 为什么交叉熵看不见 logits 的整体漂移？z-loss 和 QK-norm 各防什么？</h3>
+<p>来源：<a href="lessons/44-training-stability.html">第 44 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>softmax(z + c) = softmax(z)，所以 logits 可以无声地整体变大，直到低精度下数值出问题。z-loss = c_z(log Z)²（ST-MoE，c_z ≈ 10⁻⁴）惩罚 log Z 偏离 0，把 logits 拉回来；交叉熵不变（例：偏移 50 时交叉熵仍是 0.4402，z-loss 从 0.0006 涨到 0.275）。</p>
+<p>QK-norm：q、k 先归一化到长度 √d 再乘可学增益 g，注意力 logit |q·k|/√d ≤ g²√d，不再随 W_Q、W_K 的范数增长，防注意力 softmax 饱和引起的 loss spike。</p>
+<p>口诀：softmax 看不见整体漂移，z-loss 罚 log Z 平方；QK-norm 给 logit 上界。</p>
+</details>
+<h3 id="st146">ST146 · 梯度裁剪为什么按全局范数？</h3>
+<p>来源：<a href="lessons/44-training-stability.html">第 44 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>g ← g·min(1, c/‖g‖)，‖g‖ 是所有参数梯度拼在一起的范数：只缩短长度、不改方向（例：全局范数 13 裁到 1，每组都乘 1/13）。逐元素裁剪会改变方向。LLM 常用 c = 1.0；裁剪前的梯度范数是监控训练健康的好指标，spike 前常先变大。</p>
+<p>口诀：梯度按全局范数裁，只缩长度不改方向。</p>
+</details>
+<h3 id="st147-bf16fp16fp8e4m3-e5m2fp8">ST147 · bf16、fp16、fp8（E4M3 / E5M2）的范围和精度各是多少？fp8 训练为什么要缩放？</h3>
+<p>来源：<a href="lessons/44-training-stability.html">第 44 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>指数/尾数</th>
+<th>最大值</th>
+<th>相对精度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bf16</td>
+<td>8/7</td>
+<td>3.4e38</td>
+<td>2⁻⁷</td>
+</tr>
+<tr>
+<td>fp16</td>
+<td>5/10</td>
+<td>65504</td>
+<td>2⁻¹⁰</td>
+</tr>
+<tr>
+<td>E4M3</td>
+<td>4/3</td>
+<td>448</td>
+<td>2⁻³</td>
+</tr>
+<tr>
+<td>E5M2</td>
+<td>5/2</td>
+<td>57344</td>
+<td>2⁻²</td>
+</tr>
+</tbody>
+</table>
+<p>指数位管范围、尾数位管精度。fp8 范围窄：先按 scale = amax/格式最大值缩放，再量化，用时乘回。例：标准差 0.001 的梯度直接转 E4M3，67% 变成 0；缩放后相对误差 0.023。前向常用 E4M3、反向梯度用 E5M2；实践中用延迟缩放或分块缩放（DeepSeek-V3 的 1×128 / 128×128）。</p>
+<p>口诀：指数管范围、尾数管精度，fp8 一定要缩放。</p>
+</details>
+<h3 id="st148-moe-top-k">ST148 · MoE 的 top-k 门控怎么算？负载均衡辅助损失是什么？</h3>
+<p>来源：<a href="lessons/45-moe-math.html">第 45 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>p = softmax(W_g x)，取最大的 k 个，在 k 个里重新归一化作为权重，只计算这 k 个专家。例：logits [2, 1, 0.5, −1]，top-2 → 专家 0、1，权重 0.731、0.269。</p>
+<p>Switch 的辅助损失 α·N·Σf_i·P_i：f_i 是实际分到专家 i 的 token 比例（不可导），P_i 是平均路由概率（可导，梯度从这里走）。均匀时 = 1，越不均匀越大（例：[0.7, 0.1, 0.1, 0.1] 时约 1.84）。它的梯度和主任务冲突，α 难调。</p>
+<p>口诀：门控取 top-k 再归一；辅助损失 N 乘 Σ f P，均匀时是一。</p>
+</details>
+<h3 id="st149-token">ST149 · 容量因子是什么？为什么均匀随机路由也会丢 token？无辅助损失的偏置调节怎么做？</h3>
+<p>来源：<a href="lessons/45-moe-math.html">第 45 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>每个专家最多处理 C = cf·tokens·k/E 个 token，超出的被丢弃（走残差）。负载即使期望相等也有随机波动（二项分布）：4096 token、64 专家、top-1 时 cf = 1 丢约 4.9%，cf = 1.25 丢约 0.13%。</p>
+<p>DeepSeek-V3 的无辅助损失方法：每个专家一个偏置 b_i，只加在选 top-k 的分数上、不进权重、不进梯度；每步负载高于平均就 b_i −= γ，低于就 += γ。像一个积分控制器，不和主损失抢梯度方向。</p>
+<p>口诀：容量是 cf 乘平均，随机波动也会丢；偏置热减冷加。</p>
+</details>
+<h3 id="st150">ST150 · 专家并行一层要传多少数据？</h3>
+<p>来源：<a href="lessons/45-moe-math.html">第 45 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>每层两次 all-to-all：派发（token 隐藏向量发给所选专家所在的卡）和汇总（结果发回）。字节数 ≈ 2·tokens·k·h·每元素字节。例：每卡 8192 token、top-8、h = 7168、bf16，一层约 1.75 GiB。所以要限制每个 token 去的节点数（DeepSeek-V3 最多 4 个节点）、把通信和计算重叠。</p>
+<p>口诀：专家并行两次 all-to-all，流量 2·tokens·k·h。</p>
+</details>
+<h3 id="st151-adam-zero">ST151 · 混合精度 Adam 每个参数占多少字节？ZeRO 三个阶段各切什么？</h3>
+<p>来源：<a href="lessons/46-distributed-ledger.html">第 46 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>16 字节：bf16 参数 2 + bf16 梯度 2 + fp32 主权重 4 + Adam m 4 + v 4。7.5B → 120 GB。</p>
+<p>ZeRO 把数据并行里 N_d 份相同的副本切开：ZeRO-1 切优化器状态（4Ψ + 12Ψ/N_d），ZeRO-2 再切梯度（2Ψ + 14Ψ/N_d），ZeRO-3 / FSDP 再切参数（16Ψ/N_d）。7.5B、64 卡：120 → 31.4 → 16.6 → 1.9 GB。ZeRO-1/2 通信量同 DP，ZeRO-3 约 1.5 倍。</p>
+<p>口诀：十六字节：二参二梯十二优化器；ZeRO 一二三依次切。</p>
+</details>
+<h3 id="st152-transformer">ST152 · 一层 Transformer 的激活显存怎么估？哪一项随序列长度平方增长？</h3>
+<p>来源：<a href="lessons/46-distributed-ledger.html">第 46 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>不重算、不做序列并行时约 s·b·h·(34 + 5as/h) 字节（Korthikanti 2022）。前一项随 s 线性；5as²b 是注意力分数、softmax 输出和 dropout mask，随 s 平方。例：h = 4096、32 头、b = 1，s = 2048 时 0.96 GB，s = 8192 时 11.9 GB（其中注意力项约 10.7 GB）。FlashAttention 不存注意力矩阵，这一项就没了；再配合重算、张量 / 序列并行。</p>
+<p>口诀：激活 sbh 乘 (34 + 5as/h)，长序列靠 Flash 和重算。</p>
+</details>
+<h3 id="st153-ring-all-reduce">ST153 · ring all-reduce 每张卡发送多少数据？流水线气泡怎么算？</h3>
+<p>来源：<a href="lessons/46-distributed-ledger.html">第 46 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>ring all-reduce = reduce-scatter + all-gather，每卡发送 2(N − 1)M/N，N 大时趋于 2M，几乎和卡数无关（例：14 GB 梯度、64 卡，每卡发 27.6 GB）。瓶颈是带宽和能否与反向计算重叠。</p>
+<p>流水线 p 级、m 个微批（GPipe / 1F1B）：气泡比例 (p − 1)/(m + p − 1)（4 级 4 微批 42.9%，4 级 16 微批 15.8%）。微批越多气泡越小，交错和零气泡调度进一步压缩。</p>
+<p>口诀：ring 每卡约 2M；气泡 (p−1)/(m+p−1)。</p>
+</details>
+<h3 id="st154-roofline">ST154 · roofline 模型是什么？线性层的算术强度约等于什么？</h3>
+<p>来源：<a href="lessons/47-inference-cost.html">第 47 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>可达性能 = min(峰值算力, 算术强度 × 带宽)；拐点 = 峰值/带宽，H100 SXM 约 989 TFLOP/s ÷ 3.35 TB/s ≈ 295 FLOP/byte。强度低于拐点是带宽受限，高于是算力受限。</p>
+<p>(m×k)·(k×n) 的强度 2mkn/(2(mk + kn + mn))；m ≪ k, n 时 ≈ m，即一起处理的 token 数：1 个 token 强度约 1，2048 个约 1000。</p>
+<p>口诀：性能取峰值和强度乘带宽的小者；线性层强度约等于 token 数。</p>
+</details>
+<h3 id="st155-prefill-decode-kv-cache-token">ST155 · 为什么 prefill 和 decode 的瓶颈不同？KV cache 每个 token 多大？</h3>
+<p>来源：<a href="lessons/47-inference-cost.html">第 47 章</a> 第二、三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>prefill 一次处理整段提示词，强度上千，算力受限，决定首 token 延迟（TTFT）；decode 每步每请求 1 个 token，batch 小时强度约 batch 大小，带宽受限，决定每 token 时间（TPOT）。所以有 prefill / decode 分离部署和 chunked prefill。</p>
+<p>KV cache 每 token = 2·层数·KV 头数·头维·字节。32 层、128 维、bf16：MHA（32 头）512 KiB，GQA-8 128 KiB；4096 token 的 MHA 请求 2 GiB。并发常被 KV cache 卡住。</p>
+<p>口诀：prefill 卡算力定首字，decode 卡带宽定每字；KV 二乘层乘头乘维乘字节。</p>
+</details>
+<h3 id="st156-decode-batch">ST156 · decode 一步的时间下限怎么估？batch 变大时吞吐和延迟怎么变？</h3>
+<p>来源：<a href="lessons/47-inference-cost.html">第 47 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>t_step ≥ (读一遍权重 2Ψ + 读这批请求的 KV：B·ctx·KV 字节/token) / 带宽。例：6.7B、上下文 4096、MHA：batch 1 是 4.6 ms、batch 64 是 45 ms；换 GQA-8 后 batch 64 是 14.3 ms。</p>
+<p>batch 小时权重读取被摊薄，吞吐近似线性增长、延迟几乎不变；batch 大了以后 KV 读取主导，延迟线性变长、吞吐饱和。KV 越小（GQA、MLA、KV 量化）batch 能开越大。</p>
+<p>口诀：batch 摊薄权重读取，KV 小才开得大。</p>
+</details>
+<h3 id="st157-online-softmax">ST157 · online softmax 是怎么一遍扫完的？</h3>
+<p>来源：<a href="lessons/48-efficient-attention.html">第 48 章</a> 第一步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>维护当前最大值 m 和 l = Σe^{z − m}。来一块：m' = max(m, 块最大值)，l' = l·e^{m − m'} + Σ_块 e^{z − m'}。遇到更大的最大值时，旧的和乘修正因子 e^{m_old − m_new}。注意力输出也可以同样修正。例：[1, 3, 2, 5, 0, 4] 每块 2 个，最后 m = 5、l = 1.5781，和直接算一样。</p>
+<p>口诀：online softmax 记最大和分母，遇大就乘 e 的差。</p>
+</details>
+<h3 id="st158-flashattention">ST158 · FlashAttention 为什么快？它减少了什么、没减少什么？</h3>
+<p>来源：<a href="lessons/48-efficient-attention.html">第 48 章</a> 第二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>把 Q、K、V 切块放进 SRAM，块内用 online softmax 累积输出，N×N 的分数和概率矩阵从不写回 HBM。HBM 读写从 Θ(N² + Nd) 降到 Θ(N²d²/M)（M 是 SRAM 容量），并且这是下界。注意力是带宽受限的，少搬就是快；激活显存的 s² 项也消失。</p>
+<p>FLOPs 没有减少，反向时还要重算 S。</p>
+<p>口诀：Flash 分块进 SRAM，N 方矩阵不落地；FLOPs 不变。</p>
+</details>
+<h3 id="st159-mqagqamla-kv-cachemla-k">ST159 · MQA、GQA、MLA 各怎么减少 KV cache？MLA 打分时为什么不用还原 K？</h3>
+<p>来源：<a href="lessons/48-efficient-attention.html">第 48 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>MQA：所有查询头共用 1 组 KV；GQA：分组共用（32 查询头、8 组 KV → 1/4）。MLA：每个 token 只缓存一个低秩潜向量 c，k = W_UK·c；打分 qᵀ(W_UK c) = (W_UKᵀq)ᵀc，把 W_UK 吸收进查询投影，直接用 c 打分（RoPE 部分单独处理）。DeepSeek-V2 报告 KV cache 减少 93.3%。</p>
+<p>口诀：GQA 共享 KV，MLA 存潜向量、上投影吸进查询。</p>
+</details>
+<h3 id="st160-rnnssm">ST160 · 为什么线性注意力等价于 RNN？SSM 怎么做到训练并行？</h3>
+<p>来源：<a href="lessons/48-efficient-attention.html">第 48 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>把 softmax 换成核 φ(q)ᵀφ(k)，按结合律 (QKᵀ)V = Q(KᵀV)：因果时 S_i = S_{i−1} + φ(k_i)v_iᵀ、z_i = z_{i−1} + φ(k_i)，o_i = S_iᵀφ(q_i)/(z_iᵀφ(q_i))；状态大小固定，推理 O(1)/token，代价是历史被压进固定大小的矩阵。</p>
+<p>SSM 的线性递推 h_t = a_t h_{t−1} + b_t，操作 (a, b) 的组合 (a₁, b₁)∘(a₂, b₂) = (a₂a₁, a₂b₁ + b₂) 满足结合律，可以用 log₂n 轮的并行前缀扫描训练、用递推推理。</p>
+<p>口诀：线性注意力换结合律就是 RNN；线性递推能结合，log n 轮并行扫。</p>
+</details>
+<h3 id="st161-scale-zero-point">ST161 · 均匀量化的 scale 和 zero point 怎么定？舍入误差多大？</h3>
+<p>来源：<a href="lessons/49-quantization.html">第 49 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>非对称：scale = (max − min)/(2^b − 1)，zp = round(−min/scale)，q = clip(round(x/scale) + zp)，x̂ = (q − zp)·scale；对称：scale = max|x|/(2^{b−1} − 1)、没有零点。误差不超过半格。</p>
+<p>舍入误差近似 U(−Δ/2, Δ/2)，方差 Δ²/12；每多 1 bit，Δ 减半、方差降到 1/4。</p>
+<p>口诀：定格宽定起点，误差方差 Δ² 除 12，多一 bit 降四倍。</p>
+</details>
+<h3 id="st162-smoothquant">ST162 · 离群值为什么让量化变差？SmoothQuant 怎么解决激活的离群值？</h3>
+<p>来源：<a href="lessons/49-quantization.html">第 49 章</a> 第三、四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>scale 由最大值决定，一个离群值让步长变大几十倍，其余值都挤在很少几格里（例：1024 个 N(0, 1) 混进一个 60，int8 下其余数的误差放大 234 倍）。LLM 激活有固定的离群通道，所以权重好量化、激活难量化。对策：分组 scale、离群通道用高精度、或者挪走难度。</p>
+<p>SmoothQuant：Y = (X diag(s)⁻¹)(diag(s)W) 输出不变；s_j = max|X_j|^α/max|W_j|^{1−α}（α ≈ 0.5），把激活的离群通道压小、对应权重放大，两边都好量化（W8A8）。</p>
+<p>口诀：离群值撑大格子；SmoothQuant 对角缩放，输出不变。</p>
+</details>
+<h3 id="st163-gptq-fp4e2m1">ST163 · GPTQ 的核心思想是什么？FP4（E2M1）能表示哪些数？</h3>
+<p>来源：<a href="lessons/49-quantization.html">第 49 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>要最小化的是输出误差 ‖(W − Ŵ)X‖² = ΔwᵀHΔw（H = XXᵀ），不是每个权重自己的误差。量化第 q 个权重后，按 OBS 让其余权重补偿：δ = −(w_q − quant(w_q))/[H⁻¹]<em _q>qq·H⁻¹</em>。例：两个高度相关的输入，只量化 w₁ 不补偿误差 0.04，补偿后 0.0076。GPTQ 按列依次量化、把误差摊到未量化的列，用 Cholesky 和批量更新加速。</p>
+<p>FP4 E2M1 的正数 {0, 0.5, 1, 1.5, 2, 3, 4, 6}，网格不均匀，必须配小块缩放（MX 每 32 个、NVFP4 每 16 个数一个 scale）。</p>
+<p>口诀：GPTQ 看 H，量化一个、别的补偿；FP4 格子不均匀要块缩放。</p>
+</details>
+<h3 id="st164-top-ktop-p">ST164 · 温度、top-k、top-p 各在改什么？为什么贪心不一定得到概率最大的整句？</h3>
+<p>来源：<a href="lessons/50-decoding.html">第 50 章</a> 第一至三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>温度：logits 除以 T，T &lt; 1 变尖、T &gt; 1 变平、T → 0 是贪心。top-k：只留最大的 k 个；top-p：按概率降序累加，留累计刚到 p 的最小集合（随分布形状自适应）；都要重新归一化。</p>
+<p>贪心每步取最大，可能走进“后续很分散”的前缀。例：第一步 A 0.6 / B 0.4，A 之后最大 0.4、B 之后 0.9：贪心整句 0.24，beam 宽 2 找到 0.36。beam 适合有标准答案的任务，开放生成用采样。</p>
+<p>口诀：温度除 logits；top-p 留够概率；每步最大不等于整句最大。</p>
+</details>
+<h3 id="st165">ST165 · 投机解码的验收规则是什么？为什么输出分布和只用大模型完全一样？</h3>
+<p>来源：<a href="lessons/50-decoding.html">第 50 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>草稿 x ~ q，以 min(1, p(x)/q(x)) 接受；拒绝时从 norm(max(0, p − q)) 重采。输出概率 = q·min(1, p/q) + (1 − α)·(p − q)⁺/Σ(p − q)⁺ = min(p, q) + (p − q)⁺ = p，其中 α = Σmin(p, q) = 1 − TV(p, q)。所以是精确的，不是近似。</p>
+<p>口诀：min(1, p/q) 接受、(p−q)⁺ 重采，分布不变。</p>
+</details>
+<h3 id="st166-token">ST166 · 投机解码每次大模型前向期望得到几个 token？约束解码怎么做、有什么代价？</h3>
+<p>来源：<a href="lessons/50-decoding.html">第 50 章</a> 第四、五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>每个草稿独立以 α 接受、一次提议 γ 个时，期望 (1 − α^{γ+1})/(1 − α) 个 token（例：α = 0.774，γ = 1/4/8 → 1.77/3.19/3.98）；γ 大了收益递减、草稿开销线性增长，一般取 3–8。Medusa 用多头草稿，EAGLE 用特征级草稿头。</p>
+<p>约束解码：每步把非法 token 的 logit 设为 −∞ 再归一化（由状态机 / 文法决定哪些合法），保证格式，但改变了分布，可能把模型逼到不自然的路径。</p>
+<p>口诀：期望 token 数 (1 − α^{γ+1})/(1 − α)；约束解码非法置零。</p>
+</details>
+<h3 id="st167-sft-bradley-terry">ST167 · SFT 在优化什么？Bradley-Terry 奖励模型的损失是什么？</h3>
+<p>来源：<a href="lessons/51-post-training.html">第 51 章</a> 第一、二步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>SFT 最小化交叉熵 H(p_data, π) = KL(p_data ‖ π) + H(p_data)，熵是常数，所以就是最大似然 / 最小化 KL；只能模仿示范、不能超越。</p>
+<p>BT 模型：P(a ≻ b) = σ(r_a − r_b)；奖励模型最小化 −log σ(r(y_w) − r(y_l))（InstructGPT），就是在比较数据上做逻辑回归。只有分数差有意义（Δr = 1 → 0.731，损失 0.313）。</p>
+<p>口诀：SFT 是最大似然只能模仿；BT 用分数差的 sigmoid。</p>
+</details>
+<h3 id="st168-rlhf-kl">ST168 · RLHF 的 KL 正则目标的最优策略是什么？β 起什么作用？</h3>
+<p>来源：<a href="lessons/51-post-training.html">第 51 章</a> 第三步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>max E_π[r] − β·KL(π ‖ π_ref) 的解是 π*(y) = π_ref(y)·e^{r(y)/β}/Z（拉格朗日对每个 y 求导）。最优目标值是 β log Σπ_ref e^{r/β}（软最大值）。</p>
+<p>β 小：π* 几乎全押奖励最高的回答（易钻奖励模型的空子）；β 大：几乎不离开 π_ref。例：π_ref = [0.5, 0.3, 0.2]、r = [1, 2, 0]，β = 1 时 π* = [0.36, 0.587, 0.053]。</p>
+<p>口诀：奖励减 β 倍 KL，最优是参考乘 e 的 r 除 β。</p>
+</details>
+<h3 id="st169-dpo">ST169 · DPO 是怎么从闭式最优策略推出来的？它的损失是什么？</h3>
+<p>来源：<a href="lessons/51-post-training.html">第 51 章</a> 第四步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>反解 π* ∝ π_ref e^{r/β} 得 r(y) = β log(π*(y)/π_ref(y)) + β log Z；log Z 对同一提示下所有回答相同，代进 BT 的分数差时消掉。于是直接用策略当隐含奖励：</p>
+<p>L_DPO = −log σ(β log(π_θ(y_w)/π_ref(y_w)) − β log(π_θ(y_l)/π_ref(y_l)))。</p>
+<p>不需要单独的奖励模型和 RL 采样，就是一个分类损失；代价是离线，只在偏好数据覆盖的回答上起作用。π = π_ref 时损失 log 2 = 0.693。</p>
+<p>口诀：反解奖励 β log 比值，常数在差里消掉，就是 DPO。</p>
+</details>
+<h3 id="st170-grpo-k3-kl">ST170 · GRPO 的优势怎么算？k3 KL 估计是什么、为什么用它？</h3>
+<p>来源：<a href="lessons/51-post-training.html">第 51 章</a> 第五步 · 加入 2026-11-25 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>对同一问题采 G 个回答，Â_i = (r_i − mean(r))/std(r)，用组内统计量当基线，不需要 critic（例：[1, 0, 0, 1, 1, 0] → [1, −1, −1, 1, 1, −1]）。KL 惩罚直接加进损失，用 k3 = ρ − log ρ − 1（ρ = π_ref/π_θ，在 π_θ 的样本上算）：期望等于 KL(π_θ ‖ π_ref)、恒非负、方差小。配合 0/1 的可验证奖励就是推理 RL 的基本配方。</p>
+<p>口诀：GRPO 组内减均值除标准差，KL 用 k3。</p>
+</details>
 <hr />
 <h2 id="_13">已掌握</h2>
 <p>（暂无）</p>

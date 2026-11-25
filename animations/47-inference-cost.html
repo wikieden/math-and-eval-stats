@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>推理成本模型</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 47 章 · roofline 上的工作点与 decode 的时间</h1>
+<p class="sub">配套讲义：<a href="../lessons/47-inference-cost.html">第 47 章 · 推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a>。H100 SXM：989 TFLOP/s、3.35 TB/s。左：一次处理 m 个 token 过 4096×4096 线性层的算术强度和可达性能。右：6.7B 模型、上下文 4096 时 decode 一步的时间下限 = 读权重 + 读这批请求的 KV。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="lm">log₂ 一次处理的 token 数</label><input type="range" id="lm" min="0" max="11" step="1" value="0"><span id="lmv">0</span><label for="lb">log₂ decode batch</label><input type="range" id="lb" min="0" max="7" step="1" value="0"><span id="lbv">0</span><label for="kv">注意力</label><select id="kv"><option value="32">MHA（32 个 KV 头）</option><option value="8">GQA-8</option></select></div>
+<p class="note">看点：① token 数从 1 拖到 2048，红点沿斜线（带宽受限）爬到拐点（约 295），再走上平台（算力受限）；② batch 变大，橙色段（读 KV）越来越长，蓝色段（读权重）不变；③ 切到 GQA，橙色段缩短到 1/4。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['lm','lb','kv'],F=[[0,0,32],[4,3,32],[8,5,32],[11,6,32],[11,6,8],[11,7,8]];
+const PK=989e12,BW=3.35e12,H=4096;
+function render(lm,lb,kv){const m=2**lm,b=2**lb,I=2*m*H*H/(2*(m*H+H*H+m*H)),perf=Math.min(PK,I*BW);const kvb=2*32*kv*128*2,tw=2*6.7e9/BW*1e3,tk=b*4096*kvb/BW*1e3;
+ cap(`m = ${m}：强度 ${I.toFixed(1)}，${(perf/1e12).toFixed(0)} TFLOP/s（${I>PK/BW?'算力':'带宽'}受限）｜batch ${b}：${(tw+tk).toFixed(1)} ms/步`);
+ frame(40,40,300,280);const M=PM(40,40,300,280,[-0.3,3.5],[0,3.2]);const c=[];for(let i=0;i<=80;i++){const x=-0.3+3.8*i/80;c.push(M(x,Math.log10(Math.min(PK,10**x*BW)/1e12)))}P(c,'var(--text)',2.5);const q=M(Math.log10(I),Math.log10(perf/1e12));C(q[0],q[1],7,'var(--bad)',1);T('roofline（对数坐标）',44,56,'start','s');
+ frame(380,40,260,280);const tmax=Math.max(60,tw+tk),M2=PM(380,40,260,280,[0,1],[0,tmax]);const a=M2(0.3,tw),bb=M2(0.7,0);R(a[0],a[1],bb[0]-a[0],bb[1]-a[1],'var(--accent)',.8);const c2=M2(0.3,tw+tk),d=M2(0.7,tw);R(c2[0],c2[1],d[0]-c2[0],d[1]-c2[1],'var(--warm)',.8);
+ T(`读权重 ${tw.toFixed(1)} ms`,510,a[1]+16,'middle','s');T(`读 KV ${tk.toFixed(1)} ms`,510,c2[1]-6,'middle','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

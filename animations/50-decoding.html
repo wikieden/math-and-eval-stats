@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>解码与采样</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 50 章 · 温度、top-p 与投机解码</h1>
+<p class="sub">配套讲义：<a href="../lessons/50-decoding.html">第 50 章 · 解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a>。6 个候选 token 的 logits [2, 1.5, 1, 0, −1, −2]。投机解码：草稿分布 q 是目标 p 和另一个分布 r 按“差距”混合，q = (1 − d)·p + d·r。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">温度</option><option value="1">top-p</option><option value="2">投机解码</option></select><label for="v">T / p 阈值 / 草稿差距 d</label><input type="range" id="v" min="0.05" max="1.5" step="0.05" value="1"><span id="vv">1</span></div>
+<p class="note">看点：① 温度：T 小柱子变尖，T 大变平；② top-p：从最高的柱子开始累加，蓝色是保留并重新归一化的集合，其余变灰；③ 投机解码：深蓝是接受部分 min(p, q)，橙色是重采部分，叠起来始终等于灰框 p；d 越大 α 越小，右上角是 γ = 4 时每次前向期望得到的 token 数。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','v'],F=[[0,0.3],[0,1],[0,1.5],[1,0.5],[1,0.8],[1,0.95],[2,0.2],[2,0.6],[2,1]];
+const Z=[2,1.5,1,0,-1,-2];const sm=(z)=>{const m=Math.max(...z),e=z.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b);return e.map(v=>v/s)};
+function render(md,v){frame(40,40,600,280);const M=PM(40,40,600,280,[-0.5,5.5],[0,0.9]);const bar=(i,lo,hi,col,op,off,wd)=>{const a=M(i+off,hi),b=M(i+off+wd,lo);R(a[0],a[1],b[0]-a[0],b[1]-a[1],col,op)};const box=(i,h)=>{const a=M(i-0.3,h),b=M(i+0.3,0);el('rect',{x:a[0],y:a[1],width:b[0]-a[0],height:b[1]-a[1],fill:'none',stroke:'var(--text)','stroke-width':1.2},sv)};
+ const p=sm(Z);if(md==0){const T0=Math.max(v,0.05),q=sm(Z.map(z=>z/T0));q.forEach((x,i)=>bar(i,0,x,'var(--accent)',.75,-0.3,0.6));cap(`T = ${T0.toFixed(2)}：最大概率 ${Math.max(...q).toFixed(3)}`)}
+ else if(md==1){const thr=Math.min(v,0.99),ord=[...p.keys()].sort((a,b)=>p[b]-p[a]);let c=0;const keep=[];for(const i of ord){keep.push(i);c+=p[i];if(c>=thr)break}const s=keep.reduce((a,i)=>a+p[i],0);p.forEach((x,i)=>{if(keep.includes(i))bar(i,0,x/s,'var(--accent)',.75,-0.3,0.6);box(i,x)});cap(`top-p = ${thr.toFixed(2)}：保留 ${keep.length} 个 token`)}
+ else{const d=Math.min(v,1),r=sm([0,2.5,-1,1,0,0]),q=p.map((x,i)=>(1-d)*x+d*r[i]),acc=p.map((x,i)=>Math.min(x,q[i])),al=acc.reduce((a,b)=>a+b),res=p.map((x,i)=>Math.max(0,x-q[i])),rs=res.reduce((a,b)=>a+b)||1;
+  p.forEach((x,i)=>{bar(i,0,q[i],'var(--accent)',.25,-0.38,0.3);bar(i,0,acc[i],'var(--accent)',.85,-0.04,0.36);if(res[i]>1e-9)bar(i,acc[i],acc[i]+(1-al)*res[i]/rs,'var(--warm)',.85,-0.04,0.36);const a=M(i-0.04,x),b=M(i+0.32,0);el('rect',{x:a[0],y:a[1],width:b[0]-a[0],height:b[1]-a[1],fill:'none',stroke:'var(--text)','stroke-width':1.2},sv)});
+  cap(`差距 d = ${d.toFixed(2)}：接受率 α = ${al.toFixed(3)}，γ = 4 时每次前向期望 ${((1-al**5)/(1-al+1e-12)).toFixed(2)} 个 token`)}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

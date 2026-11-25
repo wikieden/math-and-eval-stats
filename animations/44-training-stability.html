@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>训练稳定性</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 44 章 · logit 漂移与 z-loss；fp8 要先缩放</h1>
+<p class="sub">配套讲义：<a href="../lessons/44-training-stability.html">第 44 章 · 训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a>。logits：[2, 1, 0, −1] 整体加一个偏移，看交叉熵（目标是第 0 个）和 z-loss = c·(log Z)²。fp8：4096 个梯度值（标准差 0.001，最大 0.05）的 log₂|x| 分布，对照 E4M3 的最小正规数 2⁻⁶ 和最大值 448。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">演示</label><select id="md"><option value="0">logit 漂移</option><option value="1">fp8 缩放</option></select><label for="s">偏移 / 是否缩放</label><input type="range" id="s" min="0" max="50" step="5" value="0"><span id="sv">0</span><label for="c">z-loss 系数 ×10⁻⁴</label><input type="range" id="c" min="1" max="10" step="1" value="1"><span id="cv">1</span></div>
+<p class="note">看点：① logit 漂移：左边柱子整体升高，右边 softmax 概率一动不动；下方读数里交叉熵不变、z-loss 随偏移的平方增长；② fp8：滑块 0 = 不缩放，大部分值在红线（2⁻⁶）左边，会被舍成很粗的网格甚至 0；滑块拖到大于 0 = 除以 amax/448，整体右移、最大值贴着 448。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','s','c'],F=[[0,0,1],[0,20,1],[0,50,1],[1,0,1],[1,5,1]];
+function render(md,s,c){if(md==0){const z=[2,1,0,-1].map(v=>v+(+s)),m=Math.max(...z),lz=m+Math.log(z.reduce((a,v)=>a+Math.exp(v-m),0)),p=z.map(v=>Math.exp(v-lz));
+ cap(`偏移 ${s}：交叉熵 ${(lz-z[0]).toFixed(4)}，log Z = ${lz.toFixed(2)}，z-loss = ${(c*1e-4*lz*lz).toFixed(4)}`);
+ frame(40,40,280,280);const M=PM(40,40,280,280,[-0.5,3.5],[-2,55]);z.forEach((v,i)=>{const a=M(i-0.3,v),b=M(i+0.3,0);R(a[0],Math.min(a[1],b[1]),b[0]-a[0],Math.abs(b[1]-a[1]),'var(--accent)',.7)});T('logits',44,56,'start','s');
+ frame(360,40,280,280);const M2=PM(360,40,280,280,[-0.5,3.5],[0,1]);p.forEach((v,i)=>{const a=M2(i-0.3,v),b=M2(i+0.3,0);R(a[0],a[1],b[0]-a[0],b[1]-a[1],'var(--warm)',.7);T(v.toFixed(3),(a[0]+b[0])/2,a[1]-4,'middle','s')});T('softmax 概率',364,56,'start','s')}
+ else{seed(4);const x=[];for(let i=0;i<4096;i++)x.push(0.001*gauss());x[0]=0.05;const amax=Math.max(...x.map(Math.abs)),sc=s>0?amax/448:1,lg=x.map(v=>Math.log2(Math.abs(v/sc)+1e-30));
+  const lo=-22,hi=10,nb=64,cnt=Array(nb).fill(0);lg.forEach(v=>{const i=Math.floor((v-lo)/(hi-lo)*nb);if(i>=0&&i<nb)cnt[i]++});const mx=Math.max(...cnt);frame(40,40,600,280);const M=PM(40,40,600,280,[lo,hi],[0,1.1]);
+  cnt.forEach((v,i)=>{const a=M(lo+(hi-lo)*i/nb,v/mx),b=M(lo+(hi-lo)*(i+1)/nb,0);R(a[0],a[1],b[0]-a[0]-1,b[1]-a[1],'var(--accent)',.7)});
+  [[-6,'var(--bad)','2⁻⁶'],[-9,'var(--muted)','2⁻⁹'],[Math.log2(448),'var(--warm)','448']].forEach(([v,col,t])=>{const q=M(v,0);L(q[0],40,q[0],320,col,1.5,'5 4');T(t,q[0]+4,56,'start','s')});
+  const below=lg.filter(v=>v<-6).length/4096;cap(`${s>0?'按 amax/448 缩放后':'不缩放'}：${(below*100).toFixed(0)}% 的值低于 E4M3 最小正规数`)}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

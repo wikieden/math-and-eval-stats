@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 49 章 · 量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html" class="cur"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="49-scale-zero-pointsmoothquantgptq-fp4">第 49 章 · 量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</h1><div class="run"><a class="btn" href="../animations/49-quantization.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch49_quantization.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch49_quantization.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch49_quantization.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：把 bf16 的权重压成 4 bit，scale 和 zero point 怎么定？舍入误差有多大？为什么一个离群值能毁掉整段的精度？SmoothQuant 怎么在不改变输出的前提下把激活变好量化？GPTQ 为什么比逐个四舍五入好？FP4 能表示哪些数？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/48-efficient-attention.html">第 48 章 高效注意力与序列模型</a> · 下一章：<a href="../lessons/50-decoding.html">第 50 章 解码与采样</a><br />
+对应原文：GPTQ <code>llm-full-stack/materials/text/papers/gptq-2210.17323.txt</code>（基于 OBS 的逐列量化与补偿，L159、L217–L220 的 w_q 与 δ_F 公式）；SmoothQuant <code>llm-full-stack/materials/text/papers/smoothquant-2211.10438.txt</code>（平滑因子 s_j = max|X_j|^α / max|W_j|^{1−α}，L267–L271）；AWQ <code>llm-full-stack/materials/text/papers/awq-2306.00978.txt</code>；LLM.int8() <code>llm-full-stack/materials/text/papers/llm-int8-2208.07339.txt</code>（离群特征）；OCP Microscaling <code>llm-full-stack/materials/text/papers/microscaling-mx-2310.10537.txt</code>（FP4 E2M1 与块缩放）<br />
+本章缩写：int4 / int8 = 4 / 8 位整数；scale = 步长 Δ；zp = zero point（零点）；OBS = Optimal Brain Surgeon（最优脑外科：用 Hessian 决定删 / 改哪个权重）；GPTQ = 基于 OBS 的逐列后训练量化；AWQ = Activation-aware Weight Quantization（看激活的权重量化）；H = XXᵀ（层输入的二阶统计量，“Hessian”）；E2M1 = 2 位指数 1 位尾数的 FP4。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="scale-zero-point2026-11-25">第一步：均匀量化：scale 和 zero point（2026-11-25）</h3>
+<p><strong>类比：用一把只有 16 个刻度的尺子量东西。</strong> 先决定尺子从哪开始（zero point）、每格多宽（scale），再把每个值读成最近的刻度。</p>
+<p>非对称 int4（16 个格子 0…15）：</p>
+<div class="arithmatex">\[\text{scale} = \frac{\max - \min}{2^b - 1},\quad\text{zp} = \text{round}\Big(\frac{-\min}{\text{scale}}\Big),\quad q = \text{clip}(\text{round}(x/\text{scale}) + \text{zp}),\quad\hat x = (q - \text{zp})\cdot\text{scale}\]</div>
+<p>对称量化不要零点：scale = max|x|/(2^{b−1} − 1)。</p>
+<p><strong>例子</strong>（x = [−0.62, −0.31, −0.05, 0, 0.12, 0.40, 0.55, 0.91]）：scale = 1.53/15 = 0.1020，zp = 6；反量化 [−0.612, −0.306, 0, 0, 0.102, 0.408, 0.510, 0.918]，每个误差都不超过半格。0 被精确表示（zp 的作用：padding、ReLU 后的 0 很多）。</p>
+<p><strong>一句话</strong>：均匀量化 = 定 scale（格宽）和 zero point（起点），四舍五入到最近的格；误差不超过半格。</p>
+<h3 id="2122026-11-25">第二步：舍入误差的方差是 Δ²/12（2026-11-25）</h3>
+<p>值在格子里大致均匀分布时，舍入误差 ~ U(−Δ/2, Δ/2)，方差 Δ²/12。</p>
+<p><strong>例子</strong>（[−1, 1] 上 20 万个均匀数）：</p>
+<table>
+<thead>
+<tr>
+<th>位数</th>
+<th>实测方差</th>
+<th>Δ²/12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>1.482 × 10⁻³</td>
+<td>1.481 × 10⁻³</td>
+</tr>
+<tr>
+<td>8</td>
+<td>5.131 × 10⁻⁶</td>
+<td>5.126 × 10⁻⁶</td>
+</tr>
+</tbody>
+</table>
+<p>每多 1 bit，Δ 减半，误差方差减为 1/4（信噪比提高约 6 dB）。这个误差像噪声一样加到输出上：一个输出是 n 个权重 × 输入之和，噪声方差也按 n 累加，所以量化误差要和激活一起看（第五步）。</p>
+<p><strong>一句话</strong>：舍入误差约 U(−Δ/2, Δ/2)，方差 Δ²/12；每多 1 bit 方差降到 1/4。</p>
+<h3 id="2026-11-25">第三步：离群值把步长撑大（2026-11-25）</h3>
+<p>scale 由 max|x| 决定。一个离群值让 Δ 变大几十倍，其余所有值都只能用很粗的格子。</p>
+<p><strong>例子</strong>（1024 个 N(0, 1)，int8 对称量化，看除离群值外其余数的均方误差）：没有离群值 7.97 × 10⁻⁵；混进一个 60 后 1.86 × 10⁻²（234 倍）。</p>
+<p>LLM 的激活里有固定的几个“离群通道”（LLM.int8() 论文），值比其他通道大 100 倍；所以权重好量化（分布集中），激活难量化。对策：按通道 / 按组算 scale（每组 32 或 128 个数一个 scale，就是 MX 格式和 GPTQ 的 group size）、把离群通道单独用高精度算（LLM.int8()）、或者把难度挪走（下一步）。</p>
+<p><strong>一句话</strong>：scale 由最大值决定，一个离群值能让其余值的误差放大几百倍；分组 scale 或把离群值挪走是标准对策。</p>
+<h3 id="smoothquant2026-11-25">第四步：SmoothQuant：把激活的难度挪给权重（2026-11-25）</h3>
+<p>Y = XW 对任意正的对角矩阵 diag(s) 有</p>
+<div class="arithmatex">\[Y = (X\,\text{diag}(s)^{-1})\,(\text{diag}(s)\,W)\]</div>
+<p>输出完全不变。SmoothQuant（L267–L271）取 <span class="arithmatex">\(s_j = \max|X_j|^\alpha / \max|W_j|^{1-\alpha}\)</span>（α 通常 0.5）：离群通道的激活除以一个大数、对应的权重行乘以同一个数，两边的最大值趋于相同。</p>
+<p><strong>例子</strong>（16×8 的激活，第 0 个通道放大 50 倍；8×4 的权重）：输出最大差 1.8 × 10⁻¹⁵；激活最大值 90.1 → 3.07，权重最大值变成 3.07。激活和权重都可以用 int8 量化了（W8A8）。AWQ 是同一个思路用在权重量化上：按激活大小找出重要的权重通道，放大后再量化。</p>
+<p><img alt="SmoothQuant 前后各通道的最大值" src="../figures/49-quantization-smooth.png" />
+<em>图 49-1 · 横轴输入通道 0–7，纵轴最大绝对值（对数）；左：变换前激活（蓝）在通道 0 有一个大尖峰，权重（橙）都很小；右：变换后两者在每个通道上相等</em></p>
+<p><strong>一句话</strong>：SmoothQuant 用一个对角缩放把激活的离群通道压小、对应权重放大，输出数学上不变，两边都变得好量化。</p>
+<h3 id="gptq2026-11-25">第五步：GPTQ：量化一个权重，让其余权重补偿（2026-11-25）</h3>
+<p>逐个四舍五入（RTN）只看每个权重自己的误差；真正要小的是输出误差 <span class="arithmatex">\(\|(W - \hat W)X\|^2 = \Delta w^\top H\Delta w\)</span>，H = XXᵀ。输入相关时，一个权重的误差可以由别的权重抵消。OBS / GPTQ（L217–L220）：量化第 q 个权重后，其余权重更新</p>
+<div class="arithmatex">\[\delta = -\frac{w_q - \text{quant}(w_q)}{[H^{-1}]_{qq}}\,H^{-1}_{:,q}\]</div>
+<p><strong>例子</strong>（两个高度相关的输入 H = [[1, 0.9], [0.9, 1]]，w = [0.3, 0.7]，w₁ 量化到 0.5 的倍数）：</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>输出误差 ΔwᵀHΔw</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只量化 w₁、w₂ 不动</td>
+<td>0.0400</td>
+</tr>
+<tr>
+<td>按 H⁻¹ 补偿 w₂</td>
+<td>0.0076</td>
+</tr>
+</tbody>
+</table>
+<p>GPTQ 按列依次量化、每量化一列就把误差按 H⁻¹ 摊到还没量化的列上，并用 Cholesky 分解和批量更新让它在 GPU 上几小时内量化百亿参数的模型。</p>
+<p><strong>FP4（E2M1）</strong>：1 位符号、2 位指数、1 位尾数，正数只有 {0, 0.5, 1, 1.5, 2, 3, 4, 6}。格子不均匀（大数附近更稀），必须配块缩放（MX 格式每 32 个数一个 8 位指数的 scale，NVFP4 每 16 个数一个 fp8 scale）。</p>
+<p><img alt="int4 与 FP4 的网格" src="../figures/49-quantization-grid.png" />
+<em>图 49-2 · 上：int4 对称量化在 [−7, 7]·scale 上的 15 个等距点；下：FP4（E2M1）的 15 个值，0 附近密、远处稀</em></p>
+<p><strong>场景代码</strong>：用 Transformers 加载 GPTQ / AWQ 量化好的模型（真实接口；本书环境没装，没跑过）：</p>
+<pre><code class="language-python">from transformers import AutoModelForCausalLM, GPTQConfig
+cfg = GPTQConfig(bits=4, group_size=128, dataset=&quot;c4&quot;, tokenizer=tok)   # 每 128 个权重一个 scale
+model = AutoModelForCausalLM.from_pretrained(name, quantization_config=cfg, device_map=&quot;auto&quot;)
+</code></pre>
+<p><strong>一句话</strong>：GPTQ 最小化的是输出误差 ΔwᵀHΔw，量化一个权重后按 H⁻¹ 让其余权重补偿；FP4 格子不均匀，要配小块缩放。</p>
+<h3 id="16">动画演示：16 格的尺子与离群值</h3>
+<p><img alt="量化的数学" src="../animations/49-quantization.gif" /></p>
+<p>可交互版：<a href="../animations/49-quantization.html">animations/49-quantization.html</a>（滑块调位数和离群值大小）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>灰点是 64 个原始值，竖线是量化网格，蓝点是量化后的值；右上角是均方误差（第一、二步）；</li>
+<li>把离群值从 1 拖到 20：网格被拉宽，除了它以外的点挤在中间的几格里，误差猛增（第三步）；</li>
+<li>位数从 2 调到 8：格子变密，误差按 1/4 一级级下降。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：x 的范围是 [−1, 3]，int8 非对称量化（0…255），scale 和 zero point 各是多少？x = 1.0 量化成几？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：int4 对称量化、max|x| = 2，步长是多少？舍入误差的标准差约多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：H = [[1, 0.5], [0.5, 1]]，w₁ 的量化误差 Δw₁ = 0.2。按 OBS 补偿，w₂ 应该改多少？补偿前后的输出误差各是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>定格宽、定起点，四舍五入误差不过半格；<br />
+舍入误差方差 Δ² 除 12，多一 bit 降四倍；<br />
+离群值撑大格子，分组或挪走；<br />
+SmoothQuant 对角缩放，激活压小权重放大，输出不变；<br />
+GPTQ 看 H，量化一个、别的补偿；FP4 格子不均匀要块缩放。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST161（scale / zero point 与舍入误差 Δ²/12）、ST162（离群值的影响与 SmoothQuant 的等价变换）、ST163（GPTQ 的误差补偿；FP4 与块缩放）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ GPTQ（Frantar 2022）</td>
+<td>§3（L159–L220 起）</td>
+<td>OBS 公式、逐列量化、Cholesky 实现</td>
+</tr>
+<tr>
+<td>★ SmoothQuant（Xiao 2022）</td>
+<td>§4（L267 起）</td>
+<td>平滑因子与 α 的选择</td>
+</tr>
+<tr>
+<td>AWQ（Lin 2023）</td>
+<td>§3</td>
+<td>按激活找显著权重通道</td>
+</tr>
+<tr>
+<td>LLM.int8()（Dettmers 2022）</td>
+<td>§3–4</td>
+<td>离群特征与混合精度分解</td>
+</tr>
+<tr>
+<td>Microscaling（Rouhani 2023）</td>
+<td>MX 格式定义</td>
+<td>FP4 / FP6 / FP8 与块缩放</td>
+</tr>
+<tr>
+<td><a href="https://wikieden.github.io/pytorch-inside-out/lessons/35-quant-export.html">《PyTorch 从里到外》第 35 章 量化与导出</a></td>
+<td>全章</td>
+<td>框架里的量化流程</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>均匀分布的方差</strong>：U(−Δ/2, Δ/2) 的方差 Δ²/12。</li>
+<li><strong>输出误差</strong>：Y − Ŷ = (W − Ŵ)X，‖·‖² = Σ_行 ΔwᵀXXᵀΔw，每一行（输出通道）独立。</li>
+<li><strong>OBS 的补偿</strong>：在 Δw_q = Δ_q（= quant(w_q) − w_q）固定的约束下最小化 ΔwᵀHΔw，拉格朗日解 Δw = (Δ_q/[H⁻¹]_qq)·H⁻¹e_q，最小误差 Δ_q²/[H⁻¹]_qq；这就是正文的 δ（论文写成 −(w_q − quant(w_q))/[H⁻¹]<em _q>qq·H⁻¹</em>）。</li>
+<li><strong>对角缩放的等价</strong>：X diag(s)⁻¹ diag(s) W = XW 对任何正的 s 成立。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>scale = (max − min)/(2^b − 1)，zp = round(−min/scale)</td>
+<td>非对称量化</td>
+</tr>
+<tr>
+<td>Var = Δ²/12</td>
+<td>舍入误差</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(s_j = \max\lvert X_j\rvert^\alpha/\max\lvert W_j\rvert^{1-\alpha}\)</span></td>
+<td>SmoothQuant</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\delta = -\frac{w_q - \text{quant}(w_q)}{[H^{-1}]_{qq}}H^{-1}_{:,q}\)</span></td>
+<td>OBS / GPTQ 补偿</td>
+</tr>
+<tr>
+<td>E2M1：{0, 0.5, 1, 1.5, 2, 3, 4, 6}</td>
+<td>FP4 的正数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch49_quantization.py</code>，配套测试 <code>tests/test_ch49.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch49_quantization.py  
+uv run pytest tests/test_ch49.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 量化</td>
+<td>scale、zp</td>
+<td><code>quant_asym(V)</code></td>
+<td>0.1020、6</td>
+</tr>
+<tr>
+<td>第二步 误差方差</td>
+<td>Δ²/12</td>
+<td><code>rounding_noise(8)</code></td>
+<td>5.13e-6</td>
+</tr>
+<tr>
+<td>第三步 离群值</td>
+<td>对称 int8</td>
+<td><code>outlier_effect()</code></td>
+<td>234 倍</td>
+</tr>
+<tr>
+<td>第四步 SmoothQuant</td>
+<td>对角缩放</td>
+<td><code>smoothquant()</code></td>
+<td>90.1 → 3.07</td>
+</tr>
+<tr>
+<td>第五步 OBS</td>
+<td>H⁻¹ 补偿</td>
+<td><code>obs_two_weights()</code></td>
+<td>0.04 → 0.0076</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">scale = (x.max() - x.min()) / qmax; zp = int(round(-x.min() / scale))   # 非对称量化参数
+s = np.abs(x).max(0) ** alpha / np.abs(w).max(1) ** (1 - alpha)         # SmoothQuant 平滑因子
+dw_obs = np.array([d1, d1 * hinv[1, 0] / hinv[0, 0]])                   # OBS：其余权重的补偿
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>OBS 的符号要小心</strong>：d1 = quant(w₁) − w₁，补偿 = d1·H⁻¹[1,0]/H⁻¹[0,0]；H⁻¹ 的非对角元是负的，所以 w₂ 往和 d1 相反的方向改。</li>
+<li><strong>SmoothQuant 的 s 按输入通道算</strong>：X 按列（通道）取最大值，W 按行取最大值，两者的下标是同一个输入通道。</li>
+<li><strong>没有比较 per-tensor / per-channel / group</strong>：对一个真实权重矩阵比三种粒度的误差、实现逐列的简化 GPTQ，留给自己做（里程碑 ME-M30）。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>smoothquant</code> 的 α 改成 0.8 和 0.2，激活和权重的最大值各变成多少？</li>
+<li>把 <code>obs_two_weights</code> 的 H 改成单位矩阵（输入不相关），补偿还有用吗？</li>
+</ol><nav class="pager"><a href="48-efficient-attention.html">← 第 48 章 · 高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="50-decoding.html">第 50 章 · 解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

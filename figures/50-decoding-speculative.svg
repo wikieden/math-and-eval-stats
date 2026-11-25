@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">投机解码：接受部分 + 重采部分 = 目标分布</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">浅蓝柱是草稿 q，灰框是目标 p。深蓝 min(p, q) 是接受得到的部分（共 α = 0.774），橙色是拒绝后按 (p − q)⁺ 重采补上的部分（共 1 − α），两段叠起来正好填满灰框。</text>
+<line x1="80.0" y1="220.0" x2="780.0" y2="220.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="224.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="80.0" y1="158.2" x2="780.0" y2="158.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="162.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.2</text>
+<line x1="80.0" y1="96.4" x2="780.0" y2="96.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="100.4" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.4</text>
+<line x1="138.3" y1="50.0" x2="138.3" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="138.3" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">0</text>
+<line x1="255.0" y1="50.0" x2="255.0" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="255.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">1</text>
+<line x1="371.7" y1="50.0" x2="371.7" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="371.7" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">2</text>
+<line x1="488.3" y1="50.0" x2="488.3" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="488.3" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">3</text>
+<line x1="605.0" y1="50.0" x2="605.0" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="605.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">4</text>
+<line x1="721.7" y1="50.0" x2="721.7" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="721.7" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">5</text>
+<line x1="80.0" y1="220.0" x2="780.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<line x1="80.0" y1="50.0" x2="80.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<text x="430.0" y="252.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle" font-weight="normal">token</text>
+<text transform="translate(40.0,135.0) rotate(-90)" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle">概率</text>
+<rect x="94.0" y="129.2" width="35.0" height="90.8" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="133.7" y="129.2" width="46.7" height="90.8" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="133.7" y="78.1" width="46.7" height="51.1" rx="0" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="133.7" y="78.1" width="46.7" height="141.9" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<rect x="210.7" y="70.3" width="35.0" height="149.7" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="250.3" y="133.9" width="46.7" height="86.1" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="250.3" y="133.9" width="46.7" height="86.1" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<rect x="327.3" y="186.6" width="35.0" height="33.4" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="367.0" y="186.6" width="46.7" height="33.4" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="367.0" y="167.8" width="46.7" height="18.8" rx="0" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="367.0" y="167.8" width="46.7" height="52.2" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<rect x="444.0" y="199.7" width="35.0" height="20.3" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="483.7" y="200.8" width="46.7" height="19.2" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="483.7" y="200.8" width="46.7" height="19.2" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<rect x="560.7" y="212.5" width="35.0" height="7.5" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="600.3" y="212.9" width="46.7" height="7.1" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="600.3" y="212.9" width="46.7" height="7.1" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<rect x="677.3" y="212.5" width="35.0" height="7.5" rx="0" fill="#bfdbfe" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="717.0" y="217.4" width="46.7" height="2.6" rx="0" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<rect x="717.0" y="217.4" width="46.7" height="2.6" rx="0" fill="none" stroke="#1f2937" stroke-width="1.2" opacity="1"/>
+<line x1="560.0" y1="71.0" x2="582.0" y2="71.0" stroke="#93c5fd" stroke-width="2.5"/>
+<text x="588.0" y="75.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">草稿 q</text>
+<line x1="560.0" y1="89.0" x2="582.0" y2="89.0" stroke="#2563eb" stroke-width="2.5"/>
+<text x="588.0" y="93.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">接受 min(p, q)</text>
+<line x1="560.0" y1="107.0" x2="582.0" y2="107.0" stroke="#ea580c" stroke-width="2.5"/>
+<text x="588.0" y="111.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">重采 (p − q)⁺</text>
+</svg>

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 48 章 · 高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html" class="cur"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="48-online-softmax-flashattentionmqa-gqa-mlassm">第 48 章 · 高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</h1><div class="run"><a class="btn" href="../animations/48-efficient-attention.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch48_efficient_attention.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch48_efficient_attention.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch48_efficient_attention.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：FlashAttention 为什么能不存 N×N 的注意力矩阵还算得精确？它靠的 online softmax 是什么递推？MLA 只存一个低秩向量，打分时怎么不把 K 还原出来？线性注意力为什么等价于一个 RNN？Mamba 这类状态空间模型是怎么做到“训练并行、推理递推”的？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/47-inference-cost.html">第 47 章 推理成本模型</a> · 下一章：<a href="../lessons/49-quantization.html">第 49 章 量化的数学</a><br />
+对应原文：Online normalizer calculation for softmax（Milakov 2018）<code>transformer-deep-dive/materials/text/papers/online-softmax-1805.02867.txt</code>（算法 3 L122、并行版 §3.1 L201）；FlashAttention <code>transformer-deep-dive/materials/text/papers/flashattention-2205.14135.txt</code>（HBM 访问次数的分析与下界，L24、L124–L126）；DeepSeek-V2 MLA <code>llm-full-stack/materials/text/papers/deepseek-v2-mla-2405.04434.txt</code>（KV cache 减少 93.3%，L20–L24）；Transformers are RNNs <code>transformer-deep-dive/materials/text/papers/linear-attention-transformers-are-rnns-2006.16236.txt</code>；Mamba <code>transformer-deep-dive/materials/text/papers/mamba-2312.00752.txt</code>（选择性扫描）；NSA <code>transformer-deep-dive/materials/text/papers/native-sparse-attention-2502.11089.txt</code><br />
+本章缩写：HBM = High Bandwidth Memory（高带宽显存）；SRAM = Static RAM（片上静态存储）；MLA = Multi-head Latent Attention（多头潜在注意力）；SSM = State Space Model（状态空间模型）；NSA = Native Sparse Attention（原生稀疏注意力）；m、l = online softmax 维护的当前最大值、当前分母；φ = 线性注意力的特征映射。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="online-softmax2026-11-25">第一步：online softmax：一遍扫完，边走边修正（2026-11-25）</h3>
+<p><strong>类比：边看成绩单边算平均分，看到一个更高的分数时，把之前的“相对分”统一下调。</strong></p>
+<p>稳定的 softmax 要先知道最大值（第 22 章），似乎要扫两遍。online 版本（Milakov 算法 3，L122）维护 m（目前的最大值）和 l = Σe^{z − m}：</p>
+<div class="arithmatex">\[m' = \max(m, \max\text{block}),\qquad l' = l\cdot e^{m - m'} + \sum_{\text{block}}e^{z - m'}\]</div>
+<p><strong>例子</strong>（z = [1, 3, 2, 5, 0, 4]，每块 2 个）：</p>
+<table>
+<thead>
+<tr>
+<th>块</th>
+<th>第 1 块 [1, 3]</th>
+<th>第 2 块 [2, 5]</th>
+<th>第 3 块 [0, 4]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m</td>
+<td>3</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>l</td>
+<td>1.1353</td>
+<td>1.2034</td>
+<td>1.5781</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="online softmax 的三次修正" src="../figures/48-efficient-attention-online.png" />
+<em>图 48-1 · 三个面板对应扫完第 1、2、3 块：柱子是当前的 e^{z − m}；第 2 块遇到 5 时，第 1 块的两根柱子一起缩小 e^{3−5} 倍</em></p>
+<p>和直接算的 max = 5、Σe^{z−5} = 1.5781 一样。遇到更大的最大值时，旧的 l 乘 e^{m_old − m_new} 修正。注意力输出 O 也可以同样修正：O' = O·e^{m − m'}·(l/l') + 新块的贡献。</p>
+<p><strong>一句话</strong>：online softmax 维护 (m, l)，遇到新最大值就把旧和乘 e^{m_old − m_new}；一遍扫完，结果精确。</p>
+<h3 id="flashattention-nn-2026-11-25">第二步：FlashAttention：不把 N×N 矩阵写回显存（2026-11-25）</h3>
+<p>标准实现：算 S = QKᵀ（N×N）写回 HBM，读回来做 softmax 写回 P，再读 P 乘 V。FlashAttention：把 Q、K、V 切块放进 SRAM，每个块内用 online softmax 累积输出，N×N 矩阵从不落地。HBM 访问量从 Θ(N² + Nd) 降到 Θ(N²d²/M)（M 是 SRAM 能放的元素数，L124–L126，并证明了这个量级在 SRAM 大小范围内是下界）。</p>
+<p><strong>例子</strong>（d = 128、SRAM 100 KB，按量级估算）：</p>
+<table>
+<thead>
+<tr>
+<th>N</th>
+<th>标准实现 HBM 读写</th>
+<th>FlashAttention</th>
+<th>少多少</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2048</td>
+<td>34 MiB</td>
+<td>约 5 MiB</td>
+<td>7.5 倍</td>
+</tr>
+<tr>
+<td>8192</td>
+<td>520 MiB</td>
+<td>约 49 MiB</td>
+<td>10.6 倍</td>
+</tr>
+</tbody>
+</table>
+<p>注意力是带宽受限的（第 47 章），少搬数据就是快；同时不存 N×N 矩阵，激活显存的 s² 项消失（第 46 章）。算的 FLOPs 一点没少，甚至反向时要重算 S。</p>
+<p><strong>一句话</strong>：FlashAttention = 分块 + online softmax，N×N 矩阵只在 SRAM 里出现；FLOPs 不变，HBM 读写降一个量级。</p>
+<h3 id="mqa-gqa-mla-kv2026-11-25">第三步：MQA / GQA / MLA：少存 KV（2026-11-25）</h3>
+<ul>
+<li><strong>MQA / GQA</strong>：多个查询头共用一组 K、V（32 个查询头、8 组 KV：KV cache 1/4；只有 1 组：1/32）；</li>
+<li><strong>MLA</strong>（DeepSeek-V2，L20–L24）：每个 token 只缓存一个低秩潜向量 c（如 512 维），K、V 由 c 投影得到：k = W_UK·c。打分时利用矩阵结合律：</li>
+</ul>
+<div class="arithmatex">\[q^\top(W_{UK}c) = (W_{UK}^\top q)^\top c\]</div>
+<p>把 W_UK 吸收进查询的投影，推理时直接拿 c 打分，不必把每个历史 token 的 K 还原出来（RoPE 那部分维度单独处理）。<strong>例子</strong>：两种算法的结果相差 7 × 10⁻¹⁵（只是舍入）。论文报告 KV cache 减少 93.3%。</p>
+<p><strong>一句话</strong>：GQA / MQA 让查询头共享 KV；MLA 只存低秩潜向量，把上投影矩阵吸收进查询，打分不必还原 K。</p>
+<h3 id="rnn2026-11-25">第四步：线性注意力 = RNN（2026-11-25）</h3>
+<p>把 softmax 换成核 φ(q)ᵀφ(k)，因果注意力的分子可以按结合律重排：</p>
+<div class="arithmatex">\[o_i = \frac{\sum_{j\le i}(\phi(q_i)^\top\phi(k_j))v_j}{\sum_{j\le i}\phi(q_i)^\top\phi(k_j)} = \frac{S_i^\top\phi(q_i)}{z_i^\top\phi(q_i)},\quad S_i = S_{i-1} + \phi(k_i)v_i^\top,\ z_i = z_{i-1} + \phi(k_i)\]</div>
+<p><strong>例子</strong>（6 个 token、d = 4、φ = elu + 1）：并行形式（N×N 矩阵）和递推形式（每步一个 d×d 的状态）最大差 2.2 × 10⁻¹⁶。</p>
+<p>递推形式每步的计算和状态大小都与序列长度无关：生成时像 RNN 一样 O(1) / token。代价：所有历史被压缩进一个固定大小的矩阵 S，精确检索远处的某个 token 比 softmax 注意力难。</p>
+<p><strong>一句话</strong>：线性注意力用结合律把 (QKᵀ)V 改成 Q(KᵀV)，并行训练、递推推理，状态大小固定。</p>
+<h3 id="ssm-2026-11-25">第五步：SSM 的并行扫描（2026-11-25）</h3>
+<p>状态空间模型（如 Mamba）的核心是线性递推 <span class="arithmatex">\(h_t = a_t h_{t-1} + b_t\)</span>（a、b 由输入决定：“选择性”）。看起来只能顺序算，但“操作”(a, b) 的组合满足结合律：</p>
+<div class="arithmatex">\[(a_1, b_1)\circ(a_2, b_2) = (a_2a_1,\ a_2b_1 + b_2)\]</div>
+<p>于是可以用并行前缀扫描：log₂n 轮，每轮所有位置同时和左边距离 2^r 的位置组合。</p>
+<p><strong>例子</strong>（8 步，a ~ U(0.5, 1)）：顺序算和并行扫描（3 轮）最大差 5.6 × 10⁻¹⁷。</p>
+<p>训练时并行扫描（GPU 友好），推理时就是 O(1) / token 的递推，状态大小固定。Mamba-2 进一步证明这类 SSM 和一种结构化的线性注意力等价。NSA 走的是另一条路：保留 softmax，但每个查询只看压缩块、挑选的块和滑动窗口三部分。</p>
+<p><img alt="并行前缀扫描" src="../figures/48-efficient-attention-scan.png" />
+<em>图 48-2 · 8 个位置、3 轮：第 r 轮每个位置和左边距离 2^r 的位置组合（箭头）；3 轮后每个位置都包含了从开头到自己的全部信息</em></p>
+<p><strong>场景代码</strong>：PyTorch 里调用 FlashAttention 后端（真实 API；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">from torch.nn.attention import sdpa_kernel, SDPBackend
+with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+    out = F.scaled_dot_product_attention(q, k, v, is_causal=True)   # GQA 时把 k、v 的头 repeat_interleave
+</code></pre>
+<p><strong>一句话</strong>：线性递推的操作满足结合律，所以能用 log n 轮的并行扫描训练、用 O(1) 递推推理。</p>
+<h3 id="online-softmax">动画演示：online softmax 分块扫描</h3>
+<p><img alt="高效注意力与序列模型" src="../animations/48-efficient-attention.gif" /></p>
+<p>可交互版：<a href="../animations/48-efficient-attention.html">animations/48-efficient-attention.html</a>（滑块调已经扫过的块数和块大小）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上排是 12 个分数，已扫过的块高亮；右上角是当前的 m 和 l（第一步）；</li>
+<li>遇到新的最大值时，之前所有项的柱子（e^{z − m}）一起缩小，这就是乘 e^{m_old − m_new}；</li>
+<li>扫完最后一块，柱子高度除以 l 就是 softmax，和直接算的完全一样。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：z = [2, 0, 4, 1]，每块 2 个，写出两块之后的 (m, l)。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：64 个查询头、8 组 KV 的 GQA，KV cache 是 MHA 的几分之一？如果 MLA 每层只缓存 576 个数，而 MHA 每层缓存 2 × 64 × 128 个数，减少了多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：(a, b) = (0.5, 1)、(0.9, 2)、(0.7, 3)，h₀ = 0，用组合规则算出 h₃。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>online softmax 记最大和分母，遇大就乘 e 的差；<br />
+Flash 分块进 SRAM，N 方矩阵不落地；<br />
+GQA 共享 KV，MLA 存潜向量、上投影吸进查询；<br />
+线性注意力换结合律，就是 RNN；<br />
+线性递推能结合，log n 轮并行扫。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST157（online softmax 的递推）、ST158（FlashAttention 为什么快）、ST159（GQA / MQA / MLA 怎么省 KV）、ST160（线性注意力 = RNN；SSM 的并行扫描）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ FlashAttention（Dao 2022）</td>
+<td>§3（算法 1、定理 2）</td>
+<td>分块与 IO 复杂度</td>
+</tr>
+<tr>
+<td>★ Online softmax（Milakov 2018）</td>
+<td>算法 3（L122）</td>
+<td>递推的原始形式</td>
+</tr>
+<tr>
+<td>★ <a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/27-fusion-flash.html">《从约束推导 AI Infra》第 27 章 融合与 Flash</a>、<a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/09-kv-sharing.html">第 9 章 KV 共享</a>、<a href="https://wikieden.github.io/ai-infra-from-constraints/lessons/10-kv-sparse-linear.html">第 10 章 稀疏与线性</a></td>
+<td>全章</td>
+<td>系统视角</td>
+</tr>
+<tr>
+<td>DeepSeek-V2（MLA 一节）</td>
+<td>§2.1</td>
+<td>低秩 KV 与解耦 RoPE</td>
+</tr>
+<tr>
+<td>Mamba / Mamba-2</td>
+<td>§3 / §6</td>
+<td>选择性扫描、SSM 与注意力的对偶</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>online softmax 的正确性</strong>：Σe^{z − m'} = e^{m − m'}Σe^{z − m} 对旧块成立，所以旧和乘修正因子即可。</li>
+<li><strong>结合律</strong>：(QKᵀ)V = Q(KᵀV)，前者 O(N²d)、后者 O(Nd²)；因果 mask 时改成前缀和。</li>
+<li><strong>扫描的结合律</strong>：h = a₂(a₁h₀ + b₁) + b₂ = (a₂a₁)h₀ + (a₂b₁ + b₂)。</li>
+<li><strong>IO 下界</strong>：FlashAttention 论文证明对 SRAM 大小在 [d, Nd] 范围内，任何精确注意力算法的 HBM 访问都是 Ω(N²d²/M)。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(m' = \max(m, \cdot)\)</span>，<span class="arithmatex">\(l' = le^{m - m'} + \sum e^{z - m'}\)</span></td>
+<td>online softmax</td>
+</tr>
+<tr>
+<td>HBM ≈ Θ(N²d²/M)</td>
+<td>FlashAttention 的读写量</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(q^\top W_{UK}c = (W_{UK}^\top q)^\top c\)</span></td>
+<td>MLA 的吸收</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_i = S_{i-1} + \phi(k_i)v_i^\top\)</span></td>
+<td>线性注意力的递推</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((a_1, b_1)\circ(a_2, b_2) = (a_2a_1, a_2b_1 + b_2)\)</span></td>
+<td>扫描的组合</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch48_efficient_attention.py</code>，配套测试 <code>tests/test_ch48.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch48_efficient_attention.py  
+uv run pytest tests/test_ch48.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 online softmax</td>
+<td>(m, l) 递推</td>
+<td><code>online_softmax_stats(Z)</code></td>
+<td>(5, 1.5781)</td>
+</tr>
+<tr>
+<td>第二步 Flash</td>
+<td>读写量估算</td>
+<td><code>hbm_bytes(8192, 128)</code></td>
+<td>520 vs 49 MiB</td>
+</tr>
+<tr>
+<td>第三步 MLA</td>
+<td>结合律</td>
+<td><code>mla_absorb()</code></td>
+<td>7e-15</td>
+</tr>
+<tr>
+<td>第四步 线性注意力</td>
+<td>并行 vs 递推</td>
+<td><code>linear_attention()</code></td>
+<td>2e-16</td>
+</tr>
+<tr>
+<td>第五步 扫描</td>
+<td>结合律</td>
+<td><code>parallel_scan(a, b)</code></td>
+<td>5.6e-17</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">l = l * np.exp(m - mn) + np.exp(b - mn).sum(); m = mn          # online softmax 一块
+s += np.outer(fk[i], v[i]); z += fk[i]                          # 线性注意力的状态更新
+return (y[0] * x[0], y[0] * x[1] + y[1])                        # 扫描算子的组合
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>online softmax 只算了 m、l</strong>：没有带上 V 和输出的修正；完整的分块注意力（带 V）并和直接 softmax 对数，留给自己做（里程碑 ME-M29）。</li>
+<li><strong>Flash 的读写量是量级估算</strong>：Θ(N²d²/M) 的常数没管，真实收益取决于块大小和实现；标准实现那边也只粗算了 S、P 的读写。</li>
+<li><strong>并行扫描用的是 Hillis–Steele</strong>：总工作量 O(n log n)，比顺序算多；GPU 上常用工作量 O(n) 的 Blelloch 扫描。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>online_softmax_stats</code> 的块大小改成 1 和 6，中间的 (m, l) 怎么变？最后一样吗？</li>
+<li>给 <code>parallel_scan</code> 加一个 h₀ ≠ 0 的初始状态，需要怎么改？</li>
+</ol><nav class="pager"><a href="47-inference-cost.html">← 第 47 章 · 推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="49-quantization.html">第 49 章 · 量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

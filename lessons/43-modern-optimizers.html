@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 43 章 · 现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html" class="cur"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="43-adam-shampoo-soapmuonlionwsd">第 43 章 · 现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</h1><div class="run"><a class="btn" href="../animations/43-modern-optimizers.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch43_modern_optimizers.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch43_modern_optimizers.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch43_modern_optimizers.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：Adam 在几何上到底做了什么？Shampoo 用两个矩阵预条件是什么意思？Muon 的 Newton-Schulz 迭代在做什么，为什么不直接做 SVD？Lion 只用符号为什么也能训？WSD 学习率调度有什么好处？batch 开多大才不浪费？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/42-mup.html">第 42 章 参数化与初始化</a> · 下一章：<a href="../lessons/44-training-stability.html">第 44 章 训练稳定性</a><br />
+对应原文：Shampoo <code>math-and-eval-stats/materials/text/papers/shampoo-1802.09568.txt</code>（算法 1 矩阵情形 L122–L136）；SOAP <code>math-and-eval-stats/materials/text/papers/soap-2409.11321.txt</code>（Shampoo 与在其特征基里跑 Adafactor 的等价，L21–L56）；Muon is Scalable <code>math-and-eval-stats/materials/text/papers/muon-is-scalable-2502.16982.txt</code>（Newton-Schulz 正交化 L100、L134–L159，系数 a, b, c）；Lion <code>math-and-eval-stats/materials/text/papers/lion-symbolic-discovery-2302.06675.txt</code>（Program 1 L74–L82、算法 2 L352–L358）；MiniCPM <code>math-and-eval-stats/materials/text/papers/minicpm-wsd-2404.06395.txt</code>（WSD 调度 L87、§4）；McCandlish 2018 <code>math-and-eval-stats/materials/text/papers/gradient-noise-scale-1812.06162.txt</code>（B_simple = tr(Σ)/|G|²，L299–L309）<br />
+本章缩写：SOAP = ShampoO with Adam in the Preconditioner's eigenbasis（在预条件器特征基里跑 Adam 的 Shampoo）；NS = Newton-Schulz（两位数学家的姓：迭代求矩阵函数的方法）；WSD = Warmup-Stable-Decay（预热 / 稳定 / 衰减）；B_crit、B_simple = 临界批量、简化的梯度噪声尺度；Σ = 单样本梯度的协方差；G = 真梯度。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="adam-2026-11-25">第一步：Adam 是对角预条件（2026-11-25）</h3>
+<p><strong>类比：在一个又长又窄的山谷里下山。</strong> 普通梯度下降沿陡的方向猛冲、沿平的方向几乎不动；Adam 给每个方向单独定步长，各个方向走得差不多快。</p>
+<p>Adam 的更新 <span class="arithmatex">\(\Delta\theta = -\text{lr}\cdot\hat m/(\sqrt{\hat v} + \epsilon)\)</span>：每个坐标除以自己梯度的均方根。这相当于用一个对角矩阵 diag(√v)⁻¹ 去“预条件”梯度（第 14 章）。</p>
+<p><strong>例子</strong>（f = ½(100x² + y²)，从 (1, 1) 出发，曲率差 100 倍）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>第 10 步 (x, y)</th>
+<th>第 60 步 (x, y)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>梯度下降（lr = 0.019，稳定上限 2/100）</td>
+<td>(0.349, 0.825)</td>
+<td>(0.002, 0.316)</td>
+</tr>
+<tr>
+<td>Adam（lr = 0.05）</td>
+<td>(0.512, 0.512)</td>
+<td>(0.021, 0.021)</td>
+</tr>
+<tr>
+<td>牛顿法（用真曲率）</td>
+<td>(0, 0)</td>
+<td>(0, 0)</td>
+</tr>
+</tbody>
+</table>
+<p>梯度下降的 lr 被陡方向卡死，平方向 60 步只走了 68%；Adam 两个方向一样快。牛顿法一步到位，但要 Hessian 的逆，大模型算不起。</p>
+<p><strong>一句话</strong>：Adam = 用梯度的均方根做对角预条件，让每个坐标按自己的尺度走；处理不了坐标之间的耦合。</p>
+<h3 id="shampoo-soap2026-11-25">第二步：Shampoo / SOAP：左右两个矩阵预条件（2026-11-25）</h3>
+<p>对一个矩阵参数 W（m×n），梯度 G 也是 m×n。Shampoo（算法 1，L122）分别累积左右两个统计量，用它们的 −1/4 次方预条件：</p>
+<div class="arithmatex">\[L = \sum GG^\top,\quad R = \sum G^\top G,\quad\Delta W \propto L^{-1/4}\,G\,R^{-1/4}\]</div>
+<p>只有一步时，L^{−1/4}GR^{−1/4} 正好把 G 的所有奇异值变成 1（保留奇异向量，即 UVᵀ）：</p>
+<p><strong>例子</strong>（4×3 的 G）：G 的奇异值 [3.47, 1.68, 0.97] → 预条件后 [1, 1, 1]。</p>
+<p>比 Adam 多考虑了“行之间”和“列之间”的相关性（Kronecker 结构的近似全矩阵预条件），代价是要算 m×m 和 n×n 矩阵的分数次幂。SOAP（L21–L56）发现 Shampoo 等价于在 L、R 的特征基里跑 Adafactor，于是改成在这组基里跑 Adam、低频更新特征基，更便宜也更稳。</p>
+<p><strong>一句话</strong>：Shampoo 用左右两个累积矩阵的 −1/4 次方预条件矩阵梯度，单步时就是把奇异值全变成 1；SOAP 在它的特征基里跑 Adam。</p>
+<h3 id="muon-newton-schulz-2026-11-25">第三步：Muon：用 Newton-Schulz 迭代直接正交化（2026-11-25）</h3>
+<p>既然目标方向是 UVᵀ（奇异值全为 1），Muon 就不累积 L、R，直接对动量矩阵做近似正交化。SVD 在 GPU 上慢，Muon 用 Newton-Schulz 迭代（只有矩阵乘）：</p>
+<div class="arithmatex">\[X_0 = G/\|G\|_F,\qquad X_{k+1} = aX_k + (bX_kX_k^\top + c(X_kX_k^\top)^2)X_k\]</div>
+<p>系数 a, b, c = 3.4445, −4.7750, 2.0315（L157–L159）是为“少几步、把小奇异值快速拉上来”调的，不追求精确收敛到 1。</p>
+<p><strong>例子</strong>（同一个 G）：</p>
+<table>
+<thead>
+<tr>
+<th>NS 步数</th>
+<th>0</th>
+<th>1</th>
+<th>3</th>
+<th>5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>奇异值</td>
+<td>[0.87, 0.42, 0.24]</td>
+<td>[1.12, 0.86, 0.78]</td>
+<td>[1.07, 0.85, 0.69]</td>
+<td>[1.13, 0.82, 0.74]</td>
+</tr>
+</tbody>
+</table>
+<p>5 步后都落在 0.7–1.2 之间：大奇异值方向不再主导更新，小奇异值方向被放大。Muon 只用于隐藏层的矩阵参数，嵌入、输出层、偏置仍用 AdamW；Muon is Scalable（L100、L134）把它扩展到大模型，并加了权重衰减和按矩阵形状缩放更新幅度。</p>
+<p><img alt="Newton-Schulz 迭代把奇异值拉向 1" src="../figures/43-modern-optimizers-ns.png" />
+<em>图 43-1 · 横轴输入奇异值（归一化后 0 到 1），纵轴迭代 1、3、5 步后的输出；3 步以后整个区间都被推到 0.68–1.2，1 步还不够</em></p>
+<p><strong>一句话</strong>：Muon 用 5 步 Newton-Schulz（只有矩阵乘）把动量矩阵的奇异值推到 1 附近，近似 Shampoo 的 UVᵀ 方向，便宜得多。</p>
+<h3 id="lion2026-11-25">第四步：Lion：只要符号（2026-11-25）</h3>
+<p>Lion（Program 1，L74–L82）是自动搜索出来的：</p>
+<div class="arithmatex">\[u = \text{sign}(\beta_1m + (1 - \beta_1)g),\qquad m \leftarrow \beta_2m + (1 - \beta_2)g,\qquad\theta \leftarrow \theta - \text{lr}\,(u + \lambda\theta)\]</div>
+<p><strong>例子</strong>：梯度 [0.003, −2, 50] → 更新方向 [1, −1, 1]：每个坐标走一样远，梯度大小完全不影响步长。</p>
+<p>和 Adam 比：省掉二阶矩 v（显存少一半的优化器状态）；更新的范数固定（√d·lr），所以 lr 通常要比 Adam 小 3–10 倍、权重衰减相应调大。符号更新也可以看成 Adam 在 β₂ → 0 时的极限（第 42 章用它近似 Adam）。</p>
+<p><strong>一句话</strong>：Lion 只用动量插值后的符号更新，每个坐标步长相同、省掉二阶矩；lr 要比 Adam 小。</p>
+<h3 id="wsd-2026-11-25">第五步：WSD 调度与临界批量（2026-11-25）</h3>
+<p><strong>WSD</strong>（MiniCPM L87、§4）：线性预热 → 长时间常数学习率 → 最后约 10% 的步数快速降到 0。</p>
+<p><strong>例子</strong>（1000 步，预热 50 步，最后 100 步衰减）：第 0、49、500、900、950、999 步的学习率倍数 0.02、1.0、1.0、1.0、0.5、0.01。</p>
+<p><img alt="WSD 与余弦调度" src="../figures/43-modern-optimizers-wsd.png" />
+<em>图 43-2 · 灰：余弦调度；蓝：WSD（50 步预热、常数段、最后 10% 线性降到 0）；虚线是从常数段第 600 步接一段衰减得到的另一个完整模型</em></p>
+<p>好处：常数段的任何一个检查点都可以“接一段衰减”得到一个完整训练的模型，不用像余弦调度那样事先定死总步数；续训时也只需要从常数段的检查点接着跑。loss 在衰减段会明显下降一截。</p>
+<p><strong>临界批量</strong>（McCandlish L299–L309）：一个 batch 的梯度估计噪声 ∝ tr(Σ)/B。梯度噪声尺度</p>
+<div class="arithmatex">\[B_{simple} = \frac{\text{tr}(\Sigma)}{|G|^2}\]</div>
+<p>batch 远小于 B_simple 时，batch 翻倍 ≈ 步数减半（完美并行）；远大于时，再加大 batch 几乎不省步数，只是浪费算力。</p>
+<p><strong>例子</strong>（线性回归在 w = 0 处）：B_simple ≈ 116。训练进行中 |G| 变小，B_simple 会变大：大模型训练后期常把 batch 加大。</p>
+<p><strong>场景代码</strong>：Muon 管矩阵参数、AdamW 管其余参数，再套 WSD（示意写法：较新的 PyTorch 提供 <code>torch.optim.Muon</code>，旧版本用 Muon 作者的参考实现；本书环境没装 torch，没跑过）：</p>
+<pre><code class="language-python">opt_muon = torch.optim.Muon([p for p in model.parameters() if p.ndim == 2], lr=0.02, momentum=0.95)
+opt_adam = torch.optim.AdamW(other_params, lr=3e-4)               # 嵌入、输出层、偏置、norm 仍用 AdamW
+sched = torch.optim.lr_scheduler.LambdaLR(opt_adam, lambda t: wsd(t, total, warm))
+</code></pre>
+<p><strong>一句话</strong>：WSD 的常数段检查点随时能接衰减成完整模型；batch 超过梯度噪声尺度 tr(Σ)/|G|² 后收益递减。</p>
+<h3 id="_2">动画演示：长条山谷里的三种走法</h3>
+<p><img alt="现代优化器" src="../animations/43-modern-optimizers.gif" /></p>
+<p>可交互版：<a href="../animations/43-modern-optimizers.html">animations/43-modern-optimizers.html</a>（滑块调步数和曲率比；下拉切换方法）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>椭圆是 f = ½(κx² + y²) 的等高线，点是迭代轨迹（第一步）；</li>
+<li>梯度下降：沿陡方向来回抖、沿平方向慢慢挪；Adam：斜着直奔原点；符号更新（Lion 式）：每步每个坐标走同样远，在原点附近来回跳；</li>
+<li>把曲率比 κ 调大：梯度下降更慢，Adam 几乎不受影响。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：f = ½(400x² + y²)，梯度下降的最大稳定步长是多少？用这个步长的一半，y 方向每步缩小多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二、三步）：G = diag(4, 1)（2×2），L^{−1/4}GR^{−1/4} 是什么？用 Muon 的初值 X₀ = G/‖G‖_F，X₀ 的奇异值是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第五步）：如果单样本梯度协方差的迹是 50，真梯度的范数平方是 0.1，B_simple 是多少？batch 从 64 加到 128，大约能省多少步？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>Adam 是对角预条件，各坐标按自己的尺度走；<br />
+Shampoo 左右开弓，单步就是 U V 转置；<br />
+Muon 五步 Newton-Schulz，只用矩阵乘把奇异值推到一；<br />
+Lion 只看符号，lr 要小；<br />
+WSD 常数段随时接衰减，batch 别超过噪声尺度。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST141（Adam 的对角预条件视角）、ST142（Shampoo / SOAP 与 Muon 的 Newton-Schulz 正交化）、ST143（Lion 的符号更新）、ST144（WSD 调度与梯度噪声尺度）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ Muon is Scalable（2025）</td>
+<td>§2（L100–L160）</td>
+<td>Newton-Schulz 正交化、权重衰减、更新幅度缩放</td>
+</tr>
+<tr>
+<td>★ Shampoo（Gupta 2018）</td>
+<td>§2–3、算法 1（L122）</td>
+<td>Kronecker 预条件</td>
+</tr>
+<tr>
+<td>SOAP（Vyas 2024）</td>
+<td>§3</td>
+<td>Shampoo 与 Adam / Adafactor 的关系</td>
+</tr>
+<tr>
+<td>Lion（Chen 2023）</td>
+<td>§2、Program 1</td>
+<td>符号更新、超参建议</td>
+</tr>
+<tr>
+<td>McCandlish 2018</td>
+<td>§2（L299–L309）</td>
+<td>梯度噪声尺度与临界批量</td>
+</tr>
+<tr>
+<td><a href="../lessons/14-unconstrained-optimization.html">第 14 章 无约束优化</a></td>
+<td>第一至四步</td>
+<td>梯度下降的稳定步长、动量、Adam</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>对角预条件</strong>：Δθ = −lr·D⁻¹g；D = diag(√E[g²]) 时各坐标的有效步长 ≈ lr/|梯度尺度|。</li>
+<li><strong>Shampoo 的单步</strong>：G = USVᵀ ⇒ (GGᵀ)^{−1/4}G(GᵀG)^{−1/4} = US^{−1/2}·S·S^{−1/2}Vᵀ = UVᵀ。</li>
+<li><strong>Newton-Schulz</strong>：X → aX + bXXᵀX + c(XXᵀ)²X 对每个奇异值独立地作用 σ → aσ + bσ³ + cσ⁵；选系数让这个多项式把 (0, 1] 映射到 1 附近。</li>
+<li><strong>梯度噪声尺度</strong>：E|G_B − G|² = tr(Σ)/B；当噪声和信号 |G|² 相当时，B ≈ tr(Σ)/|G|²。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\Delta\theta = -\text{lr}\,\hat m/\sqrt{\hat v}\)</span></td>
+<td>Adam</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\Delta W \propto L^{-1/4}GR^{-1/4}\)</span></td>
+<td>Shampoo</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(X \leftarrow aX + (bXX^\top + c(XX^\top)^2)X\)</span></td>
+<td>Muon 的 Newton-Schulz</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(u = \text{sign}(\beta_1m + (1 - \beta_1)g)\)</span></td>
+<td>Lion</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(B_{simple} = \text{tr}(\Sigma)/\lvert G\rvert^2\)</span></td>
+<td>梯度噪声尺度</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch43_modern_optimizers.py</code>，配套测试 <code>tests/test_ch43.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch43_modern_optimizers.py  
+uv run pytest tests/test_ch43.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 预条件</td>
+<td>GD / Adam / 牛顿</td>
+<td><code>run("adam")</code></td>
+<td>第 60 步 (0.021, 0.021)</td>
+</tr>
+<tr>
+<td>第二步 Shampoo</td>
+<td>L^{−1/4}GR^{−1/4}</td>
+<td><code>shampoo_direction(g)</code></td>
+<td>奇异值 [1, 1, 1]</td>
+</tr>
+<tr>
+<td>第三步 Muon</td>
+<td>NS 5 步</td>
+<td><code>newton_schulz(g, 5)</code></td>
+<td>[1.13, 0.82, 0.74]</td>
+</tr>
+<tr>
+<td>第四步 Lion</td>
+<td>sign</td>
+<td><code>lion_step(g, m)</code></td>
+<td>[1, −1, 1]</td>
+</tr>
+<tr>
+<td>第五步 WSD、噪声尺度</td>
+<td>分段线性；tr(Σ)/|G|²</td>
+<td><code>wsd(t)</code>、<code>noise_scale()</code></td>
+<td>0.5 @ 950；≈ 116</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">x = x - 0.05 * (m / (1 - 0.9 ** t)) / (np.sqrt(v / (1 - 0.999 ** t)) + 1e-8)   # Adam（带偏差修正）
+return mat_pow(g @ g.T, -0.25) @ g @ mat_pow(g.T @ g, -0.25)                   # Shampoo 单步
+m = x @ x.T; x = a * x + (b * m + c * m @ m) @ x                                # Newton-Schulz 一步
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>NS 迭代对“宽”矩阵做</strong>：4×3 的 G 先转置成 3×4，让 XXᵀ 是更小的 3×3，最后再转回来（Muon 原实现也这样）。</li>
+<li><strong>矩阵分数次幂用特征分解</strong>：<code>mat_pow</code> 对对称矩阵做 eigh 再对特征值取幂，小于 1e-12 的特征值截掉，防止 0 的负次幂。</li>
+<li><strong>噪声尺度在 w = 0 处算</strong>：离最优解越近 |G| 越小，B_simple 越大；代码只给一个点，实际训练中它随时间变化。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>run</code> 的曲率改成 [1000, 1]，比较梯度下降和 Adam 第 60 步的位置。</li>
+<li>把 <code>newton_schulz</code> 的系数换成 (1.5, −0.5, 0)（经典的三次 NS），看 5 步后的奇异值。</li>
+</ol><nav class="pager"><a href="42-mup.html">← 第 42 章 · 参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="44-training-stability.html">第 44 章 · 训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

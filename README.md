@@ -2,7 +2,7 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 40 章 · 40 个动画（GIF + 可交互页面）· 89 张静态图 · 135 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 66 章大纲 · 已写 51 章 · 51 个动画（GIF + 可交互页面）· 111 张静态图 · 170 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
 > 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
 
 ## 这本书讲什么
@@ -79,17 +79,17 @@
 | 38 | [位置编码的数学](https://wikieden.github.io/math-and-eval-stats/lessons/38-position-encoding.html) | 正弦编码、RoPE = 复数旋转与相对位置、长度外推（位置插值、NTK、YaRN）、ALiBi | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/38-position-encoding.gif) | ST127–ST129 | ✅ 讲解（练习待作答） |
 | 39 | [归一化与信号传播](https://wikieden.github.io/math-and-eval-stats/lessons/39-normalization.html) | LayerNorm / RMSNorm 的几何、Pre-LN vs Post-LN 的梯度、深层网络的方差传播 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/39-normalization.gif) | ST130–ST132 | ✅ 讲解（练习待作答） |
 | 40 | [张量的数学（PyTorch）](https://wikieden.github.io/math-and-eval-stats/lessons/40-tensor-math.html) | stride 与索引映射、广播规则、einsum 记号、视图与连续性、计算图上的 VJP 组合 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/40-tensor-math.gif) | ST133–ST135 | ✅ 讲解（练习待作答） |
-| 41 | Scaling law | 幂律与 log-log 拟合、Kaplan vs Chinchilla、计算最优 N / D、6ND 计算账、外推误差 | — | — | ⬜ |
-| 42 | 参数化与初始化 | 标准参数化 vs μP、超参从小模型迁移、宽度缩放下的学习率 | — | — | ⬜ |
-| 43 | 现代优化器 | Adam 的预条件视角、Shampoo / SOAP（Kronecker 预条件）、Muon（Newton-Schulz 正交化）、Lion（符号更新）、WSD 调度、梯度噪声尺度与临界批量 | — | — | ⬜ |
-| 44 | 训练稳定性 | loss spike、logit 增长与 z-loss、QK-norm、梯度裁剪、bf16 / fp8 的数值范围与缩放因子 | — | — | ⬜ |
-| 45 | MoE 的数学 | 门控与 top-k、负载均衡辅助损失、无辅助损失的偏置调节、容量因子、专家并行的通信量 | — | — | ⬜ |
-| 46 | 分布式训练账本 | 显存四项（参数 / 梯度 / 优化器状态 / 激活）、ZeRO 分片、DP / TP / PP 通信量公式、流水线气泡、all-reduce 成本模型 | — | — | ⬜ |
-| 47 | 推理成本模型 | roofline 与算术强度、prefill vs decode、KV cache 大小公式、批处理与延迟的权衡 | — | — | ⬜ |
-| 48 | 高效注意力与序列模型 | online softmax 与 FlashAttention 分块、MQA / GQA、MLA 低秩 KV、稀疏注意力（NSA）、线性注意力与 SSM 的并行扫描（Mamba） | — | — | ⬜ |
-| 49 | 量化的数学 | 均匀量化的 scale / zero-point、舍入误差方差、per-channel / group、离群值、GPTQ 的二阶误差补偿、AWQ、SmoothQuant 的等价变换、FP8 / FP4 格式 | — | — | ⬜ |
-| 50 | 解码与采样 | 温度、top-k / top-p、beam search、投机解码（拒绝采样为什么不改分布）、Medusa / EAGLE、约束解码 | — | — | ⬜ |
-| 51 | 后训练的数学 | SFT = MLE；Bradley-Terry 奖励模型；KL 正则目标与闭式最优策略；DPO 推导；GRPO / 推理 RL 的优势归一化 | — | — | ⬜ |
+| 41 | [Scaling law](https://wikieden.github.io/math-and-eval-stats/lessons/41-scaling-law.html) | 幂律与 log-log 拟合、Kaplan vs Chinchilla、计算最优 N / D、6ND 计算账、外推误差 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/41-scaling-law.gif) | ST136–ST138 | ✅ 讲解（练习待作答） |
+| 42 | [参数化与初始化](https://wikieden.github.io/math-and-eval-stats/lessons/42-mup.html) | 标准参数化 vs μP、超参从小模型迁移、宽度缩放下的学习率 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/42-mup.gif) | ST139–ST140 | ✅ 讲解（练习待作答） |
+| 43 | [现代优化器](https://wikieden.github.io/math-and-eval-stats/lessons/43-modern-optimizers.html) | Adam 的预条件视角、Shampoo / SOAP（Kronecker 预条件）、Muon（Newton-Schulz 正交化）、Lion（符号更新）、WSD 调度、梯度噪声尺度与临界批量 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/43-modern-optimizers.gif) | ST141–ST144 | ✅ 讲解（练习待作答） |
+| 44 | [训练稳定性](https://wikieden.github.io/math-and-eval-stats/lessons/44-training-stability.html) | loss spike、logit 增长与 z-loss、QK-norm、梯度裁剪、bf16 / fp8 的数值范围与缩放因子 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/44-training-stability.gif) | ST145–ST147 | ✅ 讲解（练习待作答） |
+| 45 | [MoE 的数学](https://wikieden.github.io/math-and-eval-stats/lessons/45-moe-math.html) | 门控与 top-k、负载均衡辅助损失、无辅助损失的偏置调节、容量因子、专家并行的通信量 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/45-moe-math.gif) | ST148–ST150 | ✅ 讲解（练习待作答） |
+| 46 | [分布式训练账本](https://wikieden.github.io/math-and-eval-stats/lessons/46-distributed-ledger.html) | 显存四项（参数 / 梯度 / 优化器状态 / 激活）、ZeRO 分片、DP / TP / PP 通信量公式、流水线气泡、all-reduce 成本模型 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/46-distributed-ledger.gif) | ST151–ST153 | ✅ 讲解（练习待作答） |
+| 47 | [推理成本模型](https://wikieden.github.io/math-and-eval-stats/lessons/47-inference-cost.html) | roofline 与算术强度、prefill vs decode、KV cache 大小公式、批处理与延迟的权衡 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/47-inference-cost.gif) | ST154–ST156 | ✅ 讲解（练习待作答） |
+| 48 | [高效注意力与序列模型](https://wikieden.github.io/math-and-eval-stats/lessons/48-efficient-attention.html) | online softmax 与 FlashAttention 分块、MQA / GQA、MLA 低秩 KV、稀疏注意力（NSA）、线性注意力与 SSM 的并行扫描（Mamba） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/48-efficient-attention.gif) | ST157–ST160 | ✅ 讲解（练习待作答） |
+| 49 | [量化的数学](https://wikieden.github.io/math-and-eval-stats/lessons/49-quantization.html) | 均匀量化的 scale / zero-point、舍入误差方差、per-channel / group、离群值、GPTQ 的二阶误差补偿、AWQ、SmoothQuant 的等价变换、FP8 / FP4 格式 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/49-quantization.gif) | ST161–ST163 | ✅ 讲解（练习待作答） |
+| 50 | [解码与采样](https://wikieden.github.io/math-and-eval-stats/lessons/50-decoding.html) | 温度、top-k / top-p、beam search、投机解码（拒绝采样为什么不改分布）、Medusa / EAGLE、约束解码 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/50-decoding.gif) | ST164–ST166 | ✅ 讲解（练习待作答） |
+| 51 | [后训练的数学](https://wikieden.github.io/math-and-eval-stats/lessons/51-post-training.html) | SFT = MLE；Bradley-Terry 奖励模型；KL 正则目标与闭式最优策略；DPO 推导；GRPO / 推理 RL 的优势归一化 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/51-post-training.gif) | ST167–ST170 | ✅ 讲解（练习待作答） |
 | 52 | 相机几何 | 针孔模型、内参 / 外参、畸变模型、反投影、逆透视变换与 BEV（Lift-Splat-Shoot） | — | — | ⬜ |
 | 53 | 多视几何 | 对极约束、本质 / 基础矩阵、单应、三角化、PnP、RANSAC 迭代次数公式；DUSt3R 怎么绕开这条流水线 | — | — | ⬜ |
 | 54 | 点云与配准 | 最近邻与 KD 树、Procrustes / Kabsch（SVD 求最优旋转）、ICP（点到点 / 点到面）、法向量 = 局部协方差的最小特征向量 | — | — | ⬜ |

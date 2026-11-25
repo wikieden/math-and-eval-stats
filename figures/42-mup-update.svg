@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">一步 Adam 更新对隐藏激活的影响随宽度变化</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">同一个名义学习率 10⁻³。SP（橙）每宽一倍影响翻倍；μP（蓝）把隐藏层 lr 按 1/n 缩放，影响不随宽度变。</text>
+<line x1="80.0" y1="220.0" x2="780.0" y2="220.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="224.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">-1.5</text>
+<line x1="80.0" y1="181.4" x2="780.0" y2="181.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="185.4" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">-1</text>
+<line x1="80.0" y1="142.7" x2="780.0" y2="142.7" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="146.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">-0.5</text>
+<line x1="80.0" y1="104.1" x2="780.0" y2="104.1" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="108.1" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="80.0" y1="65.5" x2="780.0" y2="65.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="74.0" y="69.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="80.0" y1="50.0" x2="80.0" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="80.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">64</text>
+<line x1="196.7" y1="50.0" x2="196.7" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="196.7" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">128</text>
+<line x1="313.3" y1="50.0" x2="313.3" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="313.3" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">256</text>
+<line x1="430.0" y1="50.0" x2="430.0" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="430.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">512</text>
+<line x1="546.7" y1="50.0" x2="546.7" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="546.7" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">1024</text>
+<line x1="663.3" y1="50.0" x2="663.3" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="663.3" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">2048</text>
+<line x1="780.0" y1="50.0" x2="780.0" y2="220.0" stroke="#f0f1f3" stroke-width="1"/>
+<text x="780.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">4096</text>
+<line x1="80.0" y1="220.0" x2="780.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<line x1="80.0" y1="50.0" x2="80.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<text x="430.0" y="252.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle" font-weight="normal">宽度 n（对数）</text>
+<text transform="translate(40.0,135.0) rotate(-90)" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle">log₁₀ |Δh|</text>
+<polyline points="80.0,206.2 196.7,181.1 313.3,156.6 430.0,133.8 546.7,111.9 663.3,87.5 780.0,64.2" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<circle cx="80.0" cy="206.2" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="196.7" cy="181.1" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="313.3" cy="156.6" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="430.0" cy="133.8" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="546.7" cy="111.9" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="663.3" cy="87.5" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<circle cx="780.0" cy="64.2" r="3.5" fill="#ea580c" stroke="#ea580c" stroke-width="0.5"/>
+<polyline points="80.0,206.2 196.7,204.4 313.3,203.1 430.0,203.6 546.7,205.0 663.3,203.8 780.0,203.8" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<circle cx="80.0" cy="206.2" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="196.7" cy="204.4" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="313.3" cy="203.1" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="430.0" cy="203.6" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="546.7" cy="205.0" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="663.3" cy="203.8" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<circle cx="780.0" cy="203.8" r="3.5" fill="#2563eb" stroke="#2563eb" stroke-width="0.5"/>
+<line x1="120.0" y1="76.0" x2="142.0" y2="76.0" stroke="#ea580c" stroke-width="2.5"/>
+<text x="148.0" y="80.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">SP</text>
+<line x1="120.0" y1="94.0" x2="142.0" y2="94.0" stroke="#2563eb" stroke-width="2.5"/>
+<text x="148.0" y="98.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">μP</text>
+</svg>
