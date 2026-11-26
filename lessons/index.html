@@ -75,13 +75,182 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 在线阅读：<a href="https://wikieden.github.io/math-and-eval-stats/">https://wikieden.github.io/math-and-eval-stats/</a>（66 章全部写完）</p>
 </blockquote>
 <h2 id="_2">这本书讲什么</h2>
-<p>从"30 次试验成功 21 次"这一个数字讲起：它有多准、两个这样的数怎么比、要测多少次才分得出高下、配对和多任务时怎么算、怎么定 A/B 判定规则，最后落到批判地读 loss 曲线和消融表。后 15 章从 Physical AI 的算法倒推数学：VLA 和动作头要的概率、高斯、KL 与生成模型数学，训练要的线代、自动微分与优化，运控要的 QP 与 Riccati，感知要的旋转、李群与 Kalman，扩散采样要的 ODE 积分器。再往下两篇：深入篇（第 23–34 章）把 RL、LQR / MPC、扩散与 flow 的推导写完整，补测度论、泛函、流形、随机微积分、最优传输、信息几何；应用篇（第 35–66 章）讲 CNN、Transformer、PyTorch 张量背后的数学，现代 LLM 的 scaling law、μP、Muon / SOAP、MoE、分布式账本、KV cache、FlashAttention、量化、投机解码、DPO / GRPO，以及导航感知（多视几何、SLAM、VIO、规划、NeRF / 3DGS）、多模态融合和 VLN。哪个算法用到哪块数学，见 Physical AI 数学需求地图。</p>
+<p>学 Physical AI 的算法（VLA、扩散 / flow 动作头、强化学习、运动控制、SLAM 与导航、大模型训练与部署），真正卡住人的往往不是算法本身，而是算法背后那一行数学：交叉熵为什么就是最大似然，PPO 的比率从哪来，flow matching 的目标为什么这么写，旋转为什么不能直接相加，Kalman 增益在权衡什么。这本书把这些数学从算法里倒推出来，一块一块讲清楚。</p>
+<p>全书 66 章，分五部分：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>章</th>
+<th>讲什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>评测统计</td>
+<td>1–7</td>
+<td>从"30 次试验成功 21 次"讲起：它有多准、两个这样的数怎么比、要测多少次、配对和多任务怎么算、怎么定 A/B 判定规则、怎么读 loss 曲线和消融表</td>
+</tr>
+<tr>
+<td>数学底座</td>
+<td>8–22</td>
+<td>概率与信息（MLE、高斯、KL）、线代与微积分（SVD、雅可比、自动微分）、优化（Adam、KKT、QP）、采样与生成（重要性采样、ELBO、score）、旋转与李群、Kalman、动力系统、数值稳定</td>
+</tr>
+<tr>
+<td>深入篇</td>
+<td>23–34</td>
+<td>RL、LQR / MPC、扩散与 flow 的完整推导；测度论、泛函、流形优化、随机微积分、最优传输、信息几何</td>
+</tr>
+<tr>
+<td>应用篇 · 模型</td>
+<td>35–51</td>
+<td>CNN、注意力、位置编码、归一化、张量；scaling law、μP、Muon / SOAP、训练稳定性、MoE、分布式、推理成本、FlashAttention、量化、解码、DPO / GRPO</td>
+</tr>
+<tr>
+<td>应用篇 · 机器人</td>
+<td>52–66</td>
+<td>相机与多视几何、点云配准、SLAM、VIO、地图、路径规划、NeRF / 3DGS、感知评测；多模态融合、视觉-语言对齐、标定、VLN 的评测与决策</td>
+</tr>
+</tbody>
+</table>
+<p>哪个算法用到哪块数学，见 Physical AI 数学需求地图。</p>
 <ul>
-<li><strong>适合谁</strong>：要审实验、做评测、拍板"新模型能不能上"的人。只需要高中数学；缺的概率知识在第 1 章和第 8 章现场补。</li>
-<li><strong>读完能做什么</strong>：当场回答 算法总监路线 · 达标自测 第 1 题（21/30 对 18/30，为什么下不了结论、要测多少次）；给团队的成功率表配上正确的区间；审一张消融表；做 学习计划 的里程碑 ME-M1–M36；读 π0 的 flow 动作头、PPO 的重要性比率、ESKF 的四元数扰动、凸 MPC 的 QP 时，知道每一步数学在干什么。</li>
-<li><strong>怎么读</strong>：按章顺序读；只想学 VLA 或运动控制的，按 <a href="../lessons/appendix-reading-paths.html">章节索引</a> 挑章读。每章先看讲解和动画，再自己做练习，最后用复习卡片隔几天考自己。</li>
+<li><strong>适合谁</strong>：学算法、读论文时被公式卡住的人；要做评测、拍板"新模型能不能上"的人。只需要高中数学，缺的知识在用到的那一章现场补。</li>
+<li><strong>读完能做什么</strong>：读 π0 的 flow 动作头、PPO 的重要性比率、ESKF 的四元数扰动、凸 MPC 的 QP、FlashAttention 的分块、DAgger 的误差界时，知道每一步数学在干什么；给成功率表配上正确的区间，回答 算法总监路线 · 达标自测 第 1 题（21/30 对 18/30 为什么下不了结论、要测多少次）；做 学习计划 的里程碑 ME-M1–M36。</li>
 </ul>
-<h2 id="_3">讲解的特点</h2>
+<h2 id="_3">怎么读：先看哪些，用到再看哪些</h2>
+<p>这本书是工具箱，不用从第 1 章读到第 66 章。先读下面 12 章打底，其余的等学某个算法、读某篇论文卡住时再回来查。</p>
+<p><strong>开头必须看的 12 章</strong>（约两周，几乎所有算法都会用到）：</p>
+<table>
+<thead>
+<tr>
+<th>章</th>
+<th>内容</th>
+<th>为什么必须先看</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../lessons/01-success-rate-ci.html">1</a></td>
+<td>一个成功率有多准</td>
+<td>21/30 到底有多准，看懂任何实验结果的第一步</td>
+</tr>
+<tr>
+<td><a href="../lessons/02-two-proportions.html">2</a></td>
+<td>两个成功率比一比</td>
+<td>判断"A 比 B 好"是不是真的</td>
+</tr>
+<tr>
+<td><a href="../lessons/08-probability-mle-map.html">8</a></td>
+<td>概率、MLE、MAP</td>
+<td>行为克隆、交叉熵损失本质上都是最大似然</td>
+</tr>
+<tr>
+<td><a href="../lessons/09-gaussian.html">9</a></td>
+<td>高斯分布</td>
+<td>策略、噪声、Kalman、扩散里全是高斯</td>
+</tr>
+<tr>
+<td><a href="../lessons/10-information-kl.html">10</a></td>
+<td>信息论与 KL</td>
+<td>交叉熵、KL 惩罚、ELBO、互信息都从这里来</td>
+</tr>
+<tr>
+<td><a href="../lessons/11-linear-algebra-basics.html">11</a></td>
+<td>线代基础</td>
+<td>矩阵、特征值、正定，读任何公式都要用</td>
+</tr>
+<tr>
+<td><a href="../lessons/12-svd-least-squares.html">12</a></td>
+<td>SVD 与最小二乘</td>
+<td>拟合、低秩（LoRA）、标定、配准都靠它</td>
+</tr>
+<tr>
+<td><a href="../lessons/13-calculus-autodiff.html">13</a></td>
+<td>微积分与自动微分</td>
+<td>梯度、雅可比、反向传播</td>
+</tr>
+<tr>
+<td><a href="../lessons/14-unconstrained-optimization.html">14</a></td>
+<td>无约束优化</td>
+<td>梯度下降、动量、Adam，训练的基础</td>
+</tr>
+<tr>
+<td><a href="../lessons/16-monte-carlo-sampling.html">16</a></td>
+<td>蒙特卡洛与采样</td>
+<td>期望怎么估、重要性采样（PPO 的比率）</td>
+</tr>
+<tr>
+<td><a href="../lessons/18-rotations-rigid-transforms.html">18</a></td>
+<td>旋转与刚体变换</td>
+<td>机器人里位姿、动作、相机都是旋转</td>
+</tr>
+<tr>
+<td><a href="../lessons/37-attention-math.html">37</a></td>
+<td>注意力的数学</td>
+<td>现在的模型主干都是 Transformer</td>
+</tr>
+</tbody>
+</table>
+<p>只学机器人控制、不碰大模型的，第 37 章可以换成 <a href="../lessons/21-dynamics-control.html">第 21 章 动力系统</a>。</p>
+<p><strong>用到再看</strong>（按你开始做什么来查）：</p>
+<table>
+<thead>
+<tr>
+<th>当你开始……</th>
+<th>再看这几章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设计实验、写论文对比表</td>
+<td><a href="../lessons/03-power-sample-size.html">3</a> 要测多少次、<a href="../lessons/04-paired-comparison.html">4</a> 配对、<a href="../lessons/05-bootstrap-bayes.html">5</a> bootstrap、<a href="../lessons/06-ab-rules-multiple-comparisons.html">6</a> 多重比较、<a href="../lessons/07-read-curves-and-ablations.html">7</a> 读曲线和消融</td>
+</tr>
+<tr>
+<td>读扩散 / flow 动作头（π0、Diffusion Policy）</td>
+<td><a href="../lessons/17-generative-math.html">17</a> 生成模型、<a href="../lessons/27-diffusion-derivation.html">27</a> 扩散推导、<a href="../lessons/28-flow-matching.html">28</a> flow matching、<a href="../lessons/22-numerics.html">22</a> ODE 积分器</td>
+</tr>
+<tr>
+<td>做强化学习、PPO、GRPO</td>
+<td><a href="../lessons/23-mdp-bellman.html">23</a> MDP 与 Bellman、<a href="../lessons/24-policy-gradient.html">24</a> 策略梯度、<a href="../lessons/51-post-training.html">51</a> DPO / GRPO</td>
+</tr>
+<tr>
+<td>做控制（LQR、MPC、全身控制）</td>
+<td><a href="../lessons/15-constrained-convex-qp.html">15</a> 约束优化与 QP、<a href="../lessons/21-dynamics-control.html">21</a> 动力系统、<a href="../lessons/25-lqr-riccati.html">25</a> LQR、<a href="../lessons/26-trajopt-mpc.html">26</a> 轨迹优化与 MPC</td>
+</tr>
+<tr>
+<td>做状态估计、上真机</td>
+<td><a href="../lessons/19-lie-groups.html">19</a> 李群、<a href="../lessons/20-state-estimation.html">20</a> Kalman、<a href="../lessons/56-vio.html">56</a> VIO、<a href="../lessons/64-calibration.html">64</a> 标定与时间对齐</td>
+</tr>
+<tr>
+<td>训大模型</td>
+<td><a href="../lessons/38-position-encoding.html">38</a> 位置编码、<a href="../lessons/39-normalization.html">39</a> 归一化、<a href="../lessons/40-tensor-math.html">40</a> 张量、<a href="../lessons/41-scaling-law.html">41</a> scaling law、<a href="../lessons/42-mup.html">42</a> μP、<a href="../lessons/43-modern-optimizers.html">43</a> 优化器、<a href="../lessons/44-training-stability.html">44</a> 训练稳定性</td>
+</tr>
+<tr>
+<td>部署、加速推理</td>
+<td><a href="../lessons/45-moe-math.html">45</a> MoE、<a href="../lessons/46-distributed-ledger.html">46</a> 分布式、<a href="../lessons/47-inference-cost.html">47</a> 推理成本、<a href="../lessons/48-efficient-attention.html">48</a> 高效注意力、<a href="../lessons/49-quantization.html">49</a> 量化、<a href="../lessons/50-decoding.html">50</a> 解码</td>
+</tr>
+<tr>
+<td>做视觉感知</td>
+<td><a href="../lessons/35-convolution.html">35</a> 卷积、<a href="../lessons/36-cnn-training.html">36</a> CNN 训练、<a href="../lessons/52-camera-geometry.html">52</a> 相机、<a href="../lessons/53-multiview-geometry.html">53</a> 多视几何、<a href="../lessons/60-perception-metrics.html">60</a> 检测评测</td>
+</tr>
+<tr>
+<td>做 SLAM、建图、导航</td>
+<td><a href="../lessons/54-point-cloud.html">54</a> 点云、<a href="../lessons/55-slam-optimization.html">55</a> SLAM 优化、<a href="../lessons/57-maps.html">57</a> 地图、<a href="../lessons/58-path-planning.html">58</a> 路径规划、<a href="../lessons/59-neural-rendering.html">59</a> NeRF / 3DGS</td>
+</tr>
+<tr>
+<td>做多模态、VLM、VLN</td>
+<td><a href="../lessons/61-multimodal-fusion.html">61</a> 融合、<a href="../lessons/62-vl-alignment.html">62</a> 视觉-语言对齐、<a href="../lessons/63-nonimage-modalities.html">63</a> 非图像模态、<a href="../lessons/65-vln-metrics.html">65</a> VLN 评测、<a href="../lessons/66-vln-decision.html">66</a> VLN 决策</td>
+</tr>
+<tr>
+<td>读论文附录里的严格证明</td>
+<td><a href="../lessons/29-measure-probability.html">29</a> 测度论、<a href="../lessons/30-functional-analysis.html">30</a> 泛函分析、<a href="../lessons/31-manifold-optimization.html">31</a> 流形优化、<a href="../lessons/32-stochastic-calculus.html">32</a> 随机微积分、<a href="../lessons/33-optimal-transport.html">33</a> 最优传输、<a href="../lessons/34-information-geometry.html">34</a> 信息几何</td>
+</tr>
+</tbody>
+</table>
+<p><strong>判断标准</strong>：论文公式看不懂，就去查对应的章，读完那一步就回到论文；第 29–34 章不做理论研究可以一直不读；第 3–7 章在自己做对比实验之前可以先放着；但上面 12 章少读一章，后面会反复卡在同一类公式上。只学 VLA 或运动控制的，<a href="../lessons/appendix-reading-paths.html">按目标读</a>里有对到 VLA、运控讲义各章的分阶段路线。</p>
+<p><strong>每一章怎么读</strong>（约 1–2 小时）：先看开头的"本章回答"，确认是你要的；再只读每一步的"类比"和"一句话"搭框架；然后读公式和例子（例子里的数都是代码算出来的，可以手算一两个对一下）；看图、拖一拖动画（"看点"写了该拖什么）；在 Colab 里跑本章 notebook，按"自己改一改"改参数；最后做 3 道练习，隔几天用复习卡片考自己。每章开头的"对应原文"标了论文的行号，读完直接去读那几行原文；正文只用小例子讲概念，完整实现留给 学习计划 的里程碑 ME-M*，动手写一遍才算学会。</p>
+<h2 id="_4">讲解的特点</h2>
 <ul>
 <li><strong>一次一小步</strong>：每个概念按"白话类比 → 公式（每个符号说清楚怎么读）→ 小数字亲手算一遍"讲。</li>
 <li><strong>能用图讲的都用图讲</strong>：数量不设上限。关键机制做成可交互页面（▶ 播放、→ 单步、↺ 重来，有参数的配滑块），讲义里嵌 GIF；数字之间的关系画成图表，结构和流程画成静态图。</li>
@@ -91,7 +260,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <li><strong>每章都有代码对照</strong>：讲义里的数字用 Python（NumPy、SciPy）算一遍，配测试核对；只算讲过的例子，不提前给练习答案。</li>
 <li><strong>每章收尾有口诀</strong>：全部口诀汇总在本页末尾。</li>
 </ul>
-<h2 id="_4">示例动画</h2>
+<h2 id="_5">示例动画</h2>
 <table>
 <thead>
 <tr>
@@ -138,7 +307,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 </tbody>
 </table>
-<h2 id="_5">其他入口</h2>
+<h2 id="_6">其他入口</h2>
 <ul>
 <li><a href="../review.html">复习卡片</a>（ST01 起）</li>
 <li><a href="../lessons/appendix-reading-paths.html">按目标读：学 VLA、学运动控制的章节索引</a>（每条一条最短路径 + 分阶段必读 / 选读，对到 VLA 和运控讲义的章）</li>
@@ -147,7 +316,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 <li>材料清单</li>
 <li>代码对照</li>
 </ul>
-<h2 id="_6">全流程总览</h2>
+<h2 id="_7">全流程总览</h2>
 <pre><code>一个成功率（第 1 章）── 有多准：SE、Wilson 区间
       │
 两个成功率（第 2 章）── 差多少、是不是运气：差值区间、p 值
@@ -273,7 +442,7 @@ LLM 篇（41–51）──────── scaling law → μP → 优化器 �
 </tr>
 </tbody>
 </table>
-<h2 id="_7">目录</h2>
+<h2 id="_8">目录</h2>
 <table>
 <thead>
 <tr>
@@ -816,9 +985,9 @@ LLM 篇（41–51）──────── scaling law → μP → 优化器 �
 </tr>
 </tbody>
 </table>
-<h2 id="_8">后续大纲</h2>
+<h2 id="_9">后续大纲</h2>
 <p>第 2–66 章各自对应的材料和里程碑见 学习计划 · 逐章计划。讲到时再微调。</p>
-<h2 id="_9">口诀汇总</h2>
+<h2 id="_10">口诀汇总</h2>
 <p><strong>第 1 章 一个成功率有多准</strong></p>
 <blockquote>
 <p>一勺汤不是一锅汤，七成背后正负十五；<br />
