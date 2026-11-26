@@ -24,6 +24,49 @@
 - **适合谁**：学算法、读论文时被公式卡住的人；要做评测、拍板"新模型能不能上"的人。只需要高中数学，缺的知识在用到的那一章现场补。
 - **读完能做什么**：读 π0 的 flow 动作头、PPO 的重要性比率、ESKF 的四元数扰动、凸 MPC 的 QP、FlashAttention 的分块、DAgger 的误差界时，知道每一步数学在干什么；给成功率表配上正确的区间，回答 算法总监路线 · 达标自测 第 1 题（21/30 对 18/30 为什么下不了结论、要测多少次）；做 学习计划 的里程碑 ME-M1–M36。
 
+## 怎么读：先看哪些，用到再看哪些
+
+这本书是工具箱，不用从第 1 章读到第 66 章。先读下面 12 章打底，其余的等学某个算法、读某篇论文卡住时再回来查。
+
+**开头必须看的 12 章**（约两周，几乎所有算法都会用到）：
+
+| 章 | 内容 | 为什么必须先看 |
+|---|---|---|
+| [1](https://wikieden.github.io/math-and-eval-stats/lessons/01-success-rate-ci.html) | 一个成功率有多准 | 21/30 到底有多准，看懂任何实验结果的第一步 |
+| [2](https://wikieden.github.io/math-and-eval-stats/lessons/02-two-proportions.html) | 两个成功率比一比 | 判断"A 比 B 好"是不是真的 |
+| [8](https://wikieden.github.io/math-and-eval-stats/lessons/08-probability-mle-map.html) | 概率、MLE、MAP | 行为克隆、交叉熵损失本质上都是最大似然 |
+| [9](https://wikieden.github.io/math-and-eval-stats/lessons/09-gaussian.html) | 高斯分布 | 策略、噪声、Kalman、扩散里全是高斯 |
+| [10](https://wikieden.github.io/math-and-eval-stats/lessons/10-information-kl.html) | 信息论与 KL | 交叉熵、KL 惩罚、ELBO、互信息都从这里来 |
+| [11](https://wikieden.github.io/math-and-eval-stats/lessons/11-linear-algebra-basics.html) | 线代基础 | 矩阵、特征值、正定，读任何公式都要用 |
+| [12](https://wikieden.github.io/math-and-eval-stats/lessons/12-svd-least-squares.html) | SVD 与最小二乘 | 拟合、低秩（LoRA）、标定、配准都靠它 |
+| [13](https://wikieden.github.io/math-and-eval-stats/lessons/13-calculus-autodiff.html) | 微积分与自动微分 | 梯度、雅可比、反向传播 |
+| [14](https://wikieden.github.io/math-and-eval-stats/lessons/14-unconstrained-optimization.html) | 无约束优化 | 梯度下降、动量、Adam，训练的基础 |
+| [16](https://wikieden.github.io/math-and-eval-stats/lessons/16-monte-carlo-sampling.html) | 蒙特卡洛与采样 | 期望怎么估、重要性采样（PPO 的比率） |
+| [18](https://wikieden.github.io/math-and-eval-stats/lessons/18-rotations-rigid-transforms.html) | 旋转与刚体变换 | 机器人里位姿、动作、相机都是旋转 |
+| [37](https://wikieden.github.io/math-and-eval-stats/lessons/37-attention-math.html) | 注意力的数学 | 现在的模型主干都是 Transformer |
+
+只学机器人控制、不碰大模型的，第 37 章可以换成 [第 21 章 动力系统](https://wikieden.github.io/math-and-eval-stats/lessons/21-dynamics-control.html)。
+
+**用到再看**（按你开始做什么来查）：
+
+| 当你开始…… | 再看这几章 |
+|---|---|
+| 设计实验、写论文对比表 | [3](https://wikieden.github.io/math-and-eval-stats/lessons/03-power-sample-size.html) 要测多少次、[4](https://wikieden.github.io/math-and-eval-stats/lessons/04-paired-comparison.html) 配对、[5](https://wikieden.github.io/math-and-eval-stats/lessons/05-bootstrap-bayes.html) bootstrap、[6](https://wikieden.github.io/math-and-eval-stats/lessons/06-ab-rules-multiple-comparisons.html) 多重比较、[7](https://wikieden.github.io/math-and-eval-stats/lessons/07-read-curves-and-ablations.html) 读曲线和消融 |
+| 读扩散 / flow 动作头（π0、Diffusion Policy） | [17](https://wikieden.github.io/math-and-eval-stats/lessons/17-generative-math.html) 生成模型、[27](https://wikieden.github.io/math-and-eval-stats/lessons/27-diffusion-derivation.html) 扩散推导、[28](https://wikieden.github.io/math-and-eval-stats/lessons/28-flow-matching.html) flow matching、[22](https://wikieden.github.io/math-and-eval-stats/lessons/22-numerics.html) ODE 积分器 |
+| 做强化学习、PPO、GRPO | [23](https://wikieden.github.io/math-and-eval-stats/lessons/23-mdp-bellman.html) MDP 与 Bellman、[24](https://wikieden.github.io/math-and-eval-stats/lessons/24-policy-gradient.html) 策略梯度、[51](https://wikieden.github.io/math-and-eval-stats/lessons/51-post-training.html) DPO / GRPO |
+| 做控制（LQR、MPC、全身控制） | [15](https://wikieden.github.io/math-and-eval-stats/lessons/15-constrained-convex-qp.html) 约束优化与 QP、[21](https://wikieden.github.io/math-and-eval-stats/lessons/21-dynamics-control.html) 动力系统、[25](https://wikieden.github.io/math-and-eval-stats/lessons/25-lqr-riccati.html) LQR、[26](https://wikieden.github.io/math-and-eval-stats/lessons/26-trajopt-mpc.html) 轨迹优化与 MPC |
+| 做状态估计、上真机 | [19](https://wikieden.github.io/math-and-eval-stats/lessons/19-lie-groups.html) 李群、[20](https://wikieden.github.io/math-and-eval-stats/lessons/20-state-estimation.html) Kalman、[56](https://wikieden.github.io/math-and-eval-stats/lessons/56-vio.html) VIO、[64](https://wikieden.github.io/math-and-eval-stats/lessons/64-calibration.html) 标定与时间对齐 |
+| 训大模型 | [38](https://wikieden.github.io/math-and-eval-stats/lessons/38-position-encoding.html) 位置编码、[39](https://wikieden.github.io/math-and-eval-stats/lessons/39-normalization.html) 归一化、[40](https://wikieden.github.io/math-and-eval-stats/lessons/40-tensor-math.html) 张量、[41](https://wikieden.github.io/math-and-eval-stats/lessons/41-scaling-law.html) scaling law、[42](https://wikieden.github.io/math-and-eval-stats/lessons/42-mup.html) μP、[43](https://wikieden.github.io/math-and-eval-stats/lessons/43-modern-optimizers.html) 优化器、[44](https://wikieden.github.io/math-and-eval-stats/lessons/44-training-stability.html) 训练稳定性 |
+| 部署、加速推理 | [45](https://wikieden.github.io/math-and-eval-stats/lessons/45-moe-math.html) MoE、[46](https://wikieden.github.io/math-and-eval-stats/lessons/46-distributed-ledger.html) 分布式、[47](https://wikieden.github.io/math-and-eval-stats/lessons/47-inference-cost.html) 推理成本、[48](https://wikieden.github.io/math-and-eval-stats/lessons/48-efficient-attention.html) 高效注意力、[49](https://wikieden.github.io/math-and-eval-stats/lessons/49-quantization.html) 量化、[50](https://wikieden.github.io/math-and-eval-stats/lessons/50-decoding.html) 解码 |
+| 做视觉感知 | [35](https://wikieden.github.io/math-and-eval-stats/lessons/35-convolution.html) 卷积、[36](https://wikieden.github.io/math-and-eval-stats/lessons/36-cnn-training.html) CNN 训练、[52](https://wikieden.github.io/math-and-eval-stats/lessons/52-camera-geometry.html) 相机、[53](https://wikieden.github.io/math-and-eval-stats/lessons/53-multiview-geometry.html) 多视几何、[60](https://wikieden.github.io/math-and-eval-stats/lessons/60-perception-metrics.html) 检测评测 |
+| 做 SLAM、建图、导航 | [54](https://wikieden.github.io/math-and-eval-stats/lessons/54-point-cloud.html) 点云、[55](https://wikieden.github.io/math-and-eval-stats/lessons/55-slam-optimization.html) SLAM 优化、[57](https://wikieden.github.io/math-and-eval-stats/lessons/57-maps.html) 地图、[58](https://wikieden.github.io/math-and-eval-stats/lessons/58-path-planning.html) 路径规划、[59](https://wikieden.github.io/math-and-eval-stats/lessons/59-neural-rendering.html) NeRF / 3DGS |
+| 做多模态、VLM、VLN | [61](https://wikieden.github.io/math-and-eval-stats/lessons/61-multimodal-fusion.html) 融合、[62](https://wikieden.github.io/math-and-eval-stats/lessons/62-vl-alignment.html) 视觉-语言对齐、[63](https://wikieden.github.io/math-and-eval-stats/lessons/63-nonimage-modalities.html) 非图像模态、[65](https://wikieden.github.io/math-and-eval-stats/lessons/65-vln-metrics.html) VLN 评测、[66](https://wikieden.github.io/math-and-eval-stats/lessons/66-vln-decision.html) VLN 决策 |
+| 读论文附录里的严格证明 | [29](https://wikieden.github.io/math-and-eval-stats/lessons/29-measure-probability.html) 测度论、[30](https://wikieden.github.io/math-and-eval-stats/lessons/30-functional-analysis.html) 泛函分析、[31](https://wikieden.github.io/math-and-eval-stats/lessons/31-manifold-optimization.html) 流形优化、[32](https://wikieden.github.io/math-and-eval-stats/lessons/32-stochastic-calculus.html) 随机微积分、[33](https://wikieden.github.io/math-and-eval-stats/lessons/33-optimal-transport.html) 最优传输、[34](https://wikieden.github.io/math-and-eval-stats/lessons/34-information-geometry.html) 信息几何 |
+
+**判断标准**：论文公式看不懂，就去查对应的章，读完那一步就回到论文；第 29–34 章不做理论研究可以一直不读；第 3–7 章在自己做对比实验之前可以先放着；但上面 12 章少读一章，后面会反复卡在同一类公式上。只学 VLA 或运动控制的，[按目标读](https://wikieden.github.io/math-and-eval-stats/lessons/appendix-reading-paths.html)里有对到 VLA、运控讲义各章的分阶段路线。
+
+**每一章怎么读**（约 1–2 小时）：先看开头的"本章回答"，确认是你要的；再只读每一步的"类比"和"一句话"搭框架；然后读公式和例子（例子里的数都是代码算出来的，可以手算一两个对一下）；看图、拖一拖动画（"看点"写了该拖什么）；在 Colab 里跑本章 notebook，按"自己改一改"改参数；最后做 3 道练习，隔几天用复习卡片考自己。每章开头的"对应原文"标了论文的行号，读完直接去读那几行原文；正文只用小例子讲概念，完整实现留给 学习计划 的里程碑 ME-M\*，动手写一遍才算学会。
+
 ## 讲解的特点
 
 - **一次一小步**：每个概念按"白话类比 → 公式（每个符号说清楚怎么读）→ 小数字亲手算一遍"讲。
