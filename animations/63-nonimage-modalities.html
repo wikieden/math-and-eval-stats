@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>非图像模态的表示</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 63 章 · STFT 的窗在信号上滑，频谱一列一列长出来</h1>
+<p class="sub">配套讲义：<a href="../lessons/63-nonimage-modalities.html">第 63 章 · 非图像模态的表示：点云的置换不变、体素与稀疏卷积、STFT 与 Mel、触觉阵列、本体感受的归一化</a>。1 秒、16 kHz：前 0.5 秒 440 Hz，后 0.5 秒 1000 Hz 加一段 2000→4000 Hz 的扫频。窗每次往右跳 160 点（10 ms），对窗内的信号做一次傅里叶变换，得到频谱图的一列（只画 0–5000 Hz）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="win">窗长</label><select id="win"><option value="200">200 点（12.5 ms）</option><option value="400">400 点（25 ms）</option><option value="1600">1600 点（100 ms）</option></select><label for="pg">已经滑过的帧</label><input type="range" id="pg" min="1" max="100" step="1" value="100"><span id="pgv">100</span></div>
+<p class="note">看点：① 窗 400 点：440 Hz、1000 Hz 是两条细横线，扫频是一条斜线；② 窗 1600 点：横线更细（频率分辨率 10 Hz），但 0.5 秒处的切换和扫频在时间上变糊；③ 窗 200 点：时间上很清楚，横线变粗（频率分辨率 80 Hz）。窗长在时间和频率之间二选一。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['win','pg'],F=[[400,10],[400,40],[400,100],[1600,100],[200,100]];
+const SR=16000,HOP=160,NF=80,X=[];for(let n=0;n<SR;n++){const t=n/SR,u=t-0.5;X.push(t<0.5?Math.sin(2*Math.PI*440*t):Math.sin(2*Math.PI*1000*t)+0.6*Math.sin(2*Math.PI*(2000*u+2000*u*u)))}
+function spec(win){return memo('s'+win,()=>{const nfr=1+Math.floor((SR-win)/HOP),out=[];let mx=0;for(let m=0;m<nfr;m++){const col=[];for(let kf=0;kf<NF;kf++){const f=(kf+0.5)*5000/NF;let re=0,im=0;for(let n=0;n<win;n++){const w=0.5-0.5*Math.cos(2*Math.PI*n/(win-1)),x=X[m*HOP+n]*w,ph=2*Math.PI*f*n/SR;re+=x*Math.cos(ph);im-=x*Math.sin(ph)}const v=Math.log(Math.hypot(re,im)+1e-3);col.push(v);mx=Math.max(mx,v)}out.push(col)}return{out,mx,nfr}})}
+function render(win,pg){win=+win;const s=spec(win),nf=Math.min(s.nfr,Math.round(pg/100*s.nfr)),m=nf-1;cap(`窗 ${win} 点（${(win/16).toFixed(1)} ms）：已算 ${nf} / ${s.nfr} 帧；频率分辨率约 ${(SR/win).toFixed(0)} Hz`);
+ frame(40,40,600,80);const st=Math.floor(SR/1200);const pts=[];for(let n=0;n<SR;n+=st)pts.push([40+600*n/SR,80-28*X[n]]);P(pts,'var(--muted)',1);
+ const x0=40+600*(m*HOP)/SR;R(x0,40,Math.max(600*win/SR,2),80,'var(--warm)',.3);
+ frame(40,140,600,190);const cw=600/s.nfr,ch=190/NF,mn=s.mx-4;
+ for(let i=0;i<nf;i++){const col=s.out[i];for(let kf=0;kf<NF;kf++){const v=(col[kf]-mn)/4;if(v>0.15)R(40+i*cw,330-(kf+1)*ch,cw+0.4,ch+0.4,'var(--accent)',Math.min(1,v))}}
+ [0,1000,2000,3000,4000,5000].forEach(h=>T(String(h),36,330-h/5000*190+4,'end','s'));T('Hz',44,152,'start','s');[0,0.25,0.5,0.75,1].forEach(t=>T(t+' s',40+600*t,346,'middle','s'))}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

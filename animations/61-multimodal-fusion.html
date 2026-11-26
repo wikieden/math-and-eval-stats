@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多模态融合的数学</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 61 章 · 拖动两个方差，看融合结果往哪边走</h1>
+<p class="sub">配套讲义：<a href="../lessons/61-multimodal-fusion.html">第 61 章 · 多模态融合的数学：逆方差加权、早 / 中 / 晚融合、交叉注意力与 Perceiver、模态缺失</a>。相机读数 2.0 m、雷达读数 2.3 m。蓝、橙是两个测量的高斯，绿色是逆方差加权（= 一维 Kalman 更新）的融合结果。权重只看报上来的方差。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="v1">相机方差 σ₁²</label><input type="range" id="v1" min="0.01" max="0.3" step="0.01" value="0.04"><span id="v1v">0.04</span><label for="v2">雷达方差 σ₂²</label><input type="range" id="v2" min="0.01" max="0.5" step="0.01" value="0.16"><span id="v2v">0.16</span><label><input type="checkbox" id="dr"> 雷达掉线</label></div>
+<p class="note">看点：① 默认：w₁ = 0.8，融合 2.06 m，比两个都窄；② 把雷达方差调到 0.01：绿色被拉到雷达那边：权重只认报上来的方差，标错了就被带偏；③ 勾上“雷达掉线”：方差 → ∞，绿色和蓝色重合。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const PHI=z=>0.5*(1+erf(z/Math.SQRT2));
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}
+const npdf=(x,m,s)=>Math.exp(-0.5*((x-m)/s)**2)/(s*2.5066283);
+const IDS=['v1','v2','dr'],F=[[0.04,0.16,0],[0.04,0.08,0],[0.04,0.04,0],[0.04,0.01,0],[0.04,0.16,1],[0.2,0.16,0]];
+function render(v1,v2,dr){const z1=2.0,z2=2.3;let w1,xf,vf;if(dr){w1=1;xf=z1;vf=+v1}else{w1=(1/v1)/(1/v1+1/v2);xf=w1*z1+(1-w1)*z2;vf=1/(1/v1+1/v2)}
+ cap(dr?`雷达掉线：只用相机，融合 ${xf.toFixed(3)} m，方差 ${vf.toFixed(3)}`:`w₁ = ${w1.toFixed(2)}：融合 ${xf.toFixed(3)} m，方差 ${vf.toFixed(4)}（比 ${Math.min(v1,v2).toFixed(2)} 还小）`);
+ frame(40,50,600,260);const ym=npdf(0,0,Math.sqrt(Math.min(vf,0.01)))*1.05;const M=PM(40,50,600,260,[1.0,3.3],[0,Math.max(ym,1)]);
+ const curve=(mu,v,col,w,dash)=>{const pts=[];for(let i=0;i<=300;i++){const x=1.0+2.3*i/300;pts.push(M(x,npdf(x,mu,Math.sqrt(v))))}P(pts,col,w,dash)};
+ curve(z1,+v1,'var(--accent)',2);if(!dr)curve(z2,+v2,'var(--warm)',2);else curve(z2,+v2,'var(--warm)',1.2,'4 4');curve(xf,vf,'var(--good)',3);
+ const q=M(xf,0);L(q[0],50,q[0],310,'var(--good)',1,'3 3');[1.0,1.5,2.0,2.5,3.0].forEach(v=>T(String(v),M(v,0)[0],328,'middle','s'));
+ T('相机',M(z1,0)[0]-30,70,'middle','s');T(dr?'雷达（掉线）':'雷达',M(z2,0)[0]+40,70,'middle','s');T('深度（m）',636,346,'end','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

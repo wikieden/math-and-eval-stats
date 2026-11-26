@@ -2,8 +2,8 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 60 章 · 60 个动画（GIF + 可交互页面）· 129 张静态图 · 197 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
-> 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
+> 66 章（全部写完）· 66 个动画（GIF + 可交互页面）· 144 张静态图 · 215 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（66 章全部写完）
 
 ## 这本书讲什么
 
@@ -99,12 +99,12 @@
 | 58 | [路径规划](https://wikieden.github.io/math-and-eval-stats/lessons/58-path-planning.html) | 图搜索（Dijkstra、A* 与可采纳启发）、构型空间、采样规划（PRM、RRT、RRT* 渐近最优）、代价地图与势场 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/58-path-planning.gif) | ST189–ST191 | ✅ 讲解（练习待作答） |
 | 59 | [神经场景表示](https://wikieden.github.io/math-and-eval-stats/lessons/59-neural-rendering.html) | 体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的协方差投影雅可比与球谐颜色 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/59-neural-rendering.gif) | ST192–ST194 | ✅ 讲解（练习待作答） |
 | 60 | [感知的学习与评测](https://wikieden.github.io/math-and-eval-stats/lessons/60-perception-metrics.html) | IoU、NMS、PR 曲线与 mAP、匈牙利匹配（DETR）、度量学习与地点识别（三元组损失、NetVLAD、InfoNCE） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/60-perception-metrics.gif) | ST195–ST197 | ✅ 讲解（练习待作答） |
-| 61 | 多模态融合的数学 | 逆方差加权（Kalman 的特例）、早 / 中 / 晚融合、交叉注意力与 Perceiver 潜变量、模态缺失与模态 dropout | — | — | ⬜ |
-| 62 | 视觉-语言对齐 | CLIP 对比损失与温度、SigLIP 的 sigmoid 损失、InfoNCE 与互信息下界、零样本分类 = 余弦相似度、视觉 token 化（patch、Q-Former、投影器）与 token 数账、ImageBind | — | — | ⬜ |
-| 63 | 非图像模态的表示 | 点云的置换不变（PointNet 对称函数）、体素化与稀疏卷积、音频的 STFT / Mel 频谱、力 / 触觉阵列、本体感受的归一化 | — | — | ⬜ |
-| 64 | 多传感器标定与对齐 | 外参标定（手眼 AX = XB）、时间同步与插值（含 SO(3) 上的插值）、相机-激光雷达投影、BEVFusion | — | — | ⬜ |
-| 65 | VLN 的几何与评测 | 指令-轨迹对齐（DTW、nDTW、SDTW）、SPL、拓扑图与图搜索、前沿探索、语言特征投到俯视地图（VLMaps） | — | — | ⬜ |
-| 66 | VLN 的序列决策 | POMDP 与信念状态、行为克隆误差 O(T²) 累积与 DAgger 的 O(T)、语言条件策略、探索的信息增益 | — | — | ⬜ |
+| 61 | [多模态融合的数学](https://wikieden.github.io/math-and-eval-stats/lessons/61-multimodal-fusion.html) | 逆方差加权（Kalman 的特例）、早 / 中 / 晚融合、交叉注意力与 Perceiver 潜变量、模态缺失与模态 dropout | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/61-multimodal-fusion.gif) | ST198–ST200 | ✅ 讲解（练习待作答） |
+| 62 | [视觉-语言对齐](https://wikieden.github.io/math-and-eval-stats/lessons/62-vl-alignment.html) | CLIP 对比损失与温度、SigLIP 的 sigmoid 损失、InfoNCE 与互信息下界、零样本分类 = 余弦相似度、视觉 token 化（patch、Q-Former、投影器）与 token 数账、ImageBind | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/62-vl-alignment.gif) | ST201–ST203 | ✅ 讲解（练习待作答） |
+| 63 | [非图像模态的表示](https://wikieden.github.io/math-and-eval-stats/lessons/63-nonimage-modalities.html) | 点云的置换不变（PointNet 对称函数）、体素化与稀疏卷积、音频的 STFT / Mel 频谱、力 / 触觉阵列、本体感受的归一化 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/63-nonimage-modalities.gif) | ST204–ST206 | ✅ 讲解（练习待作答） |
+| 64 | [多传感器标定与对齐](https://wikieden.github.io/math-and-eval-stats/lessons/64-calibration.html) | 外参标定（手眼 AX = XB）、时间同步与插值（含 SO(3) 上的插值）、相机-激光雷达投影、BEVFusion | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/64-calibration.gif) | ST207–ST209 | ✅ 讲解（练习待作答） |
+| 65 | [VLN 的几何与评测](https://wikieden.github.io/math-and-eval-stats/lessons/65-vln-metrics.html) | 指令-轨迹对齐（DTW、nDTW、SDTW）、SPL、拓扑图与图搜索、前沿探索、语言特征投到俯视地图（VLMaps） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/65-vln-metrics.gif) | ST210–ST212 | ✅ 讲解（练习待作答） |
+| 66 | [VLN 的序列决策](https://wikieden.github.io/math-and-eval-stats/lessons/66-vln-decision.html) | POMDP 与信念状态、行为克隆误差 O(T²) 累积与 DAgger 的 O(T)、语言条件策略、探索的信息增益 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/66-vln-decision.gif) | ST213–ST215 | ✅ 讲解（练习待作答） |
 
 ## 联系与合作
 

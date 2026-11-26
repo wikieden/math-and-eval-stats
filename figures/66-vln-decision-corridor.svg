@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="405" viewBox="0 0 860 405">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">环形走廊上的信念</text>
+<text x="16.0" y="395.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">5 格环形走廊，灰底的格 0、3 有门。看到门 → 信念集中在两个门格；右移一格 → 两个峰右移、被动作噪声抹开；没看到门 → 峰落在格 1 和格 4（各 0.42）。</text>
+<text x="235.0" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="end" font-weight="normal">均匀先验</text>
+<rect x="250.0" y="40.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="268.0" y="74.2" width="48.0" height="25.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="292.0" y="70.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.20</text>
+<rect x="358.0" y="74.2" width="48.0" height="25.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="382.0" y="70.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.20</text>
+<rect x="448.0" y="74.2" width="48.0" height="25.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="472.0" y="70.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.20</text>
+<rect x="520.0" y="40.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="538.0" y="74.2" width="48.0" height="25.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="562.0" y="70.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.20</text>
+<rect x="628.0" y="74.2" width="48.0" height="25.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="652.0" y="70.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.20</text>
+<line x1="250.0" y1="100.0" x2="694.0" y2="100.0" stroke="#6b7280" stroke-width="1"/>
+<text x="235.0" y="160.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="end" font-weight="normal">原地看到门</text>
+<rect x="250.0" y="115.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="268.0" y="126.7" width="48.0" height="48.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="292.0" y="122.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.37</text>
+<rect x="358.0" y="164.3" width="48.0" height="10.7" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="382.0" y="160.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.08</text>
+<rect x="448.0" y="164.3" width="48.0" height="10.7" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="472.0" y="160.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.08</text>
+<rect x="520.0" y="115.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="538.0" y="126.7" width="48.0" height="48.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="562.0" y="122.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.37</text>
+<rect x="628.0" y="164.3" width="48.0" height="10.7" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="652.0" y="160.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.08</text>
+<line x1="250.0" y1="175.0" x2="694.0" y2="175.0" stroke="#6b7280" stroke-width="1"/>
+<text x="235.0" y="235.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="end" font-weight="normal">右移一格（预测）</text>
+<rect x="250.0" y="190.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="268.0" y="231.7" width="48.0" height="18.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="292.0" y="227.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.14</text>
+<rect x="358.0" y="209.2" width="48.0" height="40.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="382.0" y="205.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.32</text>
+<rect x="448.0" y="239.3" width="48.0" height="10.7" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="472.0" y="235.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.08</text>
+<rect x="520.0" y="190.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="538.0" y="231.7" width="48.0" height="18.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="562.0" y="227.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.14</text>
+<rect x="628.0" y="209.2" width="48.0" height="40.8" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="652.0" y="205.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.32</text>
+<line x1="250.0" y1="250.0" x2="694.0" y2="250.0" stroke="#6b7280" stroke-width="1"/>
+<text x="235.0" y="310.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="end" font-weight="normal">走完没看到门</text>
+<rect x="250.0" y="265.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="268.0" y="322.0" width="48.0" height="3.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="292.0" y="318.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.02</text>
+<rect x="358.0" y="270.7" width="48.0" height="54.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="382.0" y="266.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.42</text>
+<rect x="448.0" y="310.7" width="48.0" height="14.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="472.0" y="306.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.11</text>
+<rect x="520.0" y="265.0" width="84.0" height="60.0" rx="2" fill="#e5e7eb" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="538.0" y="322.0" width="48.0" height="3.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="562.0" y="318.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.02</text>
+<rect x="628.0" y="270.7" width="48.0" height="54.3" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="652.0" y="266.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">0.42</text>
+<line x1="250.0" y1="325.0" x2="694.0" y2="325.0" stroke="#6b7280" stroke-width="1"/>
+<text x="292.0" y="362.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">格 0</text>
+<text x="382.0" y="362.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">格 1</text>
+<text x="472.0" y="362.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">格 2</text>
+<text x="562.0" y="362.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">格 3</text>
+<text x="652.0" y="362.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">格 4</text>
+</svg>

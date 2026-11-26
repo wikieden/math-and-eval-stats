@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VLN 的几何与评测</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 65 章 · DTW 的表一格一格填，再回溯出对齐</h1>
+<p class="sub">配套讲义：<a href="../lessons/65-vln-metrics.html">第 65 章 · VLN 的几何与评测：DTW、nDTW、SDTW、SPL、前沿探索、VLMaps</a>。参考路径 R = [0, 1, 2, 3, 4]（沿走廊的位置）。每格 D[i, j] = |r_i − q_j| + 左、上、左上三格里最小的那个；填完从右下角回溯，红框就是最优对齐。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="sq">智能体路径</label><select id="sq"><option value="0">Q₁ = [0, 1, 1, 2, 3, 4]（犹豫一下）</option><option value="1">Q₂ = [0, −1, −2, 0, 2, 4]（先走反）</option></select><label for="k">已填的格数</label><input type="range" id="k" min="1" max="31" step="1" value="31"><span id="kv">31</span></div>
+<p class="note">看点：① 每格的小箭头指向它取最小值的那个邻居；② Q₁：重复的 1 对上 R 里同一个 1，DTW = 0，nDTW = 1；③ Q₂：走反的两步只能对上 R 的开头，代价积累到 5，nDTW = 0.7165；两条路径都到了终点，成功率一样。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['sq','k'],F=[[0,6],[0,18],[0,31],[1,6],[1,18],[1,30],[1,31]];
+const RR=[0,1,2,3,4],QS=[[0,1,1,2,3,4],[0,-1,-2,0,2,4]];
+function render(sq,k){const Q=QS[sq],n=5,m=6,D=[],from=[];for(let i=0;i<n;i++){D.push([]);from.push([]);for(let j=0;j<m;j++){const c=Math.abs(RR[i]-Q[j]);let best=0,f=null;if(i||j){const cand=[];if(i&&j)cand.push([D[i-1][j-1],[i-1,j-1]]);if(i)cand.push([D[i-1][j],[i-1,j]]);if(j)cand.push([D[i][j-1],[i,j-1]]);cand.sort((a,b)=>a[0]-b[0]);best=cand[0][0];f=cand[0][1]}D[i].push(c+best);from[i].push(f)}}
+ const cells=Math.min(k,30),x0=330,y0=80,cw=50,chh=44;const mx=D[n-1][m-1]>0?Math.max(...D.flat()):Math.max(...D.flat());
+ for(let i=0;i<n;i++){T(String(RR[i]),x0-14,y0+i*chh+27,'middle','num');for(let j=0;j<m;j++){const idx=i*m+j,show=idx<cells;R(x0+j*cw,y0+i*chh,cw-4,chh-4,show?'var(--accent)':'var(--line)',show?0.12+0.5*D[i][j]/mx:.25);
+  if(show){T(String(D[i][j]),x0+j*cw+23,y0+i*chh+27,'middle','num');const f=from[i][j];if(f&&idx==cells-1){AR(x0+j*cw+23,y0+i*chh+20,x0+f[1]*cw+30,y0+f[0]*chh+26,'var(--warm)',2)}}}}
+ Q.forEach((q,j)=>T(String(q),x0+j*cw+23,y0-10,'middle','num'));T('R ↓   Q →',x0-20,y0-30,'start','s');
+ const done=k>=31;let path=[];if(done){let c=[n-1,m-1];while(c){path.push(c);c=from[c[0]][c[1]]}path.forEach(([i,j])=>el('rect',{x:x0+j*cw,y:y0+i*chh,width:cw-4,height:chh-4,rx:3,fill:'none',stroke:'var(--bad)','stroke-width':2.5},sv))}
+ const ya=120,yb=250,MX=v=>70+(v+2)*36;T('R',40,ya+5,'middle','num');T('Q',40,yb+5,'middle','num');L(55,ya,300,ya,'var(--line)',1);L(55,yb,300,yb,'var(--line)',1);
+ if(done)path.forEach(([i,j])=>L(MX(RR[i]),ya,MX(Q[j])+(j%2?3:0),yb,'var(--bad)',1.2));RR.forEach(v=>C(MX(v),ya,6,'var(--accent)',1));Q.forEach((v,j)=>C(MX(v)+(j%2?3:0),yb,6,'var(--warm)',1));[-2,0,2,4].forEach(v=>T(String(v),MX(v),yb+24,'middle','s'));
+ const dtw=D[n-1][m-1];cap(done?`DTW = ${dtw}，nDTW = exp(−${dtw}/(5×3)) = ${Math.exp(-dtw/15).toFixed(4)}`:`已填 ${cells} / 30 格（第 ${Math.floor((cells-1)/m)+1} 行）`)}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

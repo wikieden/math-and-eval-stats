@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">模态 dropout 的效果</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">两种训练方式 × 两种测试条件的 MSE。不做 dropout：两个模态都在时 0，b 缺失时 1.13；模态 dropout（p = 0.5）：都在 0.07、缺 b 0.10。</text>
+<line x1="100.0" y1="220.0" x2="760.0" y2="220.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="94.0" y="224.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="100.0" y1="152.0" x2="760.0" y2="152.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="94.0" y="156.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="100.0" y1="84.0" x2="760.0" y2="84.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="94.0" y="88.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="end" font-weight="normal">1</text>
+<line x1="100.0" y1="220.0" x2="760.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<line x1="100.0" y1="50.0" x2="100.0" y2="220.0" stroke="#1f2937" stroke-width="1.3"/>
+<text transform="translate(60.0,135.0) rotate(-90)" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle">测试 MSE</text>
+<rect x="133.0" y="220.0" width="90.8" height="0.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="178.4" y="214.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">0.000</text>
+<rect x="298.0" y="66.6" width="90.8" height="153.4" rx="2" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="343.4" y="60.6" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">1.128</text>
+<rect x="504.3" y="210.8" width="90.7" height="9.2" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="549.6" y="204.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">0.068</text>
+<rect x="669.2" y="207.0" width="90.8" height="13.0" rx="2" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.85"/>
+<text x="714.6" y="201.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">0.096</text>
+<text x="265.0" y="245.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">训练时不做 dropout</text>
+<text x="636.2" y="245.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">训练时模态 dropout</text>
+<line x1="620.0" y1="66.0" x2="642.0" y2="66.0" stroke="#2563eb" stroke-width="2.5"/>
+<text x="648.0" y="70.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">测试：两个都在</text>
+<line x1="620.0" y1="84.0" x2="642.0" y2="84.0" stroke="#ea580c" stroke-width="2.5"/>
+<text x="648.0" y="88.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">测试：b 缺失</text>
+</svg>

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 63 章 · 非图像模态的表示：点云的置换不变、体素与稀疏卷积、STFT 与 Mel、触觉阵列、本体感受的归一化 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="52-camera-geometry.html"><span class="n">52</span>相机几何：针孔模型、内参与外参、畸变、逆透视变换、Lift-Splat-Shoot</a><a href="53-multiview-geometry.html"><span class="n">53</span>多视几何：对极约束、本质与基础矩阵、单应、三角化、RANSAC、DUSt3R</a><a href="54-point-cloud.html"><span class="n">54</span>点云与配准：KD 树、法向量、Procrustes / Kabsch、ICP</a><a href="55-slam-optimization.html"><span class="n">55</span>SLAM 的优化：重投影误差与 BA、稀疏 Hessian 与 Schur 补、鲁棒核、边缘化</a><a href="56-vio.html"><span class="n">56</span>VIO：IMU 运动学、偏置与噪声、流形上的预积分、可观测性</a><a href="57-maps.html"><span class="n">57</span>地图表示：占用栅格的 log-odds、TSDF / ESDF、八叉树</a><a href="58-path-planning.html"><span class="n">58</span>路径规划：Dijkstra 与 A、可采纳启发、构型空间、RRT 与 RRT、势场法</a><a href="59-neural-rendering.html"><span class="n">59</span>神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</a><a href="60-perception-metrics.html"><span class="n">60</span>感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别</a><a href="61-multimodal-fusion.html"><span class="n">61</span>多模态融合的数学：逆方差加权、早 / 中 / 晚融合、交叉注意力与 Perceiver、模态缺失</a><a href="62-vl-alignment.html"><span class="n">62</span>视觉-语言对齐的数学：温度、InfoNCE 下界、SigLIP 的偏置、零样本分类、视觉 token 数账</a><a href="63-nonimage-modalities.html" class="cur"><span class="n">63</span>非图像模态的表示：点云的置换不变、体素与稀疏卷积、STFT 与 Mel、触觉阵列、本体感受的归一化</a><a href="64-calibration.html"><span class="n">64</span>多传感器标定与对齐：手眼标定 AX = XB、时间同步与 SO(3) 插值、相机-激光雷达投影、BEVFusion</a><a href="65-vln-metrics.html"><span class="n">65</span>VLN 的几何与评测：DTW、nDTW、SDTW、SPL、前沿探索、VLMaps</a><a href="66-vln-decision.html"><span class="n">66</span>VLN 的序列决策：POMDP 与信念状态、行为克隆的 O(T²) 与 DAgger 的 O(T)、语言条件策略、探索的信息增益</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="63-stft-mel">第 63 章 · 非图像模态的表示：点云的置换不变、体素与稀疏卷积、STFT 与 Mel、触觉阵列、本体感受的归一化</h1><div class="run"><a class="btn" href="../animations/63-nonimage-modalities.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch63_nonimage_modalities.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch63_nonimage_modalities.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch63_nonimage_modalities.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：一堆点没有顺序，网络怎么保证“打乱顺序输出不变”？PointNet 的 max pooling 为什么只靠几个“关键点”？一个 LiDAR 场景体素化以后有多少格是空的，稀疏卷积省在哪？一秒音频变成多少帧频谱，Mel 刻度在压缩什么？触觉阵列、关节角度这些数字进网络前要怎么处理？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/62-vl-alignment.html">第 62 章 视觉-语言对齐的数学</a> · 下一章：<a href="../lessons/64-calibration.html">第 64 章 多传感器标定与对齐</a><br />
+对应原文：PointNet <code>math-and-eval-stats/materials/text/papers/pointnet-1612.00593.txt</code>（置换不变与对称函数，L162–L204；定理 1 的通用逼近 f ≈ γ(MAX h)，L279；定理 2 关键点集合与瓶颈维数 K，L279–L311；关键点可视化，L484–L494）；BEVFusion <code>bevfusion-2205.13542.txt</code>（LiDAR 分支用 VoxelNet / SparseConvNet，L141）<br />
+本章缩写：MLP = Multi-Layer Perceptron（多层感知机）；STFT = Short-Time Fourier Transform（短时傅里叶变换）；FFT = Fast Fourier Transform（快速傅里叶变换）；Mel = 以“melody”（旋律）命名的音高刻度；n_fft = FFT 的点数；CoP = Center of Pressure（压力中心）；LiDAR = Light Detection and Ranging（激光探测与测距）。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：点云没有顺序：对称函数（2026-11-25）</h3>
+<p><strong>类比</strong>：数一袋硬币的总额，倒出来的顺序无所谓。“求和”“取最大”这类运算不管输入顺序，叫<strong>对称函数</strong>；“第 1 个乘 1、第 2 个乘 2……”就和顺序有关。</p>
+<p>N 个点有 N! 种排列，同一个点云对应 N! 个输入矩阵（L162–L163）。PointNet 的做法（L196–L204）：</p>
+<div class="arithmatex">\[f(\{x_1,\dots,x_n\}) \approx \gamma\Big(\max_{i} h(x_i)\Big)\]</div>
+<p>每个点先过<strong>同一个</strong>MLP <span class="arithmatex">\(h\)</span>（共享权重，顺序无关），再逐维取 max（对称），最后 <span class="arithmatex">\(\gamma\)</span> 处理全局特征。定理 1（L279）说这种形式能逼近任意连续的集合函数。</p>
+<p><strong>关键点</strong>：全局特征的每一维都是某一个点贡献的最大值。K 维特征最多由 K 个点决定，这些点叫关键点集合（定理 2，L279–L311）；删掉其余的点，全局特征一点都不变（L484–L494 的可视化：关键点大致勾出物体的骨架）。</p>
+<p><strong>例子</strong>（100 个二维点，随机两层 MLP 映射到 8 维再 max）：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>打乱点的顺序</td>
+<td>max 特征变化 0.0</td>
+</tr>
+<tr>
+<td>关键点个数</td>
+<td>7（≤ 8 维）</td>
+</tr>
+<tr>
+<td>只留这 7 个点</td>
+<td>max 特征变化 0.0</td>
+</tr>
+<tr>
+<td>对照：把点按顺序拼成长向量再过线性层</td>
+<td>打乱后输出变了</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="PointNet 的关键点" src="../figures/63-nonimage-modalities-critical.png" />
+<em>图 63-1 · 100 个点（灰），其中 7 个关键点（红，带编号）。全局 max 特征只由这 7 个点决定；对 max 特征来说，其余 93 个点删掉也没关系</em></p>
+<p>这也是 PointNet 的鲁棒性来源和局限：丢一些非关键点无所谓；但 max 只看极值、没有局部邻域结构，所以有了 PointNet++（分层采样 + 局部 PointNet）。</p>
+<p><strong>一句话</strong>：共享的逐点 MLP + 对称的 max，保证打乱顺序输出不变；K 维全局特征只由不超过 K 个关键点决定。</p>
+<h3 id="2026-11-25_1">第二步：体素化与稀疏卷积（2026-11-25）</h3>
+<p>另一条路：把点放进规则的三维格子（体素），就能用卷积了（<a href="../lessons/35-convolution.html">第 35 章</a>）。问题是三维格子极其稀疏。</p>
+<p><strong>例子</strong>（100 m × 100 m × 8 m 的范围，0.2 m 体素；地面 10 万个点 + 5 辆车的表面各 4000 点）：</p>
+<table>
+<thead>
+<tr>
+<th>量</th>
+<th>数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>点数</td>
+<td>120,000</td>
+</tr>
+<tr>
+<td>体素总数</td>
+<td>500 × 500 × 40 = 10,000,000</td>
+</tr>
+<tr>
+<td>非空体素</td>
+<td>94,569</td>
+</tr>
+<tr>
+<td>非空占比</td>
+<td>0.95%</td>
+</tr>
+</tbody>
+</table>
+<p>稠密的 3 × 3 × 3 卷积要在一千万个位置上算，其中 99% 的输入全是 0。<strong>稀疏卷积</strong>只存非空体素（坐标 + 特征的哈希表），只在它们上面算：</p>
+<ul>
+<li>普通稀疏卷积：输出位置 = 输入非空位置的膨胀（每层非空区域会变大）；</li>
+<li>子流形稀疏卷积（submanifold）：输出位置 = 输入非空位置本身，稀疏度不变，深网络里用得最多。</li>
+</ul>
+<p>BEVFusion 的 LiDAR 分支（L141）就是 VoxelNet / SparseConvNet 这一类，最后沿高度方向压扁成 BEV 特征图。</p>
+<p><strong>一句话</strong>：三维格子里 99% 是空的；稀疏卷积只在非空体素上算，子流形版本还保持稀疏度不变。</p>
+<h3 id="stft-mel-2026-11-25">第三步：音频：STFT 与 Mel 频谱（2026-11-25）</h3>
+<p><strong>类比</strong>：乐谱。整段音乐的频谱（一次 FFT）只告诉你用了哪些音，不告诉你什么时候用的；乐谱是“每一小段时间里有哪些音”。STFT 就是把信号切成重叠的短窗，每窗做一次 FFT。</p>
+<div class="arithmatex">\[X(m, k) = \sum_n x[n]\,w[n - mH]\,e^{-2\pi i kn/N_{\text{fft}}}\]</div>
+<p><span class="arithmatex">\(w\)</span> 是窗函数（汉宁窗），<span class="arithmatex">\(H\)</span> 是跳步。语音的常用设定：16 kHz 采样，窗 25 ms（400 点）、跳 10 ms（160 点）、n_fft = 512。</p>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>量</th>
+<th>数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 秒的帧数（不补边）</td>
+<td>1 + (16000 − 400)/160 = 98</td>
+</tr>
+<tr>
+<td>1 秒的帧数（torch.stft 默认 center=True，两边各补 n_fft/2）</td>
+<td>1 + 16000/160 = 101</td>
+</tr>
+<tr>
+<td>频率格数</td>
+<td>512/2 + 1 = 257</td>
+</tr>
+<tr>
+<td>每格频率宽度</td>
+<td>16000/512 = 31.25 Hz</td>
+</tr>
+<tr>
+<td>440 Hz + 1000 Hz 一帧的两个峰</td>
+<td>437.5 Hz、1000 Hz（440 落在两格之间，取最近的格）</td>
+</tr>
+</tbody>
+</table>
+<p>窗越长频率分辨率越细、时间分辨率越粗，这是不确定性原理（Δt · Δf 有下限）。</p>
+<p><strong>Mel 刻度</strong>：人耳对低频的差别敏感、对高频不敏感。<span class="arithmatex">\(m = 2595\log_{10}(1 + f/700)\)</span>：</p>
+<table>
+<thead>
+<tr>
+<th>f（Hz）</th>
+<th>1000</th>
+<th>2000</th>
+<th>4000</th>
+<th>8000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mel</td>
+<td>1000.0</td>
+<td>1521.4</td>
+<td>2146.1</td>
+<td>2840.0</td>
+</tr>
+</tbody>
+</table>
+<p>频率翻倍，Mel 只增加约 40–50%。Mel 滤波器组在 Mel 刻度上等间隔放 80 个三角形滤波器，把 257 个线性频率格压成 80 维，再取 log：这就是语音模型（如 Whisper）的输入 log-Mel 频谱。</p>
+<p><img alt="两个音的频谱图" src="../figures/63-nonimage-modalities-spectrogram.png" />
+<em>图 63-2 · 前 0.5 秒是 440 Hz，后 0.5 秒是 1000 Hz 加一个从 2000 Hz 升到 4000 Hz 的扫频。横轴时间（98 帧），纵轴频率（0–8000 Hz），颜色越深能量越大</em></p>
+<p><strong>场景代码</strong>：torchaudio 的 log-Mel 频谱（真实库调用；本书环境没装 torchaudio，没跑过）：</p>
+<pre><code class="language-python">mel = torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_fft=512, win_length=400, hop_length=160, n_mels=80)
+logmel = torch.log(mel(wave) + 1e-6)                     # (80, 101)：80 个 Mel 频带 × 101 帧
+</code></pre>
+<p><strong>一句话</strong>：STFT 把音频切成重叠短窗、每窗一次 FFT；1 秒 16 kHz、跳 10 ms 约 100 帧；Mel 刻度压缩高频，80 个 Mel 频带取 log 就是语音模型的标准输入。</p>
+<h3 id="2026-11-25_2">第四步：力与触觉阵列（2026-11-25）</h3>
+<p>触觉传感器常是一个 m × n 的压力阵列（像一张低分辨率的“压力图像”），可以直接当图像用卷积处理；同时有两个物理量最常用：</p>
+<div class="arithmatex">\[F = \sum_i p_i,\qquad \text{CoP} = \frac{\sum_i p_i\,\mathbf x_i}{\sum_i p_i}\]</div>
+<p><strong>例子</strong>（4 × 4 阵列，格距 5 mm；第 1 行第 1 列 2 N、第 1 行第 2 列 1 N、第 2 行第 2 列 1 N，行列从 0 数）：总力 4 N，压力中心 (7.50 mm, 6.25 mm)。压力中心的移动可以提前反映物体在手里打滑（<a href="../lessons/15-constrained-convex-qp.html">第 15 章</a>的摩擦锥：切向力 / 法向力接近 μ 时就要滑）。</p>
+<p>六维力 / 力矩传感器给 (Fx, Fy, Fz, τx, τy, τz)，单位分别是 N 和 N·m，量级可以差一两个数量级，必须按维度归一化（下一步）。</p>
+<p><strong>一句话</strong>：触觉阵列是一张压力图，总力和压力中心是两个最有用的物理量；力和力矩单位不同，要按维度归一化。</p>
+<h3 id="2026-11-25_3">第五步：本体感受的归一化（2026-11-25）</h3>
+<p>关节角（rad，±3）、关节速度（rad/s，±20）、夹爪开度（m，0–0.08）放进同一个向量，量级差几百倍。不归一化，网络的输入层就被大的那几维主导（<a href="../lessons/39-normalization.html">第 39 章</a>）。三种常见做法：</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>公式</th>
+<th>遇到离群值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>z-score</td>
+<td>(x − μ)/σ</td>
+<td>μ、σ 都被拉偏</td>
+</tr>
+<tr>
+<td>min-max 到 [−1, 1]</td>
+<td>2(x − min)/(max − min) − 1</td>
+<td>其余数据全挤在一端</td>
+</tr>
+<tr>
+<td>分位数到 [−1, 1]（π0、Diffusion Policy 等常用 1% / 99% 分位数）</td>
+<td>2(x − q_lo)/(q_hi − q_lo) − 1，再截断</td>
+<td>离群值被截到 ±1，其余正常展开</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例子</strong>（一个关节 10 帧：0.07 到 0.13 rad 之间，最后一帧离群值 2.90；只有 10 帧，用 10% / 90% 分位数）：</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>前 9 帧的范围</th>
+<th>离群帧</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>z-score</td>
+<td>−0.37 到 −0.30</td>
+<td>3.0</td>
+</tr>
+<tr>
+<td>min-max</td>
+<td>−1.00 到 −0.96</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>分位数</td>
+<td>−1.00 到 1.00</td>
+<td>1.0（截断）</td>
+</tr>
+</tbody>
+</table>
+<p>前两种把正常数据压到一个很窄的区间，网络几乎分不出它们；分位数归一化让正常数据铺满 [−1, 1]。动作也一样：扩散 / flow 动作头（<a href="../lessons/28-flow-matching.html">第 28 章</a>）的噪声是标准正态，动作量级必须先对齐到 [−1, 1] 附近。</p>
+<p><img alt="三种归一化遇到离群值" src="../figures/63-nonimage-modalities-normalize.png" />
+<em>图 63-3 · 同一组 10 帧数据的三种归一化。灰点是 9 个正常帧，红点是离群帧；z-score 和 min-max 把灰点挤成一团，分位数归一化把它们铺开</em></p>
+<p><strong>一句话</strong>：本体感受各维量级差几百倍，必须逐维归一化；有离群值时用分位数，再截断，正常数据才不会被挤成一团。</p>
+<h3 id="stft">动画演示：STFT 的窗在信号上滑，频谱一列一列长出来</h3>
+<p><img alt="非图像模态的表示" src="../animations/63-nonimage-modalities.gif" /></p>
+<p>可交互版：<a href="../animations/63-nonimage-modalities.html">animations/63-nonimage-modalities.html</a>（滑块调窗长；按钮重新播放）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上面是波形，橙色框是当前的窗（第三步）；</li>
+<li>下面是频谱图，窗每往右跳一步，就多出一列；</li>
+<li>把窗调长：频率方向的线条变细（频率分辨率高），但扫频那一段在时间上变糊。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第三步）：2 秒、16 kHz 的音频，窗 400、跳 160、不补边，STFT 有多少帧？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一步）：下面哪些聚合对点的顺序不变：求和、平均、逐维最大、按 x 坐标排序后拼接、按输入顺序拼接？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：2 × 2 触觉阵列，格距 1 cm，压力 [[1, 0], [0, 3]]（单位 N，左上角在原点），总力和压力中心是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>点没有顺序，共享 MLP 加 max；K 维只看 K 个关键点；<br />
+三维格子九成九是空，稀疏卷积只算非空；<br />
+短窗滑动做 FFT，跳十毫秒一秒百帧；Mel 压高频取对数；<br />
+压力图看总力和压力中心；<br />
+本体各维量级不同，分位数归一再截断。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST204（PointNet 的对称函数与关键点）、ST205（体素稀疏度与稀疏卷积；STFT 帧数与 Mel 刻度）、ST206（触觉阵列的压力中心；本体感受的三种归一化）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ PointNet（Qi 2017）</td>
+<td>§4（L162–L311）</td>
+<td>对称函数、定理 1 / 2</td>
+</tr>
+<tr>
+<td>PointNet++（Qi 2017）</td>
+<td>分层采样与分组</td>
+<td>补上局部结构</td>
+</tr>
+<tr>
+<td>BEVFusion（Liu 2022）</td>
+<td>LiDAR 分支（L141）</td>
+<td>稀疏卷积在自动驾驶里的用法</td>
+</tr>
+<tr>
+<td>torch.stft / torchaudio 文档</td>
+<td>center、window 参数</td>
+<td>帧数和补边的细节</td>
+</tr>
+<tr>
+<td><a href="../lessons/35-convolution.html">第 35 章 卷积</a></td>
+<td>卷积与 FFT</td>
+<td>STFT 和卷积的关系</td>
+</tr>
+<tr>
+<td><a href="../lessons/39-normalization.html">第 39 章 归一化</a></td>
+<td>输入归一化</td>
+<td>量级不一致的后果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>对称函数的表示</strong>：任意连续的集合函数可以写成 ρ(Σφ(xᵢ))（Deep Sets）或用 max 逼近（PointNet 定理 1）。</li>
+<li><strong>稀疏度</strong>：表面点云在三维格子里的占用约为 (表面积 / 体素面积) / 体素总数，随分辨率提高按 1/体素边长 下降。</li>
+<li><strong>时频不确定性</strong>：窗长 T 秒对应的频率分辨率约 1/T Hz。</li>
+<li><strong>Mel 刻度</strong>：m = 2595 log₁₀(1 + f/700)，低频近似线性、高频近似对数。</li>
+<li><strong>压力中心</strong>：压力分布的一阶矩除以零阶矩。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(f \approx \gamma(\max_i h(x_i))\)</span></td>
+<td>PointNet</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(1 + \lfloor (N - W)/H\rfloor\)</span></td>
+<td>STFT 帧数（不补边）</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\Delta f = f_s/N_{\text{fft}}\)</span></td>
+<td>频率分辨率</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m = 2595\log_{10}(1 + f/700)\)</span></td>
+<td>Mel 刻度</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\text{CoP} = \sum p_i\mathbf x_i/\sum p_i\)</span></td>
+<td>压力中心</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(2(x - q_{lo})/(q_{hi} - q_{lo}) - 1\)</span></td>
+<td>分位数归一化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch63_nonimage_modalities.py</code>，配套测试 <code>tests/test_ch63.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch63_nonimage_modalities.py  
+uv run pytest tests/test_ch63.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 PointNet</td>
+<td>共享 MLP + max</td>
+<td><code>pointnet_feature</code>、<code>critical_demo()</code></td>
+<td>7 个关键点，打乱不变</td>
+</tr>
+<tr>
+<td>第二步 体素</td>
+<td>非空占比</td>
+<td><code>voxel_sparsity()</code></td>
+<td>0.95%</td>
+</tr>
+<tr>
+<td>第三步 STFT / Mel</td>
+<td>帧数、Mel</td>
+<td><code>stft_frames</code>、<code>hz_to_mel</code>、<code>two_tone_peaks</code></td>
+<td>98 / 101 帧；1000 → 1000</td>
+</tr>
+<tr>
+<td>第四步 触觉</td>
+<td>压力中心</td>
+<td><code>center_of_pressure()</code></td>
+<td>(7.50, 6.25) mm</td>
+</tr>
+<tr>
+<td>第五步 归一化</td>
+<td>三种做法</td>
+<td><code>normalize_all()</code></td>
+<td>分位数铺满 [−1, 1]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">h = np.maximum(pts @ w1, 0) @ w2; return h.max(0), h.argmax(0)   # 共享 MLP，逐维 max；argmax 就是关键点
+ijk = np.floor((pts - [-50, -50, -1]) / voxel).astype(int)        # 体素坐标
+q = np.clip(2 * (x - lo) / (hi - lo) - 1, -1, 1)                  # 分位数归一化再截断
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>关键点个数可以小于维数</strong>：同一个点可能同时是好几维的最大值（这里 8 维只有 7 个关键点）。</li>
+<li><strong>补边改变帧数</strong>：<code>center=True</code> 时两边各补 n_fft/2，帧数变成 1 + N/H，和标签对齐时差 3 帧就会错位。</li>
+<li><strong>统计量要只在训练集上算</strong>：归一化用的 min、max、分位数如果在测试数据上重算，等于把测试分布泄露进来。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 <code>pointnet_feature</code> 的维数 d 改成 32，关键点有多少个？</li>
+<li>把 <code>voxel_sparsity</code> 的体素改成 0.1 m，非空占比变成多少？</li>
+</ol><nav class="pager"><a href="62-vl-alignment.html">← 第 62 章 · 视觉-语言对齐的数学：温度、InfoNCE 下界、SigLIP 的偏置、零样本分类、视觉 token 数账</a><a href="64-calibration.html">第 64 章 · 多传感器标定与对齐：手眼标定 AX = XB、时间同步与 SO(3) 插值、相机-激光雷达投影、BEVFusion →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>
