@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="300" viewBox="0 0 860 300">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">NMS 前后</text>
+<text x="16.0" y="290.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">左：4 个检测框，线越粗分数越高（0.9、0.8、0.7、0.6）；框 0、1、3 挤在同一个物体上。右：阈值 0.5 的 NMS 后只剩框 0（0.9）和右边独立的框 2（0.7）。</text>
+<rect x="80.0" y="50.0" width="320.0" height="180.0" rx="4" fill="#fafafa" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<text x="240.0" y="44.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold">NMS 前</text>
+<rect x="126.0" y="96.0" width="104.0" height="104.0" rx="0" fill="none" stroke="#2563eb" stroke-width="2.6" opacity="1"/>
+<text x="130.0" y="92.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#2563eb" text-anchor="start" font-weight="normal">0: 0.9</text>
+<rect x="131.2" y="106.4" width="104.0" height="104.0" rx="0" fill="none" stroke="#ea580c" stroke-width="2.2" opacity="1"/>
+<text x="135.2" y="102.4" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#ea580c" text-anchor="start" font-weight="normal">1: 0.8</text>
+<rect x="256.0" y="96.0" width="104.0" height="104.0" rx="0" fill="none" stroke="#16a34a" stroke-width="1.7999999999999998" opacity="1"/>
+<text x="260.0" y="92.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#16a34a" text-anchor="start" font-weight="normal">2: 0.7</text>
+<rect x="139.0" y="101.2" width="85.8" height="96.2" rx="0" fill="none" stroke="#7c3aed" stroke-width="1.4" opacity="1"/>
+<text x="143.0" y="97.2" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#7c3aed" text-anchor="start" font-weight="normal">3: 0.6</text>
+<rect x="480.0" y="50.0" width="320.0" height="180.0" rx="4" fill="#fafafa" stroke="#e5e7eb" stroke-width="1.4" opacity="1"/>
+<text x="640.0" y="44.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold">NMS 后</text>
+<rect x="526.0" y="96.0" width="104.0" height="104.0" rx="0" fill="none" stroke="#2563eb" stroke-width="2.6" opacity="1"/>
+<text x="530.0" y="92.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#2563eb" text-anchor="start" font-weight="normal">0: 0.9</text>
+<rect x="656.0" y="96.0" width="104.0" height="104.0" rx="0" fill="none" stroke="#16a34a" stroke-width="1.7999999999999998" opacity="1"/>
+<text x="660.0" y="92.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#16a34a" text-anchor="start" font-weight="normal">2: 0.7</text>
+</svg>

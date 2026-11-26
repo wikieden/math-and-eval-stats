@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多视几何</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 53 章 · 一条射线在另一台相机里是一条线</h1>
+<p class="sub">配套讲义：<a href="../lessons/53-multiview-geometry.html">第 53 章 · 多视几何：对极约束、本质与基础矩阵、单应、三角化、RANSAC、DUSt3R</a>。俯视图：相机 1 在原点朝上看，相机 2 在右边 1.5 m、绕竖直轴转一个角度。相机 1 的一条射线上取不同深度的点，它们在相机 2 的图像里都落在同一条对极线上。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="d">3D 点的深度（m）</label><input type="range" id="d" min="1" max="12" step="0.5" value="4"><span id="dv">4</span><label for="rot">相机 2 的转角（°）</label><input type="range" id="rot" min="-25" max="25" step="5" value="0"><span id="rotv">0</span></div>
+<p class="note">看点：① 拖深度：左边的点沿蓝色射线移动，右边相机 2 图像里的投影点沿红色对极线滑动，但从不离开它；② 拖转角：对极线跟着移动；③ 无穷远处的投影是对极线的一个端点（消失点）。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['d','rot'],F=[[2,0],[4,0],[8,0],[12,0],[4,15],[8,15],[4,-20]];
+const U3=(()=>{const v=[0.25,-0.15,1],n=Math.hypot(...v);return v.map(x=>x/n)})();
+function proj2(p,th){const X=p[0]-1.5,Y=p[1],Z=p[2],c=Math.cos(th),s=Math.sin(th),xc=c*X-s*Z,zc=s*X+c*Z;return zc>0.05?[xc/zc,Y/zc]:null}
+function render(d,rot){const th=rot*Math.PI/180,u=[U3[0],U3[2]],n=Math.hypot(...u),uu=[u[0]/n,u[1]/n],P3=U3.map(x=>x*d);
+ frame(30,40,340,300);const M=PM(30,40,340,300,[-2,4],[-0.5,12.5]);const o1=M(0,0),o2=M(1.5,0);C(o1[0],o1[1],6,'var(--text)',1);C(o2[0],o2[1],6,'var(--text)',1);T('相机 1',o1[0],o1[1]+18,'middle','s');T('相机 2',o2[0],o2[1]+18,'middle','s');
+ const far=M(U3[0]*14,U3[2]*14);L(o1[0],o1[1],far[0],far[1],'var(--accent)',2,'6 4');const q=M(P3[0],P3[2]);L(o2[0],o2[1],q[0],q[1],'var(--warm)',1.2,'3 3');C(q[0],q[1],6,'var(--bad)',1);
+ const dir=[Math.sin(th),Math.cos(th)],a=M(1.5+dir[0]*1.5,dir[1]*1.5);AR(o2[0],o2[1],a[0],a[1],'var(--muted)',1.5);
+ const ix=400,iy=80,iw=240,ih=200;el('rect',{x:ix,y:iy,width:iw,height:ih,fill:'none',stroke:'var(--line)','stroke-width':1.5},sv);T('相机 2 的图像（归一化坐标）',ix,iy-8,'start','s');
+ const IM=v=>[ix+iw/2+v[0]*110,iy+ih/2+v[1]*110];const pts=[];for(let tt=0.6;tt<=80;tt*=1.12){const v=proj2(U3.map(x=>x*tt),th);if(v&&Math.abs(v[0])<1.05&&Math.abs(v[1])<0.9)pts.push(IM(v))}
+ if(pts.length>1)P(pts,'var(--bad)',2);const vv=proj2(P3,th);if(vv&&Math.abs(vv[0])<1.05)C(...IM(vv),6,'var(--bad)',1);
+ cap(`深度 ${d} m、转角 ${rot}°：在相机 2 里的归一化坐标 ${vv?`(${vv[0].toFixed(3)}, ${vv[1].toFixed(3)})`:'看不到'}`)}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

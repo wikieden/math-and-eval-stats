@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 60 章 · 感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="52-camera-geometry.html"><span class="n">52</span>相机几何：针孔模型、内参与外参、畸变、逆透视变换、Lift-Splat-Shoot</a><a href="53-multiview-geometry.html"><span class="n">53</span>多视几何：对极约束、本质与基础矩阵、单应、三角化、RANSAC、DUSt3R</a><a href="54-point-cloud.html"><span class="n">54</span>点云与配准：KD 树、法向量、Procrustes / Kabsch、ICP</a><a href="55-slam-optimization.html"><span class="n">55</span>SLAM 的优化：重投影误差与 BA、稀疏 Hessian 与 Schur 补、鲁棒核、边缘化</a><a href="56-vio.html"><span class="n">56</span>VIO：IMU 运动学、偏置与噪声、流形上的预积分、可观测性</a><a href="57-maps.html"><span class="n">57</span>地图表示：占用栅格的 log-odds、TSDF / ESDF、八叉树</a><a href="58-path-planning.html"><span class="n">58</span>路径规划：Dijkstra 与 A、可采纳启发、构型空间、RRT 与 RRT、势场法</a><a href="59-neural-rendering.html"><span class="n">59</span>神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</a><a href="60-perception-metrics.html" class="cur"><span class="n">60</span>感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="60-iounmspr-ap">第 60 章 · 感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别</h1><div class="run"><a class="btn" href="../animations/60-perception-metrics.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch60_perception_metrics.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch60_perception_metrics.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch60_perception_metrics.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：检测框“对不对”用什么量？一堆重叠的框怎么去重？mAP 是怎么从一条 PR 曲线算出来的？DETR 为什么要用匈牙利匹配，贪心匹配差在哪？地点识别为什么学的是“距离”，三元组损失和 InfoNCE 各在拉近什么、推远什么？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/59-neural-rendering.html">第 59 章 神经场景表示</a> · 下一章：（待写）<br />
+对应原文：DETR <code>math-and-eval-stats/materials/text/papers/detr-2005.12872.txt</code>（集合预测与匈牙利匹配，式 (1) L218；L134–L195）；NetVLAD <code>math-and-eval-stats/materials/text/papers/netvlad-1511.07247.txt</code>（VLAD 描述子 V(j, k)，K × D 矩阵 L170–L176；软分配式 (3) L265–L274）；CPC <code>math-and-eval-stats/materials/text/papers/cpc-infonce-1807.03748.txt</code>（§2.3 InfoNCE，式 (4) L165–L173）<br />
+本章缩写：IoU = Intersection over Union（交并比）；NMS = Non-Maximum Suppression（非极大值抑制）；PR = Precision-Recall（精确率 / 召回率）；AP / mAP = (mean) Average Precision（（各类）平均精确率）；TP / FP = 真 / 假阳性；DETR = DEtection TRansformer（检测 Transformer）；VLAD = Vector of Locally Aggregated Descriptors（局部聚合描述子向量）；InfoNCE = Info Noise-Contrastive Estimation（信息 / 噪声对比估计）；τ = 温度。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="iou2026-11-25">第一步：IoU：两个框重合得多不多（2026-11-25）</h3>
+<div class="arithmatex">\[\text{IoU} = \frac{|A\cap B|}{|A\cup B|}\]</div>
+<p><strong>例子</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>框 A</th>
+<th>框 B</th>
+<th>IoU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(10, 10, 50, 50)</td>
+<td>(12, 14, 52, 54)</td>
+<td>0.7467</td>
+</tr>
+<tr>
+<td>(10, 10, 50, 50)</td>
+<td>(60, 10, 100, 50)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>检测评测里 IoU ≥ 0.5（COCO 还看 0.5 到 0.95 的平均）才算一个检测“命中”某个真值。IoU 当损失的问题：不重合时恒为 0、没有梯度，所以有 GIoU、DIoU 等改进（加上“包住两个框的最小框”之类的项）。</p>
+<p><strong>一句话</strong>：IoU = 交 / 并，是判断检测框命中与否的标准；不重合时为 0、没有梯度。</p>
+<h3 id="nms2026-11-25">第二步：NMS：一个物体只留一个框（2026-11-25）</h3>
+<p>检测器常在同一个物体上给出好几个高度重叠的框。NMS：按分数从高到低，保留当前最高的框，删掉和它 IoU &gt; 阈值的其余框，重复。</p>
+<p><strong>例子</strong>（4 个框，分数 0.9、0.8、0.7、0.6，其中 0、1、3 是同一个物体，阈值 0.5）：保留 [0, 2]。框 1（IoU 0.75）和框 3 被框 0 压掉，框 2 和框 0 不重合，保留。</p>
+<p>NMS 的问题：两个真物体靠得很近时会误删（阈值是硬的）；不可微。DETR 用集合预测 + 匈牙利匹配（第四步）直接让模型输出不重复的框，不需要 NMS。</p>
+<p><img alt="NMS 前后" src="../figures/60-perception-metrics-nms.png" />
+<em>图 60-1 · 左：4 个检测框（线越粗分数越高），三个挤在同一个物体上；右：NMS（阈值 0.5）后只剩分数最高的那个和右边独立的那个</em></p>
+<p><strong>一句话</strong>：NMS 按分数贪心保留、压掉高 IoU 的重复框；硬阈值会误删相邻物体，DETR 用集合匹配绕开它。</p>
+<h3 id="pr-ap2026-11-25">第三步：PR 曲线与 AP（2026-11-25）</h3>
+<p>把所有检测按分数从高到低排，逐个判断命中（TP）还是误检（FP）：</p>
+<div class="arithmatex">\[P_k = \frac{\text{前 }k\text{ 个里的 TP}}{k},\qquad R_k = \frac{\text{前 }k\text{ 个里的 TP}}{\text{真值总数}}\]</div>
+<p>AP = 精确率包络（每个召回率位置取右侧的最大精确率）对召回率的面积。</p>
+<p><strong>例子</strong>（8 个检测、5 个真值，命中序列 [1, 1, 0, 1, 0, 0, 1, 0]）：</p>
+<table>
+<thead>
+<tr>
+<th>k</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>精确率</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>0.667</td>
+<td>0.75</td>
+<td>0.6</td>
+<td>0.5</td>
+<td>0.571</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>召回率</td>
+<td>0.2</td>
+<td>0.4</td>
+<td>0.4</td>
+<td>0.6</td>
+<td>0.6</td>
+<td>0.6</td>
+<td>0.8</td>
+<td>0.8</td>
+</tr>
+</tbody>
+</table>
+<p>AP = 0.2 × 1 + 0.2 × 1 + 0.2 × 0.75 + 0.2 × 0.571 = 0.6643。有一个真值始终没被检出，召回率最高 0.8，这部分面积直接丢掉。mAP = 各类别 AP 的平均（COCO 还在多个 IoU 阈值上再平均）。第 1–7 章讲的置信区间同样适用：测试集小时 mAP 的差异要看区间。</p>
+<p><img alt="PR 曲线与 AP" src="../figures/60-perception-metrics-pr.png" />
+<em>图 60-2 · 蓝点是 8 个 (召回率, 精确率)；橙色阶梯是精确率包络，阴影面积就是 AP = 0.6643；召回率 0.8 之后没有面积</em></p>
+<p><strong>一句话</strong>：按分数排序算累计精确率和召回率，AP 是精确率包络下的面积；漏检直接截掉召回率。</p>
+<h3 id="2026-11-25">第四步：匈牙利匹配：一对一、总代价最小（2026-11-25）</h3>
+<p>DETR（式 (1)，L218）一次输出 N 个预测，训练时要先决定“哪个预测负责哪个真值”。代价 = 类别概率 + 框的 L1 + GIoU；要求一对一、总代价最小：这是指派问题，匈牙利算法 O(n³) 精确求解。</p>
+<p><strong>例子</strong>（3 个预测 × 3 个真值的代价矩阵 [[1, 2, 8], [1.5, 6, 9], [7, 3, 4]]）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>分配（预测 → 真值）</th>
+<th>总代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>匈牙利</td>
+<td>0→1、1→0、2→2</td>
+<td>7.5</td>
+</tr>
+<tr>
+<td>贪心（每次挑全局最小的一对）</td>
+<td>0→0、1→2、2→1</td>
+<td>13.0</td>
+</tr>
+</tbody>
+</table>
+<p>贪心先拿了最便宜的 (0, 0) = 1，逼得预测 1 只能去代价 9 的真值 2。匈牙利算法看全局：让预测 0 让出真值 0。</p>
+<p><strong>一句话</strong>：匈牙利算法求一对一、总代价最小的匹配；贪心局部最优，可能把别人逼到很贵的位置。</p>
+<h3 id="2026-11-25_1">第五步：度量学习与地点识别（2026-11-25）</h3>
+<p>地点识别：给一张图，在数据库里找拍摄于同一地点的图（回环检测、视觉定位）。做法是学一个嵌入，让同一地点的图距离近、不同地点的远，检索就是最近邻（第 54 章的近似版）。</p>
+<p><strong>三元组损失</strong>：max(0, d(a, p) − d(a, n) + m)：正样本要比负样本近至少 m。</p>
+<table>
+<thead>
+<tr>
+<th>d(a, p)</th>
+<th>d(a, n)</th>
+<th>损失（m = 0.2）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.3</td>
+<td>0.9</td>
+<td>0（已经够远）</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>0.6</td>
+<td>0.10</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>0.5</td>
+<td>0.50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>InfoNCE</strong>（CPC 式 (4)，L165–L173）：一个正样本和 N 个负样本做 softmax 分类，−log(e^{s⁺/τ}/Σe^{s/τ})。它的下界性质：互信息 ≥ log N − L_N。</p>
+<p><strong>例子</strong>（正样本相似度 0.8，负样本 [0.6, 0.3, 0.1, 0.0]）：</p>
+<table>
+<thead>
+<tr>
+<th>τ</th>
+<th>1.0</th>
+<th>0.1</th>
+<th>0.05</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>InfoNCE</td>
+<td>1.2153</td>
+<td>0.1339</td>
+<td>0.0182</td>
+</tr>
+</tbody>
+</table>
+<p>τ 越小，越关注最难的负样本（0.6 那个）；太小训练不稳（第 37 章 softmax 饱和）。CLIP（第 62 章）就是图文版的 InfoNCE。</p>
+<p><strong>NetVLAD</strong>（L170–L176、L265–L274）：把一张图的 D 维局部特征软分配到 K 个聚类中心，对每个中心累加残差 Σa_k(x_i)(x_i − c_k)，拼成 K × D 维描述子（K = 64、D = 512 时 32,768 维），再降维检索。</p>
+<p><strong>场景代码</strong>：scipy 的匈牙利匹配和 torchvision 的 NMS（真实库调用；torchvision 本书环境没装，没跑过）：</p>
+<pre><code class="language-python">from scipy.optimize import linear_sum_assignment
+rows, cols = linear_sum_assignment(cost)                  # DETR 的二分匹配
+keep = torchvision.ops.nms(boxes, scores, iou_threshold=0.5)
+</code></pre>
+<p><strong>一句话</strong>：度量学习让同一地点的嵌入近、不同的远；三元组用间隔、InfoNCE 用 softmax 分类，τ 控制对难负样本的关注。</p>
+<h3 id="pr">动画演示：PR 曲线一点点画出来</h3>
+<p><img alt="感知的学习与评测" src="../animations/60-perception-metrics.gif" /></p>
+<p>可交互版：<a href="../animations/60-perception-metrics.html">animations/60-perception-metrics.html</a>（滑块调已经看过的检测数；下拉切换两种命中序列）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>左边是按分数排好的检测列表，命中的是绿色、误检是红色（第三步）；</li>
+<li>右边逐个加点：命中时召回率往右走一格、精确率回升；误检时召回率不动、精确率下降；</li>
+<li>看完全部后，橙色包络下的面积就是 AP，右上角给出数值。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：框 (0, 0, 4, 4) 和 (2, 2, 6, 6) 的 IoU 是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：5 个检测的命中序列 [1, 0, 1, 1, 0]，真值共 4 个，算每一步的精确率、召回率和 AP。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：代价矩阵 [[4, 1], [2, 3]]，匈牙利匹配和贪心匹配各是什么、总代价各多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>IoU 交比并，过半才算中；<br />
+NMS 按分数留高的、压重叠的，靠太近会误删；<br />
+排序算累计 P 和 R，AP 是包络下的面积，漏检截掉召回；<br />
+匈牙利一对一看全局，贪心会把别人逼到贵处；<br />
+度量学习拉近正、推远负，τ 小盯难负样本。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p>ST195（IoU 与 NMS）、ST196（PR 曲线与 AP 的算法）、ST197（匈牙利匹配；三元组损失、InfoNCE 与 NetVLAD）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ DETR（Carion 2020）</td>
+<td>§3.1（式 (1)–(2)，L218）</td>
+<td>集合预测与匈牙利匹配损失</td>
+</tr>
+<tr>
+<td>★ CPC（van den Oord 2018）</td>
+<td>§2.3（式 (4)，L165）</td>
+<td>InfoNCE 与互信息下界</td>
+</tr>
+<tr>
+<td>NetVLAD（Arandjelović 2016）</td>
+<td>§3（L170–L274）</td>
+<td>可学习的 VLAD 聚合</td>
+</tr>
+<tr>
+<td><a href="../lessons/01-success-rate-ci.html">第 1–7 章 评测统计</a></td>
+<td>全部</td>
+<td>指标的置信区间与比较</td>
+</tr>
+<tr>
+<td><a href="../lessons/10-information-kl.html">第 10 章 信息论与 KL</a></td>
+<td>互信息一节</td>
+<td>InfoNCE 的下界从哪来</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>AP 的包络</strong>：p_interp(r) = max_{r′≥r} p(r′)，保证 PR 曲线单调不增再求面积。</li>
+<li><strong>指派问题</strong>：min Σc_{iσ(i)} over 置换 σ；线性规划松弛的顶点是置换矩阵，匈牙利算法用对偶变量 O(n³) 求解。</li>
+<li><strong>InfoNCE 的下界</strong>：I(x; c) ≥ log N − L_N（N 是候选总数）。</li>
+<li><strong>三元组损失的几何</strong>：正样本必须落在以锚点为中心、半径 d(a, n) − m 的球内。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\text{IoU} = \lvert A\cap B\rvert/\lvert A\cup B\rvert\)</span></td>
+<td>交并比</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P_k = TP_k/k\)</span>，<span class="arithmatex">\(R_k = TP_k/N_{gt}\)</span></td>
+<td>精确率、召回率</td>
+</tr>
+<tr>
+<td>AP = ∫ p_interp(r) dr</td>
+<td>平均精确率</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat\sigma = \arg\min_\sigma\sum\mathcal L(y_i, \hat y_{\sigma(i)})\)</span></td>
+<td>匈牙利匹配</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\max(0, d_{ap} - d_{an} + m)\)</span></td>
+<td>三元组损失</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(-\log\frac{e^{s^+/\tau}}{\sum e^{s/\tau}}\)</span></td>
+<td>InfoNCE</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch60_perception_metrics.py</code>，配套测试 <code>tests/test_ch60.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch60_perception_metrics.py  
+uv run pytest tests/test_ch60.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 IoU</td>
+<td>交 / 并</td>
+<td><code>iou(a, b)</code></td>
+<td>0.7467</td>
+</tr>
+<tr>
+<td>第二步 NMS</td>
+<td>贪心压制</td>
+<td><code>nms()</code></td>
+<td>[0, 2]</td>
+</tr>
+<tr>
+<td>第三步 AP</td>
+<td>包络面积</td>
+<td><code>ap()</code></td>
+<td>0.6643</td>
+</tr>
+<tr>
+<td>第四步 匹配</td>
+<td>匈牙利 / 贪心</td>
+<td><code>hungarian()</code>、<code>greedy()</code></td>
+<td>7.5 vs 13.0</td>
+</tr>
+<tr>
+<td>第五步 损失</td>
+<td>三元组 / InfoNCE</td>
+<td><code>triplet</code>、<code>infonce</code></td>
+<td>0.10；1.2153 → 0.0182</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">env = np.maximum.accumulate(prec[::-1])[::-1]             # 精确率包络：右侧最大值
+r, c = linear_sum_assignment(cost)                         # 匈牙利匹配
+return float(-(z[0] - (z.max() + np.log(np.exp(z - z.max()).sum()))))   # InfoNCE（稳定的 logsumexp）
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>命中序列是直接给的</strong>：真实评测要先按 IoU ≥ 0.5 把检测和真值配对（每个真值只能被一个检测占用），这一步决定了 TP / FP。</li>
+<li><strong>AP 用的是“所有点插值”</strong>：PASCAL VOC 2007 用 11 点插值，COCO 用 101 点，三种算法的数值略有不同。</li>
+<li><strong>每个指标只算了一个小例子</strong>：IoU、NMS、mAP、匈牙利匹配的完整实现和测试留给自己做（里程碑 ME-M35）。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把 NMS 阈值改成 0.8，<code>nms()</code> 保留哪些框？</li>
+<li>把命中序列最后一个改成 1（第 5 个真值也被检出），AP 变成多少？</li>
+</ol><nav class="pager"><a href="59-neural-rendering.html">← 第 59 章 · 神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</a><span></span></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>感知的学习与评测</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 60 章 · PR 曲线一点点画出来</h1>
+<p class="sub">配套讲义：<a href="../lessons/60-perception-metrics.html">第 60 章 · 感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别</a>。8 个按分数排好的检测、5 个真值。左边是检测列表（绿 = 命中、红 = 误检），右边逐个加点 (召回率, 精确率)；看完后橙色包络下的面积就是 AP。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="sq">命中序列</label><select id="sq"><option value="0">[1, 1, 0, 1, 0, 0, 1, 0]</option><option value="1">[0, 1, 1, 0, 1, 1, 0, 1]</option></select><label for="k">已看过的检测数</label><input type="range" id="k" min="1" max="8" step="1" value="1"><span id="kv">1</span></div>
+<p class="note">看点：① 命中：召回率往右走 0.2、精确率回升；误检：召回率不动、精确率下降；② 两个序列命中数相同（4 个），但第二个把误检排在前面，AP 更低：AP 奖励“把对的排在前面”；③ 召回率到不了 1（有一个真值没检出），那部分面积直接没了。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['sq','k'],F=[[0,1],[0,2],[0,4],[0,8],[1,1],[1,4],[1,8]];
+function render(sq,k){const H=sq==0?[1,1,0,1,0,0,1,0]:[0,1,1,0,1,1,0,1];let tp=0;const P0=[],R0=[];H.forEach((h,i)=>{tp+=h;P0.push(tp/(i+1));R0.push(tp/5)});
+ const env=P0.slice(0,k).map((_,i)=>Math.max(...P0.slice(i,k)));let ap=0,rp=0;for(let i=0;i<k;i++){ap+=(R0[i]-rp)*env[i];rp=R0[i]}cap(`前 ${k} 个：精确率 ${P0[k-1].toFixed(3)}，召回率 ${R0[k-1].toFixed(1)}；当前 AP ${ap.toFixed(4)}`);
+ H.forEach((h,i)=>{R(40,50+i*34,120,28,i<k?(h?'var(--good)':'var(--bad)'):'var(--line)',i<k?.75:.4);T(`#${i+1} ${h?'命中':'误检'}`,100,69+i*34,'middle','s')});
+ frame(220,40,420,290);const M=PM(220,40,420,290,[0,1],[0,1.1]);let r0=0;const st=[];for(let i=0;i<k;i++){if(R0[i]>r0){st.push(M(r0,env[i]),M(R0[i],env[i]));r0=R0[i]}}
+ if(st.length){el('polygon',{points:st.concat([M(r0,0),M(0,0)]).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'var(--warm)',opacity:.2},sv);P(st,'var(--warm)',2.5)}
+ for(let i=0;i<k;i++){const q=M(R0[i],P0[i]);C(q[0],q[1],5,'var(--accent)',1)}T('召回率 →',636,346,'end','s');T('精确率',224,56,'start','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

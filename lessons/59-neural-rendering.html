@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 59 章 · 神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色 · 数学与实验统计</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">数学与实验统计</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">数学与实验统计</div><a href="index.html">讲义目录</a><a href="01-success-rate-ci.html"><span class="n">1</span>一个成功率有多准：30 次试验里成了 21 次，真实水平在哪</a><a href="02-two-proportions.html"><span class="n">2</span>两个成功率比一比：差 5 个点、差 20 个点，哪个算数</a><a href="03-power-sample-size.html"><span class="n">3</span>要测多少次：功效、最小可检测效应和样本量</a><a href="04-paired-comparison.html"><span class="n">4</span>配对比较：同一批初始条件交替跑，省下一半样本</a><a href="05-bootstrap-bayes.html"><span class="n">5</span>Bootstrap 与 Beta 后验：&quot;B 比 A 好的概率&quot;怎么算</a><a href="06-ab-rules-multiple-comparisons.html"><span class="n">6</span>A/B 判定规则与多重比较：先定规则再测，别偷看，比多了要校正</a><a href="07-read-curves-and-ablations.html"><span class="n">7</span>批判地读 loss 曲线和消融表：一张图先问五个问题</a><a href="08-probability-mle-map.html"><span class="n">8</span>概率补课：期望方差、贝叶斯、最大似然与最大后验</a><a href="09-gaussian.html"><span class="n">9</span>高斯分布：动作头、扩散加噪、卡尔曼滤波都靠它</a><a href="10-information-kl.html"><span class="n">10</span>信息论：熵、交叉熵、KL 和互信息</a><a href="11-linear-algebra-basics.html"><span class="n">11</span>线代一：矩阵乘法的三种看法、秩、特征分解与正定</a><a href="12-svd-least-squares.html"><span class="n">12</span>线代二：SVD、低秩近似与 LoRA、最小二乘、条件数</a><a href="13-calculus-autodiff.html"><span class="n">13</span>多元微积分与自动微分：从机械臂雅可比到反向传播</a><a href="14-unconstrained-optimization.html"><span class="n">14</span>无约束优化：步长、动量、Adam / AdamW、学习率表、高斯-牛顿与 LM</a><a href="15-constrained-convex-qp.html"><span class="n">15</span>约束与凸优化：拉格朗日乘子、KKT、凸性与 QP</a><a href="16-monte-carlo-sampling.html"><span class="n">16</span>蒙特卡洛与采样：用样本平均代替积分，重要性采样、CEM 和 MPPI</a><a href="17-generative-math.html"><span class="n">17</span>生成模型的数学：ELBO、两种梯度估计、连续性方程与 flow matching 目标</a><a href="18-rotations-rigid-transforms.html"><span class="n">18</span>3D 旋转与刚体变换：动作里的姿态该用什么表示</a><a href="19-lie-groups.html"><span class="n">19</span>李群入门：在旋转上做加法、求导和插值</a><a href="20-state-estimation.html"><span class="n">20</span>状态估计：预测一步、用测量修正一步</a><a href="21-dynamics-control.html"><span class="n">21</span>动力系统与控制的数学：线性化、离散化、稳定性、LQR 与 Bellman 不动点</a><a href="22-numerics.html"><span class="n">22</span>数值计算：积分器的阶、softmax 的上溢、半精度的累加和病态问题</a><a href="23-mdp-bellman.html"><span class="n">23</span>MDP 与 Bellman 的完整推导：值函数、最优方程、压缩映射与值迭代</a><a href="24-policy-gradient.html"><span class="n">24</span>策略梯度推导：从似然比技巧到 PPO 和 GRPO</a><a href="25-lqr-riccati.html"><span class="n">25</span>LQR 与 Riccati：从动态规划推出 Riccati 方程，有限 / 无限时域与可控性</a><a href="26-trajopt-mpc.html"><span class="n">26</span>轨迹优化与 MPC：写成 QP（稠密 / 稀疏）、iLQR 的回传、MPPI 的路径积分</a><a href="27-diffusion-derivation.html"><span class="n">27</span>扩散模型推导：前向闭式、后验、ELBO 到噪声预测、Tweedie 与 DDIM</a><a href="28-flow-matching.html"><span class="n">28</span>Flow matching 推导：概率路径、条件目标为什么够用、rectified flow 与 π0 的动作头</a><a href="29-measure-probability.html"><span class="n">29</span>测度论概率入门：σ-代数、Lebesgue 积分、Radon-Nikodym 导数、条件期望与收敛方式</a><a href="30-functional-analysis.html"><span class="n">30</span>泛函分析入门：赋范空间、Banach 与 Hilbert 空间、算子与谱、不动点定理、RKHS</a><a href="31-manifold-optimization.html"><span class="n">31</span>微分几何与流形优化：切空间、收缩映射、测地线、黎曼梯度</a><a href="32-stochastic-calculus.html"><span class="n">32</span>随机微积分：布朗运动、Itô 积分与 Itô 引理、Euler-Maruyama、Fokker-Planck、反向 SDE 与概率流 ODE</a><a href="33-optimal-transport.html"><span class="n">33</span>最优传输：Monge 与 Kantorovich、Wasserstein 距离、熵正则与 Sinkhorn、动态最优传输</a><a href="34-information-geometry.html"><span class="n">34</span>信息几何：Fisher 信息、KL 的局部二次近似、自然梯度、TRPO / PPO 的信任域</a><a href="35-convolution.html"><span class="n">35</span>卷积的数学：稀疏共享的线性映射、尺寸公式、感受野、卷积定理与 im2col</a><a href="36-cnn-training.html"><span class="n">36</span>CNN 训练的数学：卷积的反向传播、转置卷积、Xavier / He 初始化、BatchNorm 的梯度、残差的梯度流</a><a href="37-attention-math.html"><span class="n">37</span>注意力的数学：√d 的方差推导、softmax 的饱和、核平滑、多头的低秩、因果 mask</a><a href="38-position-encoding.html"><span class="n">38</span>位置编码的数学：正弦编码、RoPE、长度外推（PI、NTK、YaRN）、ALiBi</a><a href="39-normalization.html"><span class="n">39</span>归一化与信号传播：LayerNorm / RMSNorm 的几何、不变性、梯度，Pre-LN 与 Post-LN</a><a href="40-tensor-math.html"><span class="n">40</span>张量的数学：步长与地址、视图与连续性、广播、einsum、计算图上的 VJP</a><a href="41-scaling-law.html"><span class="n">41</span>Scaling law：幂律与 log-log 拟合、Kaplan 与 Chinchilla、计算最优、6ND、外推误差</a><a href="42-mup.html"><span class="n">42</span>参数化与初始化：标准参数化 vs μP，超参从小模型迁移</a><a href="43-modern-optimizers.html"><span class="n">43</span>现代优化器：Adam 的预条件、Shampoo / SOAP、Muon、Lion、WSD 调度、临界批量</a><a href="44-training-stability.html"><span class="n">44</span>训练稳定性：logit 漂移与 z-loss、QK-norm、梯度裁剪、低精度格式与缩放因子</a><a href="45-moe-math.html"><span class="n">45</span>MoE 的数学：门控与 top-k、负载均衡损失、无辅助损失的偏置、容量因子、专家并行的通信量</a><a href="46-distributed-ledger.html"><span class="n">46</span>分布式训练账本：显存四项、ZeRO 分片、激活显存、all-reduce 通信量、流水线气泡</a><a href="47-inference-cost.html"><span class="n">47</span>推理成本模型：roofline 与算术强度、prefill vs decode、KV cache、批处理与延迟</a><a href="48-efficient-attention.html"><span class="n">48</span>高效注意力与序列模型：online softmax 与 FlashAttention、MQA / GQA / MLA、线性注意力、SSM 的并行扫描</a><a href="49-quantization.html"><span class="n">49</span>量化的数学：scale 与 zero point、舍入误差、离群值、SmoothQuant、GPTQ 的误差补偿、FP4</a><a href="50-decoding.html"><span class="n">50</span>解码与采样：温度、top-k / top-p、beam search、投机解码、约束解码</a><a href="51-post-training.html"><span class="n">51</span>后训练的数学：SFT = 最大似然、Bradley-Terry、KL 正则的闭式最优策略、DPO、GRPO</a><a href="52-camera-geometry.html"><span class="n">52</span>相机几何：针孔模型、内参与外参、畸变、逆透视变换、Lift-Splat-Shoot</a><a href="53-multiview-geometry.html"><span class="n">53</span>多视几何：对极约束、本质与基础矩阵、单应、三角化、RANSAC、DUSt3R</a><a href="54-point-cloud.html"><span class="n">54</span>点云与配准：KD 树、法向量、Procrustes / Kabsch、ICP</a><a href="55-slam-optimization.html"><span class="n">55</span>SLAM 的优化：重投影误差与 BA、稀疏 Hessian 与 Schur 补、鲁棒核、边缘化</a><a href="56-vio.html"><span class="n">56</span>VIO：IMU 运动学、偏置与噪声、流形上的预积分、可观测性</a><a href="57-maps.html"><span class="n">57</span>地图表示：占用栅格的 log-odds、TSDF / ESDF、八叉树</a><a href="58-path-planning.html"><span class="n">58</span>路径规划：Dijkstra 与 A、可采纳启发、构型空间、RRT 与 RRT、势场法</a><a href="59-neural-rendering.html" class="cur"><span class="n">59</span>神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</a><a href="60-perception-metrics.html"><span class="n">60</span>感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-reading-paths.html">附录 · 按目标读：学 VLA、学运动控制的章节索引</a></nav><main>
+<h1 id="59-nerf-3dgs">第 59 章 · 神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</h1><div class="run"><a class="btn" href="../animations/59-neural-rendering.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/math-and-eval-stats/blob/main/code/notebooks/ch59_neural_rendering.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch59_neural_rendering.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/math-and-eval-stats
+cd math-and-eval-stats/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch59_neural_rendering.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：NeRF 渲染一个像素时，沿射线到底在算什么积分？离散化时为什么用 1 − e^{−σδ} 而不是 σδ？为什么要把坐标先编码成一堆正弦？3D Gaussian Splatting 怎么把一个三维高斯变成图像上的一个椭圆？颜色为什么要用球谐函数？<br />
+讲解日期：2026-11-25 · 上一章：<a href="../lessons/58-path-planning.html">第 58 章 路径规划</a> · 下一章：<a href="../lessons/60-perception-metrics.html">第 60 章 感知的学习与评测</a><br />
+对应原文：NeRF <code>math-and-eval-stats/materials/text/papers/nerf-2003.08934.txt</code>（§4 体渲染，离散式 (3) Ĉ(r) = Σ T_i(1 − e^{−σ_iδ_i})c_i，L293；§5.1 位置编码 L84、L100）；3D Gaussian Splatting <code>math-and-eval-stats/materials/text/papers/3d-gaussian-splatting-2308.04079.txt</code>（§4 协方差投影 Σ′ = JWΣWᵀJᵀ，J 是透视投影的雅可比 L241–L243；球谐颜色 L170、L259）<br />
+本章缩写：NeRF = Neural Radiance Field（神经辐射场）；3DGS = 3D Gaussian Splatting（三维高斯泼溅）；σ = 体密度；T = 透射率；α = 不透明度；c = 颜色；δ = 采样间隔；γ(p) = 位置编码；SH = Spherical Harmonics（球谐函数）；J = 透视投影的雅可比；W = 世界到相机的旋转。全部缩写见 <a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-25">第一步：体渲染积分：透射率 × 密度 × 颜色（2026-11-25）</h3>
+<p><strong>类比：透过一片雾看后面的墙。</strong> 雾本身有颜色，也挡掉一部分后面的光；雾越浓越厚，看到的越像雾的颜色。</p>
+<p>沿射线 r(t) 的颜色：</p>
+<div class="arithmatex">\[C = \int T(t)\,\sigma(t)\,c(t)\,dt,\qquad T(t) = \exp\Big(-\int_0^t\sigma(s)ds\Big)\]</div>
+<p>T 是“光走到 t 还没被挡掉的比例”，σ dt 是在这一小段被吸收（发光）的比例。</p>
+<p><strong>例子</strong>（一片密度 σ = 2、厚 0.5、颜色 0.8 的雾，后面是颜色 0.2 的不透明墙）：穿过雾的透射率 e^{−1} = 0.3679，</p>
+<div class="arithmatex">\[C = 0.8(1 - e^{-1}) + e^{-1}\times0.2 = 0.579272\]</div>
+<p><strong>一句话</strong>：体渲染 = 沿射线累加“透射率 × 密度 × 颜色”，透射率是前面所有东西没挡住的比例。</p>
+<h3 id="1-e-2026-11-25">第二步：离散化：α = 1 − e^{−σδ} 才对（2026-11-25）</h3>
+<p>把射线切成小段，每段内 σ、c 近似常数，这一段的积分恰好是（NeRF 式 (3)，L293）：</p>
+<div class="arithmatex">\[C = \sum_iT_i\,\alpha_i\,c_i,\quad\alpha_i = 1 - e^{-\sigma_i\delta_i},\quad T_i = \prod_{j&lt;i}(1 - \alpha_j)\]</div>
+<p>这就是图形学里的 α 合成（从前往后叠半透明层）。</p>
+<p><strong>例子</strong>（同上的雾）：</p>
+<table>
+<thead>
+<tr>
+<th>切几段</th>
+<th>α 合成</th>
+<th>直接用 σδ 当权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.579272</td>
+<td>0.873576</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.579272</td>
+<td>0.645115</td>
+</tr>
+<tr>
+<td>64</td>
+<td>0.579272</td>
+<td>0.583233</td>
+</tr>
+</tbody>
+</table>
+<p>密度在段内是常数时，α = 1 − e^{−σδ} 是<strong>精确</strong>的，切多少段都一样；用 σδ 当权重是一阶近似，段少时严重偏（σδ = 1 时把 63% 当成了 100%）。3DGS 的渲染也是同一个 α 合成公式，只是每个高斯给出一个 α。</p>
+<p><img alt="体渲染的权重沿射线分布" src="../figures/59-neural-rendering-weights.png" />
+<em>图 59-1 · 横轴沿射线的距离：灰线是透射率 T(t)（进雾后指数下降、在墙处降到 0），蓝色是每段的权重 T_iα_i（雾里递减），橙色柱是墙承接的剩余权重 0.368</em></p>
+<p><strong>一句话</strong>：离散体渲染 C = ΣT_iα_ic_i，α = 1 − e^{−σδ} 在段内密度恒定时精确；用 σδ 是一阶近似，段少就错。</p>
+<h3 id="2026-11-25_1">第三步：位置编码：让网络能表示高频细节（2026-11-25）</h3>
+<p>MLP 直接吃坐标 (x, y, z) 很难学出高频细节（谱偏置：网络先学低频）。NeRF（§5.1，L84、L100）先把每个坐标编码成</p>
+<div class="arithmatex">\[\gamma(p) = \big(\sin2^0\pi p, \cos2^0\pi p, \dots, \sin2^{L-1}\pi p, \cos2^{L-1}\pi p\big)\]</div>
+<p><strong>例子</strong>（L = 10）：每个坐标变成 20 维，三个坐标共 60 维。0.50 和 0.51 只差 0.01，编码后相差 3.69：最高频那对每 1/512 就转一圈，相邻的点在编码空间里被“拉开”，网络才能给它们不同的输出。</p>
+<p><img alt="位置编码的几个频率" src="../figures/59-neural-rendering-posenc.png" />
+<em>图 59-2 · 横轴坐标 p ∈ [0, 1]，四条曲线是 sin(2^kπp)，k = 0、2、4、6；竖虚线是 0.50 和 0.51：低频分量几乎一样，高频分量差别很大</em></p>
+<p>这和第 38 章 Transformer 的正弦位置编码是同一个思路；L 太大会过拟合噪声（Instant-NGP 改用多分辨率哈希网格，更快也更省）。</p>
+<p><strong>一句话</strong>：位置编码把坐标映射到一组频率递增的正弦上，让相近的点可区分，网络才学得出高频细节。</p>
+<h3 id="3dgs2026-11-25">第四步：3DGS：三维高斯投影成图像上的椭圆（2026-11-25）</h3>
+<p>3DGS 不用网络，而是用几十万到几百万个三维高斯（位置 μ、协方差 Σ、不透明度、颜色）表示场景。渲染时把每个高斯投影到图像上：</p>
+<div class="arithmatex">\[\Sigma' = JW\Sigma W^\top J^\top\]</div>
+<p>W 是世界到相机的旋转，J 是透视投影在高斯中心处的雅可比（L241–L243）：</p>
+<div class="arithmatex">\[J = \begin{pmatrix}f/z &amp; 0 &amp; -fx/z^2\\0 &amp; f/z &amp; -fy/z^2\end{pmatrix}\]</div>
+<p><strong>例子</strong>（光轴上、各向同性标准差 0.05 m 的高斯，f = 500；在光轴上 J = diag(f/z, f/z)）：</p>
+<table>
+<thead>
+<tr>
+<th>深度 z</th>
+<th>图像上的标准差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 m</td>
+<td>12.5 像素</td>
+</tr>
+<tr>
+<td>5 m</td>
+<td>5.0 像素</td>
+</tr>
+<tr>
+<td>10 m</td>
+<td>2.5 像素</td>
+</tr>
+</tbody>
+</table>
+<p>离得越远椭圆越小；偏离光轴时 J 的第三列不为 0，球形的高斯会被拉成椭圆。投影后按深度排序，用第二步的 α 合成叠起来；整个过程可微，所以能直接用图像损失优化所有高斯的参数。</p>
+<p><strong>一句话</strong>：3DGS 用 Σ′ = JWΣWᵀJᵀ 把三维高斯投影成二维椭圆，再按深度 α 合成；全部可微。</p>
+<h3 id="2026-11-25_2">第五步：球谐颜色：随观察方向变的颜色（2026-11-25）</h3>
+<p>镜面反光让同一个点从不同方向看颜色不同。3DGS（L170、L259）给每个高斯存一组球谐系数，颜色 c(d) = Σ_{l,m} k_{lm} Y_{lm}(d)，d 是观察方向。</p>
+<table>
+<thead>
+<tr>
+<th>阶数 l</th>
+<th>每通道系数个数 (l + 1)²</th>
+<th>RGB 共</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0（与方向无关）</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>1</td>
+<td>4</td>
+<td>12</td>
+</tr>
+<tr>
+<td>3（3DGS 默认）</td>
+<td>16</td>
+<td>48</td>
+</tr>
+</tbody>
+</table>
+<p>球谐是球面上的“傅里叶基”（第 30 章的正交展开）：低阶描述漫反射、高阶描述高光。3 阶的 48 个系数占了每个高斯参数量的大头（位置 3 + 缩放 3 + 旋转 4 + 不透明度 1 + 颜色 48 = 59）。</p>
+<p><strong>场景代码</strong>：用 nerfstudio 训练两种模型（真实命令行；本书环境没装，没跑过）：</p>
+<pre><code class="language-bash">ns-train nerfacto --data data/scene        # NeRF 系列：哈希网格 + 体渲染
+ns-train splatfacto --data data/scene      # 3D Gaussian Splatting
+</code></pre>
+<p><strong>一句话</strong>：3DGS 用球谐系数表示随视角变化的颜色，3 阶共 48 个，是每个高斯参数的大头。</p>
+<h3 id="_2">动画演示：射线穿过雾</h3>
+<p><img alt="神经场景表示" src="../animations/59-neural-rendering.gif" /></p>
+<p>可交互版：<a href="../animations/59-neural-rendering.html">animations/59-neural-rendering.html</a>（滑块调雾的密度、分段数；下拉切换 α 合成 / σδ 近似）。</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上方是射线：雾（橙色区域）和后面的墙（灰）；每段的柱子高度是它的权重 T_iα_i（第一、二步）；</li>
+<li>右上角是渲染出的颜色和闭式解；α 合成在任何分段数下都等于闭式解，σδ 近似段少时偏得厉害；</li>
+<li>把密度调大：权重集中在雾的前沿，墙几乎看不见。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一、二步）：一段射线上有两个采样，α₁ = 0.5、颜色 1；α₂ = 0.8、颜色 0；后面没有东西。渲染颜色和总不透明度各是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：L = 6 时每个坐标编码成几维？最高频那对的周期是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：一个各向同性标准差 0.1 m 的高斯在相机坐标 (0, 0, 4)，f = 600，投影后标准差多少像素？把它移到 (2, 0, 4)，椭圆会沿哪个方向被拉长？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>透过雾看墙，透射率乘密度乘颜色沿射线积；<br />
+离散用 1 减 e 的负 σδ，段内常密度就精确；<br />
+位置编码一串正弦，近的点被拉开，网络才学得出细节；<br />
+3DGS 高斯投成椭圆，JWΣWᵀJᵀ，再 α 合成；<br />
+球谐管视角颜色，三阶四十八个系数。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p>ST192（体渲染积分与离散 α 合成）、ST193（NeRF 的位置编码）、ST194（3DGS 的协方差投影与球谐颜色）。练习做完后，按答错、卡住的地方补上。</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ NeRF（Mildenhall 2020）</td>
+<td>§4（式 (3) L293）、§5（位置编码、分层采样）</td>
+<td>体渲染与位置编码</td>
+</tr>
+<tr>
+<td>★ 3D Gaussian Splatting（Kerbl 2023）</td>
+<td>§4–6（L241–L259）</td>
+<td>投影、可微光栅化、自适应增删高斯</td>
+</tr>
+<tr>
+<td><a href="../lessons/38-position-encoding.html">第 38 章 位置编码的数学</a></td>
+<td>第一步</td>
+<td>正弦编码</td>
+</tr>
+<tr>
+<td><a href="../lessons/30-functional-analysis.html">第 30 章 泛函分析入门</a></td>
+<td>第三步</td>
+<td>正交展开（球谐是球面上的版本）</td>
+</tr>
+<tr>
+<td><a href="../lessons/52-camera-geometry.html">第 52 章 相机几何</a></td>
+<td>第一步</td>
+<td>透视投影</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>一段常密度的积分</strong>：∫₀^δ e^{−σs}σc ds = c(1 − e^{−σδ})，所以 α = 1 − e^{−σδ} 精确。</li>
+<li><strong>透射率的乘积</strong>：exp(−Σσ_jδ_j) = Π e^{−σ_jδ_j} = Π(1 − α_j)。</li>
+<li><strong>协方差的线性变换</strong>：y = Ax ⇒ Cov(y) = AΣAᵀ；透视投影在中心处线性化成 J。</li>
+<li><strong>球谐</strong>：球面上的正交基，l 阶有 2l + 1 个，到 l 阶累计 (l + 1)² 个。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(C = \int T\sigma c\,dt\)</span>，<span class="arithmatex">\(T = e^{-\int\sigma}\)</span></td>
+<td>体渲染</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(C = \sum T_i\alpha_ic_i\)</span>，<span class="arithmatex">\(\alpha_i = 1 - e^{-\sigma_i\delta_i}\)</span></td>
+<td>离散 α 合成</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\gamma(p) = (\sin2^k\pi p, \cos2^k\pi p)_{k&lt;L}\)</span></td>
+<td>位置编码</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\Sigma' = JW\Sigma W^\top J^\top\)</span></td>
+<td>3DGS 投影</td>
+</tr>
+<tr>
+<td>(l + 1)² 个系数</td>
+<td>球谐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>代码在仓库本地 <code>math-and-eval-stats/solutions/chapter-code/ch59_neural_rendering.py</code>，配套测试 <code>tests/test_ch59.py</code>：</p>
+<p><code>bash  
+cd math-and-eval-stats/solutions/chapter-code  
+uv run python ch59_neural_rendering.py  
+uv run pytest tests/test_ch59.py</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 闭式解</td>
+<td>c(1 − T) + T·c_墙</td>
+<td><code>closed_form()</code></td>
+<td>0.579272</td>
+</tr>
+<tr>
+<td>第二步 离散</td>
+<td>α 合成 / σδ</td>
+<td><code>discrete(n)</code>、<code>naive_riemann(n)</code></td>
+<td>恒等 / 0.874 → 0.583</td>
+</tr>
+<tr>
+<td>第三步 位置编码</td>
+<td>γ(p)</td>
+<td><code>posenc(0.5)</code></td>
+<td>20 维，距离 3.69</td>
+</tr>
+<tr>
+<td>第四步 投影</td>
+<td>fσ/z</td>
+<td><code>gaussian_2d_std(0.05, z)</code></td>
+<td>12.5、5、2.5 像素</td>
+</tr>
+<tr>
+<td>第五步 球谐</td>
+<td>(l + 1)²</td>
+<td><code>sh_coeffs(3)</code></td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">alpha = 1 - np.exp(-SIGMA * delta)                     # 每段的不透明度
+c += t * alpha * C_FOG; t *= 1 - alpha                 # 从前往后 α 合成
+f = 2.0 ** np.arange(levels) * np.pi; return np.r_[np.sin(f * p), np.cos(f * p)]   # 位置编码
+</code></pre>
+<p><strong>代码里才看得到的 3 件事</strong>：</p>
+<ol>
+<li><strong>例子的密度是分段常数</strong>：所以 α 合成和闭式解完全相等；密度连续变化时离散化才有误差，要靠更细的采样或分层采样。</li>
+<li><strong>高斯只放在光轴上、各向同性</strong>：此时 J 退化成 diag(f/z, f/z)；任意 3D 协方差投影到 2D 的完整计算留给自己做（里程碑 ME-M35）。</li>
+<li><strong>没有写一般的单射线渲染函数</strong>：给定任意的 (σ_i, c_i, δ_i) 序列做离散体渲染，也留给里程碑 ME-M35。</li>
+</ol>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ol>
+<li>把雾分成两层（前半 σ = 4、后半 σ = 0），用 <code>discrete</code> 的思路重算颜色。</li>
+<li>把位置编码的 L 从 10 改成 4，0.50 和 0.51 编码后的距离变成多少？</li>
+</ol><nav class="pager"><a href="58-path-planning.html">← 第 58 章 · 路径规划：Dijkstra 与 A、可采纳启发、构型空间、RRT 与 RRT、势场法</a><a href="60-perception-metrics.html">第 60 章 · 感知的学习与评测：IoU、NMS、PR 曲线与 AP、匈牙利匹配、度量学习与地点识别 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/math-and-eval-stats">github.com/wikieden/math-and-eval-stats</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

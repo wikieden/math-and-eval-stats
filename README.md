@@ -2,7 +2,7 @@
 
 **在线阅读：<https://wikieden.github.io/math-and-eval-stats/>** · [讲义目录](https://wikieden.github.io/math-and-eval-stats/lessons/index.html) · [全部动画](https://wikieden.github.io/math-and-eval-stats/animations/index.html) · [复习卡片](https://wikieden.github.io/math-and-eval-stats/review.html) · [全部讲义书](https://wikieden.github.io/ai-books/)
 
-> 66 章大纲 · 已写 51 章 · 51 个动画（GIF + 可交互页面）· 111 张静态图 · 170 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
+> 66 章大纲 · 已写 60 章 · 60 个动画（GIF + 可交互页面）· 129 张静态图 · 197 张复习卡片 · 评测统计在前（第 1–7 章），Physical AI 的数学底座在后（第 8–22 章：概率与信息、线代与微积分、优化、采样与生成、几何估计与动力系统）；深入篇在第 23–34 章（RL / 控制 / 扩散推导与严格理论），应用篇在第 35–66 章（CNN / Transformer / PyTorch、现代 LLM 训练与推理、导航与感知、多模态与 VLN）
 > 在线阅读：<https://wikieden.github.io/math-and-eval-stats/>（连载中，写完一批发布一批）
 
 ## 这本书讲什么
@@ -90,15 +90,15 @@
 | 49 | [量化的数学](https://wikieden.github.io/math-and-eval-stats/lessons/49-quantization.html) | 均匀量化的 scale / zero-point、舍入误差方差、per-channel / group、离群值、GPTQ 的二阶误差补偿、AWQ、SmoothQuant 的等价变换、FP8 / FP4 格式 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/49-quantization.gif) | ST161–ST163 | ✅ 讲解（练习待作答） |
 | 50 | [解码与采样](https://wikieden.github.io/math-and-eval-stats/lessons/50-decoding.html) | 温度、top-k / top-p、beam search、投机解码（拒绝采样为什么不改分布）、Medusa / EAGLE、约束解码 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/50-decoding.gif) | ST164–ST166 | ✅ 讲解（练习待作答） |
 | 51 | [后训练的数学](https://wikieden.github.io/math-and-eval-stats/lessons/51-post-training.html) | SFT = MLE；Bradley-Terry 奖励模型；KL 正则目标与闭式最优策略；DPO 推导；GRPO / 推理 RL 的优势归一化 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/51-post-training.gif) | ST167–ST170 | ✅ 讲解（练习待作答） |
-| 52 | 相机几何 | 针孔模型、内参 / 外参、畸变模型、反投影、逆透视变换与 BEV（Lift-Splat-Shoot） | — | — | ⬜ |
-| 53 | 多视几何 | 对极约束、本质 / 基础矩阵、单应、三角化、PnP、RANSAC 迭代次数公式；DUSt3R 怎么绕开这条流水线 | — | — | ⬜ |
-| 54 | 点云与配准 | 最近邻与 KD 树、Procrustes / Kabsch（SVD 求最优旋转）、ICP（点到点 / 点到面）、法向量 = 局部协方差的最小特征向量 | — | — | ⬜ |
-| 55 | SLAM 的优化 | 重投影误差与 BA、稀疏 Hessian 与 Schur 补、位姿图、鲁棒核（Huber / Cauchy）、边缘化 | — | — | ⬜ |
-| 56 | VIO | IMU 运动学与噪声 / 偏置模型、流形上的预积分、紧耦合滑窗、可观测性 | — | — | ⬜ |
-| 57 | 地图表示 | 占用栅格的 log-odds 贝叶斯更新、TSDF / ESDF、体素与八叉树、语义地图 | — | — | ⬜ |
-| 58 | 路径规划 | 图搜索（Dijkstra、A* 与可采纳启发）、构型空间、采样规划（PRM、RRT、RRT* 渐近最优）、代价地图与势场 | — | — | ⬜ |
-| 59 | 神经场景表示 | 体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的协方差投影雅可比与球谐颜色 | — | — | ⬜ |
-| 60 | 感知的学习与评测 | IoU、NMS、PR 曲线与 mAP、匈牙利匹配（DETR）、度量学习与地点识别（三元组损失、NetVLAD、InfoNCE） | — | — | ⬜ |
+| 52 | [相机几何](https://wikieden.github.io/math-and-eval-stats/lessons/52-camera-geometry.html) | 针孔模型、内参 / 外参、畸变模型、反投影、逆透视变换与 BEV（Lift-Splat-Shoot） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/52-camera-geometry.gif) | ST171–ST173 | ✅ 讲解（练习待作答） |
+| 53 | [多视几何](https://wikieden.github.io/math-and-eval-stats/lessons/53-multiview-geometry.html) | 对极约束、本质 / 基础矩阵、单应、三角化、PnP、RANSAC 迭代次数公式；DUSt3R 怎么绕开这条流水线 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/53-multiview-geometry.gif) | ST174–ST176 | ✅ 讲解（练习待作答） |
+| 54 | [点云与配准](https://wikieden.github.io/math-and-eval-stats/lessons/54-point-cloud.html) | 最近邻与 KD 树、Procrustes / Kabsch（SVD 求最优旋转）、ICP（点到点 / 点到面）、法向量 = 局部协方差的最小特征向量 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/54-point-cloud.gif) | ST177–ST179 | ✅ 讲解（练习待作答） |
+| 55 | [SLAM 的优化](https://wikieden.github.io/math-and-eval-stats/lessons/55-slam-optimization.html) | 重投影误差与 BA、稀疏 Hessian 与 Schur 补、位姿图、鲁棒核（Huber / Cauchy）、边缘化 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/55-slam-optimization.gif) | ST180–ST182 | ✅ 讲解（练习待作答） |
+| 56 | [VIO](https://wikieden.github.io/math-and-eval-stats/lessons/56-vio.html) | IMU 运动学与噪声 / 偏置模型、流形上的预积分、紧耦合滑窗、可观测性 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/56-vio.gif) | ST183–ST185 | ✅ 讲解（练习待作答） |
+| 57 | [地图表示](https://wikieden.github.io/math-and-eval-stats/lessons/57-maps.html) | 占用栅格的 log-odds 贝叶斯更新、TSDF / ESDF、体素与八叉树、语义地图 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/57-maps.gif) | ST186–ST188 | ✅ 讲解（练习待作答） |
+| 58 | [路径规划](https://wikieden.github.io/math-and-eval-stats/lessons/58-path-planning.html) | 图搜索（Dijkstra、A* 与可采纳启发）、构型空间、采样规划（PRM、RRT、RRT* 渐近最优）、代价地图与势场 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/58-path-planning.gif) | ST189–ST191 | ✅ 讲解（练习待作答） |
+| 59 | [神经场景表示](https://wikieden.github.io/math-and-eval-stats/lessons/59-neural-rendering.html) | 体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的协方差投影雅可比与球谐颜色 | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/59-neural-rendering.gif) | ST192–ST194 | ✅ 讲解（练习待作答） |
+| 60 | [感知的学习与评测](https://wikieden.github.io/math-and-eval-stats/lessons/60-perception-metrics.html) | IoU、NMS、PR 曲线与 mAP、匈牙利匹配（DETR）、度量学习与地点识别（三元组损失、NetVLAD、InfoNCE） | [GIF](https://wikieden.github.io/math-and-eval-stats/animations/60-perception-metrics.gif) | ST195–ST197 | ✅ 讲解（练习待作答） |
 | 61 | 多模态融合的数学 | 逆方差加权（Kalman 的特例）、早 / 中 / 晚融合、交叉注意力与 Perceiver 潜变量、模态缺失与模态 dropout | — | — | ⬜ |
 | 62 | 视觉-语言对齐 | CLIP 对比损失与温度、SigLIP 的 sigmoid 损失、InfoNCE 与互信息下界、零样本分类 = 余弦相似度、视觉 token 化（patch、Q-Former、投影器）与 token 数账、ImageBind | — | — | ⬜ |
 | 63 | 非图像模态的表示 | 点云的置换不变（PointNet 对称函数）、体素化与稀疏卷积、音频的 STFT / Mel 频谱、力 / 触觉阵列、本体感受的归一化 | — | — | ⬜ |

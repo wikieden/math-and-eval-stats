@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="370" viewBox="0 0 860 370">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">二维 ESDF（7×7 栅格）</text>
+<text x="16.0" y="360.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">中间的黑块是障碍物，每个格子里的数是到最近障碍格的欧氏距离（格子数），颜色越深越近。机器人半径 r 的碰撞检测就是查“ESDF &lt; r”。</text>
+<rect x="300.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.21262256080090192"/>
+<text x="318.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.6</text>
+<rect x="338.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.34999999999999987"/>
+<text x="356.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.8</text>
+<rect x="376.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="394.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="414.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="432.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="452.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="470.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="490.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="508.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="528.0" y="45.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.34999999999999987"/>
+<text x="546.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.8</text>
+<rect x="300.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.2909830056250525"/>
+<text x="318.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.2</text>
+<rect x="338.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="356.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="376.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.5999999999999999"/>
+<text x="394.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.4</text>
+<rect x="414.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="432.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="452.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="470.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="490.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.5999999999999999"/>
+<text x="508.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.4</text>
+<rect x="528.0" y="83.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="546.0" y="106.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="300.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.31966991411008927"/>
+<text x="318.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.0</text>
+<rect x="338.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="356.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="376.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="394.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="414.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#1f2937" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="452.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#1f2937" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="490.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="508.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="528.0" y="121.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="546.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="300.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.31966991411008927"/>
+<text x="318.0" y="182.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.0</text>
+<rect x="338.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="356.0" y="182.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="376.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="394.0" y="182.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="414.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#1f2937" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="452.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#1f2937" stroke="none" stroke-width="1.4" opacity="1"/>
+<rect x="490.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="508.0" y="182.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="528.0" y="159.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="546.0" y="182.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="300.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.2909830056250525"/>
+<text x="318.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.2</text>
+<rect x="338.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="356.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="376.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.5999999999999999"/>
+<text x="394.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.4</text>
+<rect x="414.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="432.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="452.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.6732233047033631"/>
+<text x="470.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.0</text>
+<rect x="490.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.5999999999999999"/>
+<text x="508.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">1.4</text>
+<rect x="528.0" y="197.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="546.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="300.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.21262256080090192"/>
+<text x="318.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.6</text>
+<rect x="338.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.34999999999999987"/>
+<text x="356.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.8</text>
+<rect x="376.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="394.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="414.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="432.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="452.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4964466094067262"/>
+<text x="470.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.0</text>
+<rect x="490.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.4547152924789525"/>
+<text x="508.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.2</text>
+<rect x="528.0" y="235.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.34999999999999987"/>
+<text x="546.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">2.8</text>
+<rect x="300.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.09999999999999998"/>
+<text x="318.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">4.2</text>
+<rect x="338.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.21262256080090192"/>
+<text x="356.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.6</text>
+<rect x="376.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.2909830056250525"/>
+<text x="394.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.2</text>
+<rect x="414.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.31966991411008927"/>
+<text x="432.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.0</text>
+<rect x="452.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.31966991411008927"/>
+<text x="470.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.0</text>
+<rect x="490.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.2909830056250525"/>
+<text x="508.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.2</text>
+<rect x="528.0" y="273.0" width="36.0" height="36.0" rx="2" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.21262256080090192"/>
+<text x="546.0" y="296.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10" fill="#1f2937" text-anchor="middle" font-weight="normal">3.6</text>
+</svg>

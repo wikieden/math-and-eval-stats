@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>相机几何</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 52 章 · 相机看地面：近大远小与逆透视</h1>
+<p class="sub">配套讲义：<a href="../lessons/52-camera-geometry.html">第 52 章 · 相机几何：针孔模型、内参与外参、畸变、逆透视变换、Lift-Splat-Shoot</a>。相机水平朝前、离地 h 米，f = 500、主点 (320, 240)。左：侧视图，一条射线穿过光心打到地面上的点。右：640×480 的图像，地面上每隔 2 米画一条横线；当前地面点所在的像素行标红。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="z">地面点前方距离（m）</label><input type="range" id="z" min="3" max="30" step="1" value="6"><span id="zv">6</span><label for="h">相机高度（m）</label><input type="range" id="h" min="0.5" max="3" step="0.1" value="1.5"><span id="hv">1.5</span><label for="k1">径向畸变 k₁</label><input type="range" id="k1" min="-0.4" max="0.2" step="0.05" value="0"><span id="k1v">0</span></div>
+<p class="note">看点：① 距离 z 拉远，红色像素行往上挤，越靠近地平线（v = 240）越密：远处一个像素对应好几米；② 相机升高，同一距离的点落得更低（v 更大），远处分辨率变好；③ 拖 k₁：图像里竖直的参考线变弯，越往边上越明显。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['z','h','k1'],F=[[6,1.5,0],[10,1.5,0],[20,1.5,0],[30,1.5,0],[10,3,0],[10,1.5,-0.3],[10,1.5,0.15]];
+function render(z,h,k1){const f=500,v=240+f*h/z;cap(`地面点前方 ${z} m、相机高 ${(+h).toFixed(1)} m：像素行 v = ${v.toFixed(1)}；v 差 1 像素 ≈ 距离差 ${(z*z/(f*h)).toFixed(2)} m`);
+ frame(30,50,300,260);const M=PM(30,50,300,260,[-1,31],[-0.3,3.3]);const g=M(0,0);L(30,g[1],330,g[1],'var(--muted)',2);const c=M(0,h);C(c[0],c[1],6,'var(--text)',1);const p=M(z,0);L(c[0],c[1],p[0],p[1],'var(--bad)',1.5,'4 3');C(p[0],p[1],5,'var(--bad)',1);T('相机',c[0]+8,c[1]-6,'start','s');T('地面',36,g[1]-6,'start','s');
+ const ox=360,oy=50,s=0.45;el('rect',{x:ox,y:oy,width:640*s,height:480*s,fill:'none',stroke:'var(--line)','stroke-width':1.5},sv);
+ for(let zz=2;zz<=40;zz+=2){const vv=240+f*h/zz;if(vv<480){const y=oy+vv*s;L(ox,y,ox+640*s,y,'var(--accent)',.8)}}const yr=oy+Math.min(v,479)*s;L(ox,yr,ox+640*s,yr,'var(--bad)',2.5);L(ox,oy+240*s,ox+640*s,oy+240*s,'var(--muted)',1,'4 3');T('地平线',ox+640*s-4,oy+240*s-4,'end','s');
+ for(const u0 of [80,200,440,560]){const pts=[];for(let vv=0;vv<=480;vv+=20){const x=(u0-320)/f,y=(vv-240)/f,r2=x*x+y*y,s2=1+k1*r2;pts.push([ox+(320+f*x*s2)*s,oy+(240+f*y*s2)*s])}P(pts,'var(--warm)',1.2)}}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

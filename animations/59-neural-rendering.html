@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>神经场景表示</title><link rel="stylesheet" href="anim.css">
+<style>svg text.cap{font-size:15px;font-weight:500}svg text.num{font-size:15px;font-weight:600}svg text.s{font-size:12px}</style></head>
+<body><main>
+<h1>第 59 章 · 射线穿过雾：α 合成与 σδ 近似</h1>
+<p class="sub">配套讲义：<a href="../lessons/59-neural-rendering.html">第 59 章 · 神经场景表示：体渲染积分与 α 合成、NeRF 的位置编码、3DGS 的投影与球谐颜色</a>。射线依次穿过一片雾（[1, 1.5]，颜色 0.8，密度 σ）和后面颜色 0.2 的不透明墙（x = 2）。雾切成 n 段，每段的权重 T_iα_i 画成柱子，墙承接剩下的权重。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="md">离散方法</label><select id="md"><option value="0">α = 1 − e^{−σδ}</option><option value="1">直接用 σδ</option></select><label for="sig">雾的密度 σ</label><input type="range" id="sig" min="0.5" max="8" step="0.5" value="2"><span id="sigv">2</span><label for="n">分段数 n</label><input type="range" id="n" min="1" max="32" step="1" value="4"><span id="nv">4</span></div>
+<p class="note">看点：① α 合成：不管分几段，渲染结果都等于闭式解（右上角对照）；② 切到 σδ 近似：段少时权重之和超过真值，颜色偏得厉害，段数加多才慢慢接近；③ 把密度调大：权重集中在雾的前沿，墙几乎看不见。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+function R(x,y,w,h,col,op){return el('rect',{x,y,width:Math.max(w,1),height:Math.max(h,1),rx:3,fill:col,opacity:op??.75},sv)}
+function T(s,x,y,a,c){return txt(s,{x,y,'text-anchor':a||'start',class:c||'m'},sv)}
+function C(x,y,r,col,op){return el('circle',{cx:x,cy:y,r,fill:col,opacity:op??.8},sv)}
+function L(x1,y1,x2,y2,col,w,dash){return el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||1.5,'stroke-dasharray':dash||''},sv)}
+function P(pts,col,w,dash){return el('polyline',{points:pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:'none',stroke:col,'stroke-width':w||2,'stroke-dasharray':dash||'','stroke-linejoin':'round'},sv)}
+function AR(x1,y1,x2,y2,col,w){L(x1,y1,x2,y2,col,w||1.8);const a=Math.atan2(y2-y1,x2-x1),h=7;el('polygon',{points:[[x2,y2],[x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)],[x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '),fill:col},sv)}
+function cap(s){T(s,340,24,'middle','cap')}
+function PM(x0,y0,w,h,xr,yr){return (x,y)=>[x0+(x-xr[0])/(xr[1]-xr[0])*w,y0+h-(y-yr[0])/(yr[1]-yr[0])*h]}
+function CL(m,x0,y0,w,h){return (a,b)=>{const q=m(a,b);return[Math.min(Math.max(q[0],x0),x0+w),Math.min(Math.max(q[1],y0),y0+h)]}}
+function frame(x0,y0,w,h){el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--line)','stroke-width':1},sv)}
+const BETA=[],AB=[];{let a=1;for(let i=0;i<1000;i++){const b=1e-4+(0.02-1e-4)*i/999;BETA.push(b);a*=1-b;AB.push(a)}}
+const abar=t=>t<=0?1:AB[Math.min(Math.round(t),1000)-1];
+function spiral(n,s){seed(s||5);const p=[];for(let i=0;i<n;i++){const th=1.5*Math.PI*(1+2*rnd());p.push([th*Math.cos(th)/10,th*Math.sin(th)/10])}return p}
+function noise(n,s){seed(s||9);const p=[];for(let i=0;i<n;i++)p.push([gauss(),gauss()]);return p}
+const MEMO={};function memo(k,f){if(!(k in MEMO))MEMO[k]=f();return MEMO[k]}
+const GET=ids=>ids.map(i=>{const e=$(i);return e.type==='checkbox'?+e.checked:+e.value});
+function SET(ids,v){ids.forEach((i,k)=>{const e=$(i);if(e.type==='checkbox')e.checked=!!v[k];else e.value=v[k];const o=$(i+'v');if(o)o.textContent=(+v[k]).toString()})}
+const IDS=['md','sig','n'],F=[[0,2,1],[0,2,4],[0,2,32],[1,2,1],[1,2,4],[1,2,32],[0,8,8]];
+function render(md,sig,n){const d=0.5/n,a=md==0?1-Math.exp(-sig*d):Math.min(sig*d,1);let t=1,c=0;const ws=[];for(let i=0;i<n;i++){const w=md==0?t*a:t*sig*d;ws.push(w);c+=w*0.8;t*=md==0?1-a:Math.exp(-sig*d)}c+=t*0.2;
+ const ex=0.8*(1-Math.exp(-sig*0.5))+Math.exp(-sig*0.5)*0.2;cap(`渲染颜色 ${c.toFixed(4)}，闭式解 ${ex.toFixed(4)}；雾的权重合计 ${ws.reduce((x,y)=>x+y,0).toFixed(3)}，墙 ${t.toFixed(3)}`);
+ frame(40,40,600,280);const M=PM(40,40,600,280,[0.5,2.3],[0,1.05]);const f0=M(1,1.05),f1=M(1.5,0);R(f0[0],f0[1],f1[0]-f0[0],f1[1]-f0[1],'var(--warm)',.12);const wl=M(2,1.05),w2=M(2.08,0);R(wl[0],wl[1],w2[0]-wl[0],w2[1]-wl[1],'var(--muted)',.3);
+ ws.forEach((w,i)=>{const p=M(1+i*d+0.002,Math.min(w*Math.max(1,n/4),1.05)),q=M(1+(i+1)*d-0.002,0);R(p[0],p[1],q[0]-p[0],q[1]-p[1],'var(--accent)',.8)});const p=M(1.98,t),q=M(2.06,0);R(p[0],p[1],q[0]-p[0],q[1]-p[1],'var(--bad)',.8);
+ T(`雾（蓝柱放大 ${Math.max(1,n/4)} 倍）`,M(1.25,0)[0],336,'middle','s');T('墙',M(2.02,0)[0],336,'middle','s')}
+let k=0,custom=null;
+function draw(){clear(sv);const v=custom||F[k];SET(IDS,v);render(...v)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=F.length-1)return false;k++;draw();return true}
+IDS.forEach(i=>{const e=$(i);const f=()=>{ANIM.stop();custom=GET(IDS);draw()};e.oninput=f;e.onchange=f});
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>
